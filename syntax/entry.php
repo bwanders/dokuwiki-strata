@@ -71,12 +71,24 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
     function render($mode, &$R, $data) {
         if($mode == 'xhtml') {
             $R->table_open();
+
             $R->tablerow_open();
-            $R->tablecell_open();
-            $R->doc .= "<pre>";
-            $R->doc .= print_r($data,1);
-            $R->doc .= "</pre>";
-            $R->tablecell_close();
+            $R->tableheader_open(2);
+            $R->doc .="Header";
+            $R->tableheader_close();
+            $R->tablerow_close();
+
+            foreach($data['triples'] as $triple) {
+                $R->tablerow_open();
+                $R->tableheader_open();
+                $R->doc .= $R->_xmlEntities($triple['key']);
+                $R->tableheader_close();
+                $R->tablecell_open();
+                $R->doc .= $R->_xmlEntities($triple['value'].' ::'.$triple['type'].'('.$triple['hint'].')');
+                $R->tablecell_close();
+                $R->tablerow_open();
+           }
+
             $R->tablerow_close();
             $R->table_close();
             
