@@ -1,0 +1,7 @@
+base   stratastorage
+author Brend Wanders
+email  b.wanders@utwente.nl
+date   2012-02-22
+name   Strata Storage
+desc   Helper plugin for query and type handling
+url    http://example.com/
