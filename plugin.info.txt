@@ -1,0 +1,7 @@
+base   stratabasic
+author Brend Wanders
+email  b.wanders@utwente.nl
+date   2012-02-22
+name   Strata Basic
+desc   Minimalist syntax for data entry and querying
+url    http://example.com/
