@@ -29,22 +29,26 @@ class syntax_plugin_stratastorage_typelist extends DokuWiki_Syntax_Plugin {
     }
 
     public function getSort() {
-        return 999;
+        return 154;
     }
 
 
     public function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('~~STRATA:types~~',$mode,'plugin_stratastorage_typelist');
+        $this->Lexer->addSpecialPattern('~~INFO:stratatypes~~',$mode,'plugin_stratastorage_typelist');
     }
 
     public function handle($match, $state, $pos, &$handler){
         $data = array();
 
         foreach(glob(DOKU_PLUGIN."*/types/*.php") as $type) {
-            if(preg_match('@/types/([^/]+)\.php@',$type,$matches)) {
-                $meta = $this->_types->loadType($matches[1])->getInfo();
+            if(preg_match('@/([^/]+)/types/([^/]+)\.php@',$type,$matches)) {
+                $meta = $this->_types->loadType($matches[2])->getInfo();
                 if(!isset($meta['synthetic']) || !$meta['synthetic']) {
-                    $data[$matches[1]] = $meta;
+                    $data[] = array(
+                        'name'=>$matches[2],
+                        'plugin'=>$matches[1],
+                        'meta'=>$meta
+                    );
                 }
             }
         }       
@@ -54,7 +58,20 @@ class syntax_plugin_stratastorage_typelist extends DokuWiki_Syntax_Plugin {
 
     public function render($mode, &$R, $data) {
         if($mode == 'xhtml') {
-            $R->doc .= $R->_xmlEntities(print_r($data,1));
+            $R->listu_open();
+            foreach($data as $data){
+                $R->listitem_open(1);
+                $R->listcontent_open();
+                $R->strong_open();
+                $R->doc .= $data['name'];
+                $R->strong_close();
+                $R->doc .=' (in '.$data['plugin'].' plugin)';
+                $R->linebreak();
+                $R->doc .= $R->_xmlEntities($data['meta']['desc']);
+                $R->listcontent_close();
+                $R->listitem_close();
+            }
+            $R->listu_close();
             return true;
         }
 
