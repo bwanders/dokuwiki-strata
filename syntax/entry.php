@@ -17,6 +17,10 @@ require_once(DOKU_PLUGIN.'syntax.php');
  * need to inherit from this class
  */
 class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
+    function syntax_plugin_stratabasic_entry() {
+        $this->_types =& plugin_load('helper', 'stratastorage_types');
+    }
+
     function getType() {
         return 'substition';
     }
@@ -26,7 +30,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
     }
 
     function getSort() {
-        return 999;
+        return 450;
     }
 
     function connectTo($mode) {
@@ -44,7 +48,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
         preg_match('/^<data( [_a-zA-Z0-9 ]+)?(?: ?#([^>]*?))?>/', array_shift($lines), $header);
 
         foreach(preg_split('/\s+/',trim($header[1])) as $class) {
-            $result['triples'][] = array('key'=>'class','value'=>$class,'type'=>null, 'hint'=>null);
+            $result['triples'][] = array('key'=>'class','value'=>$class,'type'=>'string', 'hint'=>null);
         }
 
         $result['entry'] = $header[2];
@@ -58,6 +62,9 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                     $values = array(trim($parts[5]));
                 }
                 foreach($values as $v) {
+                    if(!isset($parts[2]) || $parts[2] == '') {
+                        $parts[2] = $this->_types->getConf('default_type');
+                    }
                     $result['triples'][] = array('key'=>$parts[1],'value'=>$v,'type'=>$parts[2],'hint'=>$parts[3]);
                 }
             } else {
@@ -81,10 +88,12 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
             foreach($data['triples'] as $triple) {
                 $R->tablerow_open();
                 $R->tableheader_open();
-                $R->doc .= $R->_xmlEntities($triple['key']);
+                $R->doc .= $R->_xmlEntities($triple['key']. '::'.$triple['type'].((isset($triple['hint']) && $triple['hint']!='')?'('.$triple['hint'].')':''));
                 $R->tableheader_close();
                 $R->tablecell_open();
-                $R->doc .= $R->_xmlEntities($triple['value'].' ::'.$triple['type'].'('.$triple['hint'].')');
+                $type = $this->_types->loadType($triple['type']);
+                $normalized = $type->normalize($triple['value'], $triple['hint']);
+                $type->render($mode, $R, $normalized, $triple['hint']);
                 $R->tablecell_close();
                 $R->tablerow_open();
            }
