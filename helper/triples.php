@@ -87,10 +87,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
             if($s == '') continue;
 
             if($this->getConf('debug')) msg(hsc('Strata storage: Executing \''.$s.'\'.'));
-            $res = $this->_db->query($s);
-            if($res === false) {
-                $error = $this->_db->errorInfo();
-                msg(hsc('Strata storage: Failed to set up database: '.$error[2]),-1);
+            if(!$this->_query($s, 'Failed to set up database')) {
                 $this->_db->query($this->_driver->rollback());
                 return false;
             }
@@ -112,6 +109,16 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         return $result;
     }
 
+    function _query($query, $message="Query failed") {
+        $res = $this->_db->query($s);
+        if($res === false) {
+            $error = $this->_db->errorInfo();
+            msg(hsc('Strata storage: '.$message.' (with \''.$query.'\'): '.$error[2]),-1);
+            return false;
+        }
+        return true;
+    }
+
     function removeTriples($subject=null, $predicate=null, $object=null, $graph=null) {
         $filters = array('1');
         foreach(array('subject','predicate','object','graph') as $param) {
@@ -125,7 +132,11 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
 
         $query = $this->_prepare($sql);
         if($query == false) return;
-        $query->execute($values);
+        $rest = $query->execute($values);
+        if($res === false) {
+            $error = $query->errorInfo();
+            msg(hsc('Strata storage: Failed to remove triples: '.$error[2]),-1);
+        }
     }
 
     function addTriple($subject, $predicate, $object, $graph) {
@@ -136,9 +147,15 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         $sql = "INSERT INTO data(subject, predicate, object, graph) VALUES(?, ?, ?, ?)";
         $query = $this->_prepare($sql);
         if($query == false) return;
-        foreach($triples as $triple) {
-            $triple[] = $graph;
-            $query->execute($triple);
+
+        foreach($triples as $t) {
+            $values = array($t['subject'],$t['predicate'],$t['object'],$graph);
+            $res = $query->execute($values);
+            if($res === false) {
+                $error = $query->errorInfo();
+                msg(hsc('Strata storage: Failed to add triples: '.$error[2]),-1);
+                return;
+            }
         }
     }
 }
