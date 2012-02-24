@@ -132,11 +132,36 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
 
         $query = $this->_prepare($sql);
         if($query == false) return;
-        $rest = $query->execute($values);
+        $res = $query->execute($values);
         if($res === false) {
             $error = $query->errorInfo();
             msg(hsc('Strata storage: Failed to remove triples: '.$error[2]),-1);
         }
+        $query->closeCursor();
+    }
+
+    function fetchTriples($subject=null, $predicate=null, $object=null, $graph=null) {
+        $filters = array('1');
+        foreach(array('subject','predicate','object','graph') as $param) {
+            if($$param != null) {
+                $filters[]="$param LIKE ?";
+                $values[] = $$param;
+            }
+        }
+
+        $sql .= "SELECT * FROM data WHERE ". implode(" AND ", $filters);
+
+        $query = $this->_prepare($sql);
+        if($query == false) return;
+        $res = $query->execute($values);
+        if($res === false) {
+            $error = $query->errorInfo();
+            msg(hsc('Strata storage: Failed to fetch triples: '.$error[2]),-1);
+        }
+
+        $result = $query->fetchAll();
+        $query->closeCursor();
+        return $result;
     }
 
     function addTriple($subject, $predicate, $object, $graph) {
@@ -158,6 +183,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
                 $this->_query($this->_driver->rollback());
                 return;
             }
+            $query->closeCursor();
         }
         $this->_query($this->_driver->commit());
     }
