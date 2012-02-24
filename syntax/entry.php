@@ -55,6 +55,8 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
 
         $result['entry'] = $header[2];
 
+        $result['data'][] = array('key'=>'title','value'=>$result['entry'], 'type'=>'string', 'hint'=>null);
+
         foreach($lines as $line) {
             if($line == '</data>') break;
             if(preg_match('/^([-a-zA-Z0-9 ]+)(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?(\*)?:(.*)$/',$line,$parts)) {
@@ -79,24 +81,46 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
     }
 
     function render($mode, &$R, $data) {
+        global $ID;
+
+
         if($mode == 'xhtml') {
             $R->table_open();
 
             $R->tablerow_open();
             $R->tableheader_open(2);
-            $R->doc .= "Header";
+            $heading = '';
+            if($data['entry'] != '') {
+                $heading = $data['entry'];
+            } elseif (useHeading('content')) {
+                $heading = p_get_first_heading($ID);
+            } else {
+                $heading = noNS($ID);
+            }
+            $R->doc .= $R->_xmlEntities($heading);
             $R->tableheader_close();
             $R->tablerow_close();
 
-            foreach($data['data'] as $triple) {
+            $keys = array();
+            foreach($data['data'] as $t) {
+                if(!isset($keys[$t['key']])) $keys[$t['key']] = array();
+                $keys[$t['key']][] = $t;
+            }
+
+            foreach($keys as $key=>$values) {
+                if($key == 'title' || $key == 'class') continue;
                 $R->tablerow_open();
                 $R->tableheader_open();
-                $R->doc .= $R->_xmlEntities($triple['key']. '::'.$triple['type'].((isset($triple['hint']) && $triple['hint']!='')?'('.$triple['hint'].')':''));
+                $R->doc .= $R->_xmlEntities($key);
                 $R->tableheader_close();
                 $R->tablecell_open();
-                $type = $this->_types->loadType($triple['type']);
-                $normalized = $type->normalize($triple['value'], $triple['hint']);
-                $type->render($mode, $R, $normalized, $triple['hint']);
+                for($i=0;$i<count($values);$i++) {
+                    $triple =& $values[$i];
+                    if($i!=0) $R->doc .= ', ';
+                    $type = $this->_types->loadType($triple['type']);
+                    $normalized = $type->normalize($triple['value'], $triple['hint']);
+                    $type->render($mode, $R, $normalized, $triple['hint']);
+                }
                 $R->tablecell_close();
                 $R->tablerow_open();
            }
@@ -106,7 +130,6 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
             
             return true;
         } elseif($mode == 'metadata') {
-            global $ID;
             $triples = array();
             $subject = $ID.'#'.$data['entry'];
             resolve_pageid(getNS($ID),$id,$exists);
