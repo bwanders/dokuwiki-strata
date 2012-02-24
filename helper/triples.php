@@ -110,7 +110,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
     }
 
     function _query($query, $message="Query failed") {
-        $res = $this->_db->query($s);
+        $res = $this->_db->query($query);
         if($res === false) {
             $error = $this->_db->errorInfo();
             msg(hsc('Strata storage: '.$message.' (with \''.$query.'\'): '.$error[2]),-1);
@@ -148,14 +148,17 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         $query = $this->_prepare($sql);
         if($query == false) return;
 
+        $this->_query($this->_driver->startTransaction());
         foreach($triples as $t) {
             $values = array($t['subject'],$t['predicate'],$t['object'],$graph);
             $res = $query->execute($values);
             if($res === false) {
                 $error = $query->errorInfo();
                 msg(hsc('Strata storage: Failed to add triples: '.$error[2]),-1);
+                $this->_query($this->_driver->rollback());
                 return;
             }
         }
+        $this->_query($this->_driver->commit());
     }
 }
