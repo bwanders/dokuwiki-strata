@@ -22,7 +22,17 @@ require_once DOKU_PLUGIN.'action.php';
 class action_plugin_stratastorage extends DokuWiki_Action_Plugin {
 
     public function register(Doku_Event_Handler &$controller) {
-        // does nothing, goes nowhere
+        $controller->register_hook('IO_WIKIPAGE_WRITE', 'BEFORE', $this, '_remove_data');
+    }
+
+    public function _remove_data(&$event, $param) {
+        $triples =& plugin_load('helper', 'stratastorage_triples');
+        $triples->initialize();
+
+        $id = ltrim($event->data[1].':'.$event->data[2],':');
+        if($event->data[3] == false || $event->data[0][1] == '') {
+            $triples->removeTriples($id.'#%');
+        }
     }
 
 }
@@ -56,4 +66,3 @@ function plugin_stratastorage_autoload($fullname) {
 
 spl_autoload_register('plugin_stratastorage_autoload');
 
-// vim:ts=4:sw=4:et:

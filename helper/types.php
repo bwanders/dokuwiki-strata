@@ -42,5 +42,3 @@ class helper_plugin_stratastorage_types extends DokuWiki_Plugin {
         return $this->loaded[$type];
     }
 }
-
-// vim:ts=4:sw=4:et:
