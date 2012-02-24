@@ -50,6 +50,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
         preg_match('/^<data( [_a-zA-Z0-9 ]+)?(?: ?#([^>]*?))?>/', array_shift($lines), $header);
 
         foreach(preg_split('/\s+/',trim($header[1])) as $class) {
+            if($class == '') continue;
             $result['data'][] = array('key'=>'class','value'=>$class,'type'=>'string', 'hint'=>null);
         }
 
