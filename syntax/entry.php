@@ -55,7 +55,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
 
         $result['entry'] = $header[2];
 
-        $result['data'][] = array('key'=>'title','value'=>$result['entry'], 'type'=>'string', 'hint'=>null);
+        if($result['entry'] != '') $result['data'][] = array('key'=>'title','value'=>$result['entry'], 'type'=>'string', 'hint'=>null);
 
         foreach($lines as $line) {
             if($line == '</data>') break;
@@ -96,8 +96,8 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
             $R->tablerow_open();
             $R->tableheader_open(2);
             $heading = '';
-            if($data['entry'] != '') {
-                $heading = $data['entry'];
+            if(isset($keys['title'])) {
+                $heading = $keys['title'][0]['value'];
             } elseif (useHeading('content')) {
                 $heading = p_get_first_heading($ID);
             } else {
