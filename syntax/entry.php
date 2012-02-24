@@ -85,8 +85,14 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
 
 
         if($mode == 'xhtml') {
-            $R->table_open();
+            $keys = array();
+            foreach($data['data'] as $t) {
+                if(!isset($keys[$t['key']])) $keys[$t['key']] = array();
+                $keys[$t['key']][] = $t;
+            }
 
+
+            $R->table_open();
             $R->tablerow_open();
             $R->tableheader_open(2);
             $heading = '';
@@ -98,14 +104,22 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                 $heading = noNS($ID);
             }
             $R->doc .= $R->_xmlEntities($heading);
+            if(isset($keys['class'])) {
+                $R->emphasis_open();
+                $R->doc .= ' (';
+                $values = $keys['class'];
+                for($i=0;$i<count($values);$i++) {
+                    $triple =& $values[$i];
+                    if($i!=0) $R->doc .= ', ';
+                    $type = $this->_types->loadType($triple['type']);
+                    $normalized = $type->normalize($triple['value'], $triple['hint']);
+                    $type->render($mode, $R, $normalized, $triple['hint']);
+                }
+                $R->doc .= ')';
+                $R->emphasis_close();
+            }
             $R->tableheader_close();
             $R->tablerow_close();
-
-            $keys = array();
-            foreach($data['data'] as $t) {
-                if(!isset($keys[$t['key']])) $keys[$t['key']] = array();
-                $keys[$t['key']][] = $t;
-            }
 
             foreach($keys as $key=>$values) {
                 if($key == 'title' || $key == 'class') continue;
