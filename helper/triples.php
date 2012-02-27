@@ -142,7 +142,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         $filters = array('1');
         foreach(array('subject','predicate','object','graph') as $param) {
             if($$param != null) {
-                $filters[]="$param LIKE ?";
+                $filters[]="$param = ?";
                 $values[] = $$param;
             }
         }
