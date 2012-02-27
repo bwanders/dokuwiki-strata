@@ -32,7 +32,7 @@ class plugin_strata_type_page extends plugin_strata_type {
 
     function getInfo() {
         return array(
-            'desc'=>'The value is used as a wiki page name and linked if appropriate.'
+            'desc'=>'The value is used as a wiki page name and linked if appropriate. The optional hint is treated as namespace for the link.'
         );
     }
 }
