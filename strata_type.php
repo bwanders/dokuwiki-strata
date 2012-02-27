@@ -17,10 +17,11 @@ class plugin_strata_type {
      *
      * @param mode string output format being rendered
      * @param renderer ref reference to the current renderer object
+     * @param triples ref reference to the current triples helper
      * @param value string the value to render (this should be a normalized value)
      * @param hint string a type hint
      */
-    function render($mode, &$renderer, $value, $hint) {
+    function render($mode, &$renderer, &$triples, $value, $hint) {
         if($mode == 'xhtml') {
             $renderer->doc .= $renderer->_xmlEntities($value);
             return true;

@@ -23,7 +23,7 @@ class plugin_strata_type_page extends plugin_strata_type {
         return $value;
     }
 
-    function render($mode, &$R, $value, $hint) {
+    function render($mode, &$R, &$T, $value, $hint) {
         // render internal link
         // (':' is prepended to make sure we use an absolute pagename,
         // internallink resolves page names, but the name is already resolved.)
