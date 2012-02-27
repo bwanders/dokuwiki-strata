@@ -156,7 +156,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                 $triples[] = array('subject'=>$subject, 'predicate'=>$triple['key'], 'object'=>$triple['value']);
             }
 
-            $this->_triples->addTriples($triples, $this->_triples->getConf('default_graph'));
+            $this->_triples->addTriples($triples);
             return true;
         }
 
