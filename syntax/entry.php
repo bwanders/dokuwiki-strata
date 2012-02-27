@@ -71,7 +71,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                     if(!isset($parts[2]) || $parts[2] == '') {
                         $parts[2] = $this->_types->getConf('default_type');
                     }
-                    $result['data'][] = array('key'=>$parts[1],'value'=>$v,'type'=>$parts[2],'hint'=>$parts[3]);
+                    $result['data'][] = array('key'=>$parts[1],'value'=>$v,'type'=>$parts[2],'hint'=>($parts[3]?:null));
                 }
             } else {
                 msg('I don\'t understand data entry \''.htmlentities($line).'\'.', -1);
