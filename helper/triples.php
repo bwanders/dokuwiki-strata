@@ -75,12 +75,9 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         $sqlfile = DOKU_PLUGIN."stratastorage/sql/setup-$driver.sql";
 
         $sql = io_readFile($sqlfile, false);
-
         $sql = explode(';', $sql);
 
-        array_unshift($sql, $this->_driver->startTransaction());
-        array_push($sql, $this->_driver->commit());
-
+        $this->_db->beginTransaction();
         foreach($sql as $s) {
             $s = preg_replace('/^\s*--.*$/','',$s);
             $s = trim($s);
@@ -88,10 +85,11 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
 
             if($this->getConf('debug')) msg(hsc('Strata storage: Executing \''.$s.'\'.'));
             if(!$this->_query($s, 'Failed to set up database')) {
-                $this->_db->query($this->_driver->rollback());
+                $this->_db->rollback();
                 return false;
             }
         }
+        $this->_db->commit();
 
         msg('Strata storage: Database set up succesful!',1);
 
@@ -173,18 +171,18 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         $query = $this->_prepare($sql);
         if($query == false) return;
 
-        $this->_query($this->_driver->startTransaction());
+        $this->_db->beginTransaction();
         foreach($triples as $t) {
             $values = array($t['subject'],$t['predicate'],$t['object'],$graph);
             $res = $query->execute($values);
             if($res === false) {
                 $error = $query->errorInfo();
                 msg(hsc('Strata storage: Failed to add triples: '.$error[2]),-1);
-                $this->_query($this->_driver->rollback());
+                $this->_db->rollback();
                 return;
             }
             $query->closeCursor();
         }
-        $this->_query($this->_driver->commit());
+        $this->_db->commit();
     }
 }

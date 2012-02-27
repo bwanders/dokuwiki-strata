@@ -13,27 +13,6 @@ if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
  */
 class plugin_strata_driver {
     /**
-     * Returns the syntax to start a transaction.
-     */
-    public function startTransaction() {
-        return "BEGIN TRANSACTION";
-    }
-
-    /**
-     * Returns the syntax to commit a transaction.
-     */
-    public function commit() {
-        return "COMMIT";
-    }
-
-    /**
-     * Returns the syntax to roll back a transaction.
-     */
-    public function rollback() {
-        return "ROLLBACK";
-    }
-
-    /**
      * Produces the syntax to cast something to a number.
      *
      * @param val string the thing to cast
