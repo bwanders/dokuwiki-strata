@@ -15,8 +15,10 @@ class plugin_strata_type_page extends plugin_strata_type {
     function normalize($value, $hint) {
         global $ID;
 
-        // resolve page id with current location as base
-        resolve_pageid(getNS($ID),$value,$exists);
+        $base = ($hint?:getNS($ID));
+
+        // resolve page id with respect to selected base
+        resolve_pageid($base,$value,$exists);
 
         return $value;
     }
