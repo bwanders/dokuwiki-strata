@@ -147,7 +147,8 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
         } elseif($mode == 'metadata') {
             $triples = array();
             $subject = $ID.'#'.$data['entry'];
-            resolve_pageid(getNS($ID),$id,$exists);
+            resolve_pageid(getNS($ID),$subject,$exists);
+            if(substr($subject,-1) != '#') $subject.='#';
             foreach($data['data'] as $triple) {
                 $type = $this->_types->loadType($triple['type']);
                 $normalized = $type->normalize($triple['value'], $triple['hint']);
