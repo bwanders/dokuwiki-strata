@@ -162,11 +162,15 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         return $result;
     }
 
-    function addTriple($subject, $predicate, $object, $graph) {
+    function addTriple($subject, $predicate, $object, $graph=null) {
         return $this->addTriples(array(array('subject'=>$subject, 'predicate'=>$predicate, 'object'=>$object)), $graph);
     }
 
-    function addTriples($triples, $graph) {
+    function addTriples($triples, $graph=null) {
+        if($graph == null) {
+            $graph = $this->getConf('default_graph');
+        }
+
         $sql = "INSERT INTO data(subject, predicate, object, graph) VALUES(?, ?, ?, ?)";
         $query = $this->_prepare($sql);
         if($query == false) return;
