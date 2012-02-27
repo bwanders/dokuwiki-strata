@@ -150,7 +150,6 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
             $triples = array();
             $subject = $ID.'#'.$data['entry'];
             resolve_pageid(getNS($ID),$subject,$exists);
-            if(substr($subject,-1) != '#') $subject.='#';
             foreach($data['data'] as $triple) {
                 $triple['type']->render($mode, $R, $normalized, $triple['hint']);
                 $triples[] = array('subject'=>$subject, 'predicate'=>$triple['key'], 'object'=>$triple['value']);
