@@ -19,7 +19,7 @@ require_once(DOKU_PLUGIN.'syntax.php');
 class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
     function syntax_plugin_stratabasic_entry() {
         $this->_types =& plugin_load('helper', 'stratastorage_types');
-        $this->_triples =& plugin_load('helper', 'stratastorage_triples');
+        $this->_triples =& plugin_load('helper', 'stratastorage_triples', false);
         $this->_triples->initialize();
     }
 
