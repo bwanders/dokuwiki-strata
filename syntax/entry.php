@@ -78,6 +78,12 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
             }
         }
 
+        foreach($result['data'] as &$triple) {
+            $type = $this->_types->loadType($triple['type']);
+            $triple['type'] = $type;
+            $triple['value'] = $type->normalize($triple['value'], $triple['hint']);
+        }
+
         return $result;
     }
 
@@ -112,9 +118,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                 for($i=0;$i<count($values);$i++) {
                     $triple =& $values[$i];
                     if($i!=0) $R->doc .= ', ';
-                    $type = $this->_types->loadType($triple['type']);
-                    $normalized = $type->normalize($triple['value'], $triple['hint']);
-                    $type->render($mode, $R, $normalized, $triple['hint']);
+                    $triple['type']->render($mode, $R, $triple['value'], $triple['hint']);
                 }
                 $R->doc .= ')';
                 $R->emphasis_close();
@@ -132,9 +136,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                 for($i=0;$i<count($values);$i++) {
                     $triple =& $values[$i];
                     if($i!=0) $R->doc .= ', ';
-                    $type = $this->_types->loadType($triple['type']);
-                    $normalized = $type->normalize($triple['value'], $triple['hint']);
-                    $type->render($mode, $R, $normalized, $triple['hint']);
+                    $triple['type']->render($mode, $R, $triple['value'], $triple['hint']);
                 }
                 $R->tablecell_close();
                 $R->tablerow_open();
@@ -150,10 +152,8 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
             resolve_pageid(getNS($ID),$subject,$exists);
             if(substr($subject,-1) != '#') $subject.='#';
             foreach($data['data'] as $triple) {
-                $type = $this->_types->loadType($triple['type']);
-                $normalized = $type->normalize($triple['value'], $triple['hint']);
-                $type->render($mode, $R, $normalized, $triple['hint']);
-                $triples[] = array('subject'=>$subject, 'predicate'=>$triple['key'], 'object'=>$normalized);
+                $triple['type']->render($mode, $R, $normalized, $triple['hint']);
+                $triples[] = array('subject'=>$subject, 'predicate'=>$triple['key'], 'object'=>$triple['value']);
             }
 
             $this->_triples->addTriples($triples, $this->_triples->getConf('default_graph'));
