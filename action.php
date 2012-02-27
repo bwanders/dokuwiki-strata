@@ -31,6 +31,7 @@ class action_plugin_stratastorage extends DokuWiki_Action_Plugin {
 
         $id = ltrim($event->data[1].':'.$event->data[2],':');
         if($event->data[3] == false || $event->data[0][1] == '') {
+            $triples->removeTriples($id);
             $triples->removeTriples($id.'#%');
         }
     }
