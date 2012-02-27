@@ -118,7 +118,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                 for($i=0;$i<count($values);$i++) {
                     $triple =& $values[$i];
                     if($i!=0) $R->doc .= ', ';
-                    $triple['type']->render($mode, $R, $triple['value'], $triple['hint']);
+                    $triple['type']->render($mode, $R, $this->_triples, $triple['value'], $triple['hint']);
                 }
                 $R->doc .= ')';
                 $R->emphasis_close();
@@ -136,7 +136,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                 for($i=0;$i<count($values);$i++) {
                     $triple =& $values[$i];
                     if($i!=0) $R->doc .= ', ';
-                    $triple['type']->render($mode, $R, $triple['value'], $triple['hint']);
+                    $triple['type']->render($mode, $R, $this->_triples, $triple['value'], $triple['hint']);
                 }
                 $R->tablecell_close();
                 $R->tablerow_open();
@@ -151,7 +151,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
             $subject = $ID.'#'.$data['entry'];
             resolve_pageid(getNS($ID),$subject,$exists);
             foreach($data['data'] as $triple) {
-                $triple['type']->render($mode, $R, $triple['value'], $triple['hint']);
+                $triple['type']->render($mode, $R, $this->_triples, $triple['value'], $triple['hint']);
                 $triples[] = array('subject'=>$subject, 'predicate'=>$triple['key'], 'object'=>$triple['value']);
             }
 
