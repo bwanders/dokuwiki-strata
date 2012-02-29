@@ -89,7 +89,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                 case 'sort':
                     if(count($result['sort'])) {
                         msg('Strata basic: Query contains double \'<code>sort</code>\' block.',-1);
-                        return array();
+                        return false;
                     }
                     $block =& $result['sort'];
                     break;
@@ -103,7 +103,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                     break;
                 default:
                     msg('Strata basic: Query contains weird block \'<code>'.$match[1].'</code>\'', -1);
-                    return array();
+                    return false;
                 }
                 $blockid = $match[1];
 
@@ -181,13 +181,49 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                     break;
                 default:
                     msg('Strata basic: Query contains weird closing bracket.', -1);
-                    return array();
+                    return false;
                 }
                 $blockid = 'where';
                 $block =& $result['where'];
             } else {
                 msg('Strata basic: Query contains weird line \'<code>'.hsc($line).'</code>\'.',-1);
-                return array();
+                return false;
+            }
+        }
+
+        return $result;
+    }
+
+    function parse_fields_long($lines, &$typemap) {
+        $result = array();
+
+        foreach($lines as $line) {
+            $line = trim($line);
+            if($this->ignorable_line($line)) {
+                continue;
+            } elseif(preg_match('/^([^_]*)(?:(_)([a-z0-9]*)(?:\(([^)]+)\))?)?:\s*\?([a-zA-Z0-9]+)$/S',$line, $match)) {
+                list($_, $caption, $underscore, $type, $hint, $variable) = $match;
+                if(!$underscore || (!$underscore && !$caption && !$type)) $caption = ucfirst($variable);
+                $this->update_typemap($typemap, $variable, $type, $hint);
+                $result[$variable] = array('caption'=>$caption);
+            } else {
+                msg('Strata basic: Weird line \'<code>'.hsc($line).'</code>\' in \'<code>fields</code>\' group.', -1);
+                return false;
+            }
+        }
+
+        return $result;
+    }
+
+    function parse_fields_short($line, &$typemap) {
+        $result = array();
+
+        if(preg_match_all('/(?:\?([a-zA-Z0-9]+))(?:\s*(\()([^_)]*)(?:_([a-z0-9]*)(?:\(([^)]*)\))?)?\))?/',$line,$match, PREG_SET_ORDER)) {
+            foreach($match as $m) {
+                list($_, $variable, $parenthesis, $caption, $type, $hint) = $m;
+                if(!$parenthesis || (!$parenthesis && !$caption && !$type)) $caption = ucfirst($variable);
+                $this->update_typemap($typemap, $variable, $type, $hint);
+                $result[$variable] = array('caption'=>$caption);
             }
         }
 

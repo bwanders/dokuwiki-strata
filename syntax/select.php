@@ -39,7 +39,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
     function connectTo($mode) {
         // ')' between  [^ and ] escaped to work around dokuwiki's pattern handling
         // (The lexer uses ( and ) as delimiter patterns)
-        $this->Lexer->addSpecialPattern('<select(?:\s+\?[a-zA-Z0-9]+(?:\s*\([^_\)]*(?:_[a-z0-9]+(?:\([^\)]*\))?)?\))?)*>\n.+?\n</select>',$mode, 'plugin_stratabasic_select');
+        $this->Lexer->addSpecialPattern('<select(?:\s+\?[a-zA-Z0-9]+(?:\s*\([^_\)]*(?:_[a-z0-9]*(?:\([^\)]*\))?)?\))?)*>\n.+?\n</select>',$mode, 'plugin_stratabasic_select');
     }
 
     function handle($match, $state, $pos, &$handler) {
@@ -54,14 +54,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         $typemap = array();
 
         if($header != '<select>') {
-            if(preg_match_all('/(?:\?([a-zA-Z0-9]+))(?:\s*(\()([^_)]*)(?:_([a-z0-9]+)(?:\(([^)]*)\))?)?\))?/',$header,$match, PREG_SET_ORDER)) {
-                foreach($match as $m) {
-                    list($_, $variable, $parenthesis, $caption, $type, $hint) = $m;
-                    if(!$parenthesis || (!$parenthesis && !$caption && !$type)) $caption = ucfirst($variable);
-                    $this->helper->update_typemap($typemap, $variable, $type, $hint);
-                    $result['fields'][$variable] = array('caption'=>$caption);
-                }
-            }
+            $result['fields'] = $this->helper->parse_fields_short($header,$typemap);
         }
 
         list($fields, $lines) = $this->helper->extract_block($lines, 'fields');
@@ -71,20 +64,8 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
                 msg('Strata basic: Query contains both \'fields\' group and column.',-1);
                 return array();
             } else {
-                foreach($fields as $line) {
-                    $line = trim($line);
-                    if($this->helper->ignorable_line($line)) {
-                        continue;
-                    } elseif(preg_match('/^([^_]*)(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?:\s*\?([a-zA-Z0-9]+)$/S',$line, $match)) {
-                        list($_, $caption, $type, $hint, $variable) = $match;
-                        if(!$caption && !$type) $caption = ucfirst($variable);
-                        $this->helper->update_typemap($typemap, $variable, $type, $hint);
-                        $result['fields'][$variable] = array('caption'=>$caption);
-                    } else {
-                        msg('Strata basic: Weird line in fields group.', -1);
-                        return array();
-                    }
-                }
+                $result['fields'] = $this->helper->parse_fields_long($fields, $typemap);
+                if(!$result['fields']) return array();
             }
         }
 
