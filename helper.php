@@ -38,7 +38,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
     function variable($var) {
         if($var[0] == '?') $var = substr($var,1);
-        return array('type'=>'variable', 'name'=>$var);
+        return array('type'=>'variable', 'text'=>$var);
     }
 
     function extractBlock($lines, $blockname) {
@@ -113,7 +113,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                 list($_, $subject, $predicate, $type, $hint, $object) = $match;
                 if($subject[0] == '?') {
                     $subject = $this->variable($subject);
-                    $this->updateTypemap($typemap, $subject['name'], 'ref');
+                    $this->updateTypemap($typemap, $subject['text'], 'ref');
                 } else {
                     global $ID;
                     $subject = substr($subject,2,-2);
@@ -123,14 +123,14 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
                 if($predicate[0] == '?') {
                     $predicate = $this->variable($predicate);
-                    $this->updateTypemap($typemap, $predicate['name'], 'string');
+                    $this->updateTypemap($typemap, $predicate['text'], 'string');
                 } else {
                     $predicate = $this->literal($predicate);
                 }
 
                 if($object[0] == '?') {
                     $object = $this->variable($object);
-                    $this->updateTypemap($typemap, $object['name'], $type, $hint);
+                    $this->updateTypemap($typemap, $object['text'], $type, $hint);
                 } else {
                     if(!$type) $type = $this->_types->getConf('default_type');
                     $type = $this->_types->loadType($type);
@@ -148,7 +148,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
                 if($rhs[0] == '?') {
                     $rhs = $this->variable($rhs);
-                    $this->updateTypemap($typemap, $rhs['name'], $type, $hint);
+                    $this->updateTypemap($typemap, $rhs['text'], $type, $hint);
                 } else {
                     if(!$type) {
                         if(!empty($typemap[$variable])) {
