@@ -39,7 +39,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
     function connectTo($mode) {
         // ')' between  [^ and ] escaped to work around dokuwiki's pattern handling
         // (The lexer uses ( and ) as delimiter patterns)
-        $this->Lexer->addSpecialPattern('<select'.$this->helper->fields_short_pattern().'*>\n.+?\n</select>',$mode, 'plugin_stratabasic_select');
+        $this->Lexer->addSpecialPattern('<select'.$this->helper->fieldsShortPattern().'*>\n.+?\n</select>',$mode, 'plugin_stratabasic_select');
     }
 
     function handle($match, $state, $pos, &$handler) {
@@ -54,22 +54,22 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         $typemap = array();
 
         if($header != '<select>') {
-            $result['fields'] = $this->helper->parse_fields_short($header,$typemap);
+            $result['fields'] = $this->helper->parseFieldsShort($header,$typemap);
         }
 
-        list($fields, $lines) = $this->helper->extract_block($lines, 'fields');
+        list($fields, $lines) = $this->helper->extractBlock($lines, 'fields');
 
         if(count($fields)) {
             if(count($result['fields'])) {
                 msg('Strata basic: Query contains both \'fields\' group and column.',-1);
                 return array();
             } else {
-                $result['fields'] = $this->helper->parse_fields_long($fields, $typemap);
+                $result['fields'] = $this->helper->parseFieldsLong($fields, $typemap);
                 if(!$result['fields']) return array();
             }
         }
 
-        $result['query'] = $this->helper->parse_query($lines, $typemap, array_keys($result['fields']));
+        $result['query'] = $this->helper->parseQuery($lines, $typemap, array_keys($result['fields']));
         if(!$result['query']) return array();
 
         foreach($result['fields'] as $var=>$f) {

@@ -19,11 +19,11 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         $this->_types =& plugin_load('helper', 'stratastorage_types');
     }
 
-    function ignorable_line($line) {
+    function ignorableLine($line) {
         return $line == '' || substr($line,0,2) == '--';
     }
 
-    function update_typemap(&$typemap, $var, $type, $hint=null) {
+    function updateTypemap(&$typemap, $var, $type, $hint=null) {
         if(empty($typemap[$var]) && $type) {
             $typemap[$var] = array('type'=>$type,'hint'=>$hint);
             return true;
@@ -41,7 +41,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         return array('type'=>'variable', 'name'=>$var);
     }
 
-    function extract_block($lines, $blockname) {
+    function extractBlock($lines, $blockname) {
         $block = array();
         $rest = array();
 
@@ -63,7 +63,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         return array($block, $rest);
     }
 
-    function parse_query($lines, &$typemap, $select = null) {
+    function parseQuery($lines, &$typemap, $select = null) {
         $result = array(
             'select'=>array(),
             'where'=>array(),
@@ -81,7 +81,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         foreach($lines as $line) {
             $lineno++;
             $line = trim($line);
-            if($this->ignorable_line($line)) continue;
+            if($this->ignorableLine($line)) continue;
 
             if(preg_match('/^([a-z]+)\s*\{$/S', $line, $match)) {
                 // block opener
@@ -113,7 +113,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                 list($_, $subject, $predicate, $type, $hint, $object) = $match;
                 if($subject[0] == '?') {
                     $subject = $this->variable($subject);
-                    $this->update_typemap($typemap, $subject['name'], 'ref');
+                    $this->updateTypemap($typemap, $subject['name'], 'ref');
                 } else {
                     global $ID;
                     $subject = substr($subject,2,-2);
@@ -123,14 +123,14 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
                 if($predicate[0] == '?') {
                     $predicate = $this->variable($predicate);
-                    $this->update_typemap($typemap, $predicate['name'], 'string');
+                    $this->updateTypemap($typemap, $predicate['name'], 'string');
                 } else {
                     $predicate = $this->literal($predicate);
                 }
 
                 if($object[0] == '?') {
                     $object = $this->variable($object);
-                    $this->update_typemap($typemap, $object['name'], $type, $hint);
+                    $this->updateTypemap($typemap, $object['name'], $type, $hint);
                 } else {
                     if(!$type) $type = $this->_types->getConf('default_type');
                     $type = $this->_types->loadType($type);
@@ -148,7 +148,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
                 if($rhs[0] == '?') {
                     $rhs = $this->variable($rhs);
-                    $this->update_typemap($typemap, $rhs['name'], $type, $hint);
+                    $this->updateTypemap($typemap, $rhs['name'], $type, $hint);
                 } else {
                     if(!$type) {
                         if(!empty($typemap[$variable])) {
@@ -194,17 +194,17 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         return $result;
     }
 
-    function parse_fields_long($lines, &$typemap) {
+    function parseFieldsLong($lines, &$typemap) {
         $result = array();
 
         foreach($lines as $line) {
             $line = trim($line);
-            if($this->ignorable_line($line)) {
+            if($this->ignorableLine($line)) {
                 continue;
             } elseif(preg_match('/^([^_]*)(?:(_)([a-z0-9]*)(?:\(([^)]+)\))?)?:\s*\?([a-zA-Z0-9]+)$/S',$line, $match)) {
                 list($_, $caption, $underscore, $type, $hint, $variable) = $match;
                 if(!$underscore || (!$underscore && !$caption && !$type)) $caption = ucfirst($variable);
-                $this->update_typemap($typemap, $variable, $type, $hint);
+                $this->updateTypemap($typemap, $variable, $type, $hint);
                 $result[$variable] = array('caption'=>$caption);
             } else {
                 msg('Strata basic: Weird line \'<code>'.hsc($line).'</code>\' in \'<code>fields</code>\' group.', -1);
@@ -215,14 +215,14 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         return $result;
     }
 
-    function parse_fields_short($line, &$typemap) {
+    function parseFieldsShort($line, &$typemap) {
         $result = array();
 
         if(preg_match_all('/\s*\?([a-zA-Z0-9]+)(?:\s*(\()([^_)]*)(?:_([a-z0-9]*)(?:\(([^)]*)\))?)?\))?/',$line,$match, PREG_SET_ORDER)) {
             foreach($match as $m) {
                 list($_, $variable, $parenthesis, $caption, $type, $hint) = $m;
                 if(!$parenthesis || (!$parenthesis && !$caption && !$type)) $caption = ucfirst($variable);
-                $this->update_typemap($typemap, $variable, $type, $hint);
+                $this->updateTypemap($typemap, $variable, $type, $hint);
                 $result[$variable] = array('caption'=>$caption);
             }
         }
@@ -230,7 +230,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         return $result;
     }
 
-    function fields_short_pattern() {
+    function fieldsShortPattern() {
         return '(?:\s+\?[a-zA-Z0-9]+(?:\s*\([^_\)]*(?:_[a-z0-9]*(?:\([^\)]*\))?)?\))?)';
     }
 }
