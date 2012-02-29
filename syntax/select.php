@@ -86,11 +86,12 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
     }
 
     function render($mode, &$R, $data) {
-        global $ID;
-
+        $result = $this->_triples->queryRelations($data['query']);
 
         if($mode == 'xhtml') {
-            $R->preformatted(print_r($data,1));
+            $R->preformatted(print_r($data['fields'],1));
+            $R->code($result['sql'],'sql');
+            $R->preformatted(print_r($result['literals'],1));
             return true;
         } elseif($mode == 'metadata') {
             return false;
