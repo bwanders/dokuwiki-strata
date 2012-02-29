@@ -18,6 +18,7 @@ require_once(DOKU_PLUGIN.'syntax.php');
  */
 class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
     function syntax_plugin_stratabasic_select() {
+        $this->helper =& plugin_load('helper', 'stratabasic');
         $this->_types =& plugin_load('helper', 'stratastorage_types');
         $this->_triples =& plugin_load('helper', 'stratastorage_triples', false);
         $this->_triples->initialize();
@@ -47,142 +48,48 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         $footer = array_pop($lines);
 
         $result = array(
-            'query'=>array(
-                'select'=>array(),
-                'where'=>array(),
-                'sort'=>array(),
-                'optionals'=>array(),
-                'minus'=>array()
-            ),
             'fields'=>array()
         );
 
         $typemap = array();
 
         if($header != '<select>') {
-            if(preg_match_all('/(?:\?([a-zA-Z0-9]+))(?:\s*\(([^_)]*)(?:_([a-z0-9]+)(?:\(([^)]*)\))?)?\))?/',$header,$match, PREG_SET_ORDER)) {
+            if(preg_match_all('/(?:\?([a-zA-Z0-9]+))(?:\s*(\()([^_)]*)(?:_([a-z0-9]+)(?:\(([^)]*)\))?)?\))?/',$header,$match, PREG_SET_ORDER)) {
                 foreach($match as $m) {
-                    list($_, $variable, $caption, $type, $hint) = $m;
-                    $result['query']['select'][] = $variable;
-                    $caption = $caption?:ucfirst($variable);
-                    if($type) {
-                        $typemap[$variable] = array('type'=>$type, 'hint'=>$hint);
-                    }
+                    list($_, $variable, $parenthesis, $caption, $type, $hint) = $m;
+                    if(!$parenthesis || (!$parenthesis && !$caption && !$type)) $caption = ucfirst($variable);
+                    $this->helper->update_typemap($typemap, $variable, $type, $hint);
                     $result['fields'][$variable] = array('caption'=>$caption);
                 }
             }
         }
 
-        $block =& $result['query']['where'];
-        $blockid = 'where';
+        list($fields, $lines) = $this->helper->extract_block($lines, 'fields');
 
-        $lineno = 0;
-        foreach($lines as $line) {
-            $lineno++;
-            $line = trim($line);
-            if($line == '' || substr($line,0,2) == '--') continue;
-
-            if(preg_match('/^([a-z]+)\s*\{$/S', $line, $match)) {
-                // block opener
-                switch($match[1]) {
-                case 'sort':
-                    $block =& $result['query']['sort'];
-                    break;
-                case 'optional':
-                    $new = array();
-                    $block =& $new;
-                    break;
-                case 'minus':
-                    $new = array();
-                    $block =& $new;
-                    break;
-                case 'fields':
-                default:
-                    msg('Strata basic: Query contains weird block \''.$match[1].'\'', -1);
-                    return array();
-                }
-                $blockid = $match[1];
-
-            } elseif(in_array($blockid, array('where','optional','minus')) && 
-                     preg_match('/^((?:\?[a-zA-Z0-9]+)|(?:\[\[[^]]+\]\]))\s+(?:((?:[-a-zA-Z0-9 ]+)|(?:\?[a-zA-Z0-9]+))(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?):\s*(.+?)\s*$/S',$line,$match)) {
-                // triple pattern
-                list($_, $subject, $predicate, $type, $hint, $object) = $match;
-                if($subject[0] == '?') {
-                    $subject = array('type'=>'variable','name'=>substr($subject,1));
-                    if(empty($typemap[$subject['name']])) $typemap[$subject['name']] = array('type'=>'ref','hint'=>null);
-                } else {
-                    global $ID;
-                    $subject = substr($subject,2,-2);
-                    resolve_pageid(getNS($ID), $subject, $exists);
-                    $subject = array('type'=>'literal', 'text'=>$subject);
-                }
-
-                if($predicate[0] == '?') {
-                    $predicate = array('type'=>'variable','name'=>substr($predicate,1));
-                    if(empty($typemap[$predicate['name']])) $typemap[$predicate['name']] = array('type'=>'string','hint'=>null);
-                } else {
-                    $predicate = array('type'=>'literal', 'text'=>$predicate);
-                }
-
-                if($object[0] == '?') {
-                    $object = array('type'=>'variable', 'name'=>substr($object,1));
-                    if(empty($typemap[$object['name']]) && $type) $typemap[$object['name']] = array('type'=>$type, 'hint'=>$hint);
-                } else {
-                    if(!$type) $type = $this->_types->getConf('default_type');
-                    $type = $this->_types->loadType($type);
-                    $object = array('type'=>'literal', 'text'=>$type->normalize($object,$hint));
-                }
-                $block[] = array('type'=>'triple','subject'=>$subject, 'predicate'=>$predicate, 'object'=>$object);
-            } elseif(in_array($blockid, array('where','optional','minus')) &&
-                     preg_match('/^(?:\?([a-zA-Z0-9]+)(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*(=|!=|>|<|>=|<=|~|!~|\^~|\$~)\s*(.+?)\s*$/S',$line, $match)) {
-                // filter pattern
-                list($_, $variable,$type,$hint,$operator,$rhs) = $match;
-
-                if($rhs[0] == '?') {
-                    $rhs = array('type'=>'variable', 'name'=>substr($rhs,1));
-                    if(empty($typemap[$rhs['name']]) && $type) $typemap[$rhs['name']] = array('type'=>$type, 'hint'=>$hint);
-                } else {
-                    if(!$type) {
-                        if(!empty($typemap[$variable])) {
-                            extract($typemap[$variable]);
-                        } else {
-                            $type = $this->_types->getConf('default_type');
-                        }
-                    }
-                    $type = $this->_types->loadType($type);
-                    $rhs = array('type'=>'literal', 'text'=>$type->normalize($rhs,$hint));
-                }
-
-
-                $block[] = array('type'=>'filter','lhs'=>array('type'=>'variable','name'=>$variable), 'operator'=>$operator, 'rhs'=>$rhs);
-
-            } elseif(in_array($blockid, array('sort')) &&
-                     preg_match('/^\?([a-zA-Z0-9]+)\s*(?:\((asc|desc)(?:ending)?\))?$/S',$line,$match)) {
-                // sort pattern
-                $block[] = array('name'=>$match[1], 'order'=>($match[2]?:'asc'));
-
-            } elseif($line == '}') {
-                // block closer
-                switch($blockid) {
-                case 'optional':
-                    $result['query']['optionals'][] = $block;
-                    break;
-                case 'minus':
-                    $result['query']['minus'][] = $block;
-                    break;
-                case 'sort':
-                case 'fields':
-                    break;
-                default:
-                    msg('Strata basic: Query contains weird closing bracket.', -1);
-                    return array();
-                }
-                $blockid = 'where';
-                $block =& $result['query']['where'];
+        if(count($fields)) {
+            if(count($result['fields'])) {
+                msg('Strata basic: Query contains both \'fields\' group and column.',-1);
+                return array();
             } else {
-                msg('Strata basic: Query contains weird line (line number '.$lineno.').',-1);
+                foreach($fields as $line) {
+                    $line = trim($line);
+                    if($this->helper->ignorable_line($line)) {
+                        continue;
+                    } elseif(preg_match('/^([^_]*)(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?:\s*\?([a-zA-Z0-9]+)$/S',$line, $match)) {
+                        list($_, $caption, $type, $hint, $variable) = $match;
+                        if(!$caption && !$type) $caption = ucfirst($variable);
+                        $this->helper->update_typemap($typemap, $variable, $type, $hint);
+                        $result['fields'][$variable] = array('caption'=>$caption);
+                    } else {
+                        msg('Strata basic: Weird line in fields group.', -1);
+                        return array();
+                    }
+                }
             }
         }
+
+        $result['query'] = $this->helper->parse_query($lines, $typemap, array_keys($result['fields']));
+        if(!$result['query']) return array();
 
         foreach($result['fields'] as $var=>$f) {
             if(empty($f['type'])) {
