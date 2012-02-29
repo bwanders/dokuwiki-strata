@@ -93,7 +93,8 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
                     $block =& $new;
                     break;
                 case 'minus':
-                    $block =& $result['query']['minus'];
+                    $new = array();
+                    $block =& $new;
                     break;
                 case 'fields':
                 default:
@@ -166,8 +167,10 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
                 case 'optional':
                     $result['query']['optionals'][] = $block;
                     break;
-                case 'sort':
                 case 'minus':
+                    $result['query']['minus'][] = $block;
+                    break;
+                case 'sort':
                 case 'fields':
                     break;
                 default:
