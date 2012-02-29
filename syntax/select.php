@@ -159,7 +159,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
             } elseif(in_array($blockid, array('sort')) &&
                      preg_match('/^\?([a-zA-Z0-9]+)\s*(?:\((asc|desc)(?:ending)?\))?$/S',$line,$match)) {
                 // sort pattern
-                //$block[] = array('field'=>$match[1], 'order'=>($match[2]?:'asc'));
+                $block[] = array('name'=>$match[1], 'order'=>($match[2]?:'asc'));
 
             } elseif($line == '}') {
                 // block closer
