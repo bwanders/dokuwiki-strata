@@ -191,4 +191,83 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         }
         $this->_db->commit();
     }
+
+    function queryRelations($query) {
+        $generator = new stratastorage_sql_generator();
+        
+        list($sql, $literals) = $generator->translate($query);
+        
+        return array('sql'=>$sql,'literals'=>$literals);
+    }
+
+    function queryResources($query) {
+        return array();
+    }
+}
+
+class stratastorage_sql_generator {
+    private $_aliasCounter = 0;
+    function _alias() {
+        return 'a'.($this->_aliasCounter++);
+    }
+
+    private $_literalLookup = array();
+    function _name($term) {
+        if($term['type'] == 'variable') {
+            return 'v_'.$term['text'];
+        } elseif($term['type'] == 'literal') {
+            if(empty($this->_literalLookup[$term['text']])) {
+                // use double-quotes literal names as test
+                // shouldn't do this in production
+                $this->_literalLookup[$term['text']] = '"'.str_replace('"','""',$term['text']).'"';
+            }
+            return $this->_literalLookup[$term['text']];
+        }
+    }
+
+    function _patternEquals($pa, $pb) {
+        return $pa['type'] == $pb['type'] && $pa['text'] == $pb['text'];
+    }
+
+    function _getCond($tp) {
+        $conditions = array();
+        if($tp['subject']['type'] != 'variable') {
+            $id = $this->_alias();
+            $conditions[] = 'subject = :'.$id;
+            $this->literals[$id] = $tp['subject']['text'];
+        }
+        if($tp['predicate']['type'] != 'variable') {
+            $id = $this->_alias();
+            $conditions[] = 'predicate = :'.$id;
+            $this->literals[$id] = $tp['predicate']['text'];
+        }
+        if($tp['object']['type'] != 'variable') {
+            $id = $this->_alias();
+            $conditions[] = 'object = :'.$id;
+            $this->literals[$id] = $tp['object']['text'];
+        }
+        if($this->_patternEquals($tp['subject'],$tp['predicate'])) {
+            $conditions[] = 'subject = predicate';
+        }
+        if($this->_patternEquals($tp['subject'],$tp['object'])) {
+            $conditions[] = 'subject = object';
+        }
+        if($this->_patternEquals($tp['predicate'],$tp['object'])) {
+            $conditions[] = 'predicate = object';
+        }
+
+        if(count($conditions)!=0) {
+            return implode(' AND ',$conditions);
+        } else {
+            return 'TRUE';
+        }
+    }
+
+
+    private $literals = array();
+
+    function translate($query) {
+        $sql = '';
+        return array($sql, $this->literals);
+    }
 }
