@@ -16,11 +16,7 @@ require_once(DOKU_PLUGIN.'stratastorage/driver/driver.php');
 class plugin_strata_driver_sqlite extends plugin_strata_driver {
     // Does not require overrides
 
-    public function isInitialized($file) {
-        if($file == ':memory:') {
-            return false;
-        } else {
-            return @file_exists($file) && ((int) @filesize($file) >= 3);
-        }
+    public function isInitialized($db) {
+        return $db->query("SELECT count(*) FROM sqlite_master WHERE name = 'data'")->fetchColumn() != 0;
     }
 }

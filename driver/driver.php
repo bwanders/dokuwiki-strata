@@ -24,8 +24,8 @@ abstract class plugin_strata_driver {
     /**
      * Determines whether the database is initialised.
      *
-     * @param connection string the connection part of the PDO Data Source Name
+     * @param db object the PDO connection to check
      * @return boolean true if the database is initialised
      */
-    public abstract function isInitialized($connection);
+    public abstract function isInitialized($db);
 }

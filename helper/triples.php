@@ -66,7 +66,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
             return false;
         }
 
-        if(!$this->_driver->isInitialized($connection)) {
+        if(!$this->_driver->isInitialized($this->_db)) {
             $this->_setupDatabase();
         }
 
