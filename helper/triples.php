@@ -161,7 +161,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
             msg(hsc('Strata storage: Failed to fetch triples: '.$error[2]),-1);
         }
 
-        $result = $query->fetchAll();
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
         $query->closeCursor();
         return $result;
     }
