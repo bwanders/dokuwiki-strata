@@ -54,18 +54,22 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         require_once($driverFile);
         $driverClass = "plugin_strata_driver_$driver";
         $this->_driver = new $driverClass();
-        $init = !$this->_driver->isInitialized($connection);
 
         try {
             $this->_db = new PDO($dsn);
         } catch(PDOException $e) {
-            if($this->getConf('debug')) msg(hsc("Strata storage: failed to open DSN '$dsn': ".$e->getMessage()),-1);
+            if($this->getConf('debug')) {
+                msg(hsc("Strata storage: Failed to open data source '$dsn': ".$e->getMessage()),-1);
+            } else {
+                msg('Strata storage: Failed to open data source.',-1);
+            }
             return false;
         }
 
-        if($init) {
+        if(!$this->_driver->isInitialized($connection)) {
             $this->_setupDatabase();
         }
+
 
         return true;
     }
