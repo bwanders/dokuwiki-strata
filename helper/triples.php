@@ -29,17 +29,18 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
 
         return $result;
     }
+
+    function _expandTokens($str) {
+        global $conf;
+        $tokens    = array('@METADIR@');
+        $replacers = array($conf['metadir']);
+        return str_replace($tokens,$replacers,$str);
+    }
     
     function initialize($dsn=null) {
         if($dsn == null) {
             $dsn = $this->getConf('default_dsn');
-
-            if($dsn == '') {
-                global $conf;
-                $file = "{$conf['metadir']}/strata.sqlite";
-                $init = (!@file_exists($file) || ((int) @filesize($file) < 3));
-                $dsn = "sqlite:$file";
-            }
+            $dsn = $this->_expandTokens($dsn);
         }
 
         $this->_dsn = $dsn;
@@ -53,6 +54,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         require_once($driverFile);
         $driverClass = "plugin_strata_driver_$driver";
         $this->_driver = new $driverClass();
+        $init = !$this->_driver->isInitialized($connection);
 
         try {
             $this->_db = new PDO($dsn);
