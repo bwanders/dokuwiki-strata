@@ -3,7 +3,7 @@ require_once(DOKU_INC.'_test/lib/unittest.php');
 require_once(DOKU_INC.'inc/init.php');
 require_once(DOKU_INC.'inc/plugin.php');
 require_once(DOKU_INC.'lib/plugins/stratastorage/helper/triples.php');
-class storage_test extends Doku_UnitTestCase {
+class storage_removes_test extends Doku_UnitTestCase {
 
 	function setup() {
 		// Setup a new in-memory table
