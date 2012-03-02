@@ -9,7 +9,6 @@ class storage_test extends Doku_UnitTestCase {
 		// Setup a new in-memory table
 		$this->_triples = new helper_plugin_stratastorage_triples();
 		$this->_triples->initialize('sqlite::memory:');
-		$this->_triples->_setupDatabase();
 	}
 
 	function testAdd() {
