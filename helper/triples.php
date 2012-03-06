@@ -224,6 +224,18 @@ class stratastorage_sql_generator {
         }
     }
 
+    function _genPR($tp) {
+        $list = array();
+        $list[] = 'subject AS '.$this->_name($tp['subject']);
+        if(!$this->_patternEquals($tp['subject'], $tp['predicate'])) {
+            $list[] = 'predicate AS '.$this->_name($tp['predicate']);
+        }
+        if(!$this->_patternEquals($tp['subject'], $tp['object']) && !$this->_patternEquals($tp['predicate'],$tp['object'])) {
+            $list[] = 'object AS '.$this->_name($tp['object']);
+        }
+        return implode(', ',$list);
+    }
+
 
     private $literals = array();
 
