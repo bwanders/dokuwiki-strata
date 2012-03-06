@@ -29,17 +29,18 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
 
         return $result;
     }
+
+    function _expandTokens($str) {
+        global $conf;
+        $tokens    = array('@METADIR@');
+        $replacers = array($conf['metadir']);
+        return str_replace($tokens,$replacers,$str);
+    }
     
     function initialize($dsn=null) {
         if($dsn == null) {
             $dsn = $this->getConf('default_dsn');
-
-            if($dsn == '') {
-                global $conf;
-                $file = "{$conf['metadir']}/strata.sqlite";
-                $init = (!@file_exists($file) || ((int) @filesize($file) < 3));
-                $dsn = "sqlite:$file";
-            }
+            $dsn = $this->_expandTokens($dsn);
         }
 
         $this->_dsn = $dsn;
@@ -57,64 +58,24 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         try {
             $this->_db = new PDO($dsn);
         } catch(PDOException $e) {
-            if($this->getConf('debug')) msg(hsc("Strata storage: failed to open DSN '$dsn': ".$e->getMessage()),-1);
-            return false;
-        }
-
-        if($init) {
-            $this->_setupDatabase();
-        }
-
-        return true;
-    }
-
-    function _setupDatabase() {
-        list($driver,$connection) = explode(':',$this->_dsn,2);
-        if($this->getConf('debug')) msg('Strata storage: Setting up '.$driver.' database.');
-
-        $sqlfile = DOKU_PLUGIN."stratastorage/sql/setup-$driver.sql";
-
-        $sql = io_readFile($sqlfile, false);
-        $sql = explode(';', $sql);
-
-        $this->_db->beginTransaction();
-        foreach($sql as $s) {
-            $s = preg_replace('/^\s*--.*$/','',$s);
-            $s = trim($s);
-            if($s == '') continue;
-
-            if($this->getConf('debug')) msg(hsc('Strata storage: Executing \''.$s.'\'.'));
-            if(!$this->_query($s, 'Failed to set up database')) {
-                $this->_db->rollback();
-                return false;
+            if($this->getConf('debug')) {
+                msg(hsc("Strata storage: Failed to open data source '$dsn': ".$e->getMessage()),-1);
+            } else {
+                msg('Strata storage: Failed to open data source.',-1);
             }
+            return false;
         }
-        $this->_db->commit();
 
-        msg('Strata storage: Database set up succesful!',1);
+        if(!$this->_driver->isInitialized($this->_db)) {
+            $this->_driver->initializeDatabase($this->_db, $dsn, $this->getConf('debug'));
+        }
+
 
         return true;
     }
 
-    function _prepare($query) {
-        $result = $this->_db->prepare($query);
-        if($result === false) {
-            $error = $this->_db->errorInfo();
-            msg(hsc('Strata storage: Failed to prepare query \''.$query.'\': '.$error[2]),-1);
-            return false;
-        }
-
-        return $result;
-    }
-
-    function _query($query, $message="Query failed") {
-        $res = $this->_db->query($query);
-        if($res === false) {
-            $error = $this->_db->errorInfo();
-            msg(hsc('Strata storage: '.$message.' (with \''.$query.'\'): '.$error[2]),-1);
-            return false;
-        }
-        return true;
+   function _prepare($query) {
+        return $this->_driver->prepare($this->_db, $query);
     }
 
     function removeTriples($subject=null, $predicate=null, $object=null, $graph=null) {
@@ -161,7 +122,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
             msg(hsc('Strata storage: Failed to fetch triples: '.$error[2]),-1);
         }
 
-        $result = $query->fetchAll();
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
         $query->closeCursor();
         return $result;
     }
@@ -175,7 +136,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
 
         $sql = "INSERT INTO data(subject, predicate, object, graph) VALUES(?, ?, ?, ?)";
         $query = $this->_prepare($sql);
-        if($query == false) return;
+        if($query == false) return false;
 
         $this->_db->beginTransaction();
         foreach($triples as $t) {
@@ -185,11 +146,11 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
                 $error = $query->errorInfo();
                 msg(hsc('Strata storage: Failed to add triples: '.$error[2]),-1);
                 $this->_db->rollback();
-                return;
+                return false;
             }
             $query->closeCursor();
         }
-        $this->_db->commit();
+        return $this->_db->commit();
     }
 
     function queryRelations($query) {
