@@ -75,7 +75,7 @@ abstract class plugin_strata_driver {
      * @return whether the database was removed successfully
      */
     public function removeDatabase($db) {
-        return $db->query('DROP TABLE data', 'Failed to remove database');
+        return $this->query($db, 'DROP TABLE data', 'Failed to remove database');
     }
 
     /**
