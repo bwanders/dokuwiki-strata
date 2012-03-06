@@ -1,15 +1,6 @@
 <?php
-require_once(DOKU_INC.'_test/lib/unittest.php');
-require_once(DOKU_INC.'inc/init.php');
-require_once(DOKU_INC.'inc/plugin.php');
-require_once(DOKU_INC.'lib/plugins/stratastorage/helper/triples.php');
-class storage_graphs_test extends Doku_UnitTestCase {
-
-	function setup() {
-		// Setup a new in-memory table
-		$this->_triples = new helper_plugin_stratastorage_triples();
-		$this->_triples->initialize('sqlite::memory:');
-	}
+require_once('stratatest.inc.php');
+class storage_graphs_test extends Strata_UnitTestCase {
 
 	function testGraphs() {
 		$OK = $this->_triples->addTriple('Bob', 'knows', 'Alice', 'knowledgebase of bob');
