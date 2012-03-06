@@ -67,60 +67,15 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         }
 
         if(!$this->_driver->isInitialized($this->_db)) {
-            $this->_setupDatabase();
+            $this->_driver->initializeDatabase($this->_db, $dsn, $this->getConf('debug'));
         }
 
 
         return true;
     }
 
-    function _setupDatabase() {
-        list($driver,$connection) = explode(':',$this->_dsn,2);
-        if($this->getConf('debug')) msg('Strata storage: Setting up '.$driver.' database.');
-
-        $sqlfile = DOKU_PLUGIN."stratastorage/sql/setup-$driver.sql";
-
-        $sql = io_readFile($sqlfile, false);
-        $sql = explode(';', $sql);
-
-        $this->_db->beginTransaction();
-        foreach($sql as $s) {
-            $s = preg_replace('/^\s*--.*$/','',$s);
-            $s = trim($s);
-            if($s == '') continue;
-
-            if($this->getConf('debug')) msg(hsc('Strata storage: Executing \''.$s.'\'.'));
-            if(!$this->_query($s, 'Failed to set up database')) {
-                $this->_db->rollback();
-                return false;
-            }
-        }
-        $this->_db->commit();
-
-        msg('Strata storage: Database set up succesful!',1);
-
-        return true;
-    }
-
-    function _prepare($query) {
-        $result = $this->_db->prepare($query);
-        if($result === false) {
-            $error = $this->_db->errorInfo();
-            msg(hsc('Strata storage: Failed to prepare query \''.$query.'\': '.$error[2]),-1);
-            return false;
-        }
-
-        return $result;
-    }
-
-    function _query($query, $message="Query failed") {
-        $res = $this->_db->query($query);
-        if($res === false) {
-            $error = $this->_db->errorInfo();
-            msg(hsc('Strata storage: '.$message.' (with \''.$query.'\'): '.$error[2]),-1);
-            return false;
-        }
-        return true;
+   function _prepare($query) {
+        return $this->_driver->prepare($this->_db, $query);
     }
 
     function removeTriples($subject=null, $predicate=null, $object=null, $graph=null) {
