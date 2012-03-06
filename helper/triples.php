@@ -190,7 +190,7 @@ class stratastorage_sql_generator {
         return $pa['type'] == $pb['type'] && $pa['text'] == $pb['text'];
     }
 
-    function _getCond($tp) {
+    function _genCond($tp) {
         $conditions = array();
         if($tp['subject']['type'] != 'variable') {
             $id = $this->_alias();
