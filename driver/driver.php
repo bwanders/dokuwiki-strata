@@ -69,6 +69,16 @@ abstract class plugin_strata_driver {
     }
 
     /**
+     * Removes a database that was initialized before.
+     *
+     * @param db object the PDO connection to use
+     * @return whether the database was removed successfully
+     */
+    public function removeDatabase($db) {
+        return $this->query('DROP TABLE data', 'Failed to remove database');
+    }
+
+    /**
      * Prepares a query and reports any problems to Dokuwiki.
      *
      * @param db object the PDO connection to use
