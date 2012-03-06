@@ -12,6 +12,8 @@ class Strata_UnitTestCase extends Doku_UnitTestCase {
 	}
 
 	function teardown() {
+		// Remove the database
+		$this->_triples->_driver->removeDatabase($this->_triples->_db);
 	}
 }
 
