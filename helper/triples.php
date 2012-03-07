@@ -416,12 +416,12 @@ class stratastorage_sql_generator {
     function translate($query) {
         $gp = $this->_convertQueryGroup($query['where']);
 
-        foreach($query['optionals'] as $opt) {
-            $gp = $this->_trans_opt($gp, $this->_convertQueryGroup($opt));
-        }
-
         foreach($query['minus'] as $minus) {
             $gp = $this->_trans_minus($gp, $this->_convertQueryGroup($minus));
+        }
+
+        foreach($query['optionals'] as $opt) {
+            $gp = $this->_trans_opt($gp, $this->_convertQueryGroup($opt));
         }
 
         $q = $this->_trans_select($gp, $query['select']);
