@@ -165,8 +165,6 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
 
         $query = $this->_prepare($sql);
         if($query === false) {
-            $error = $query->errorInfo();
-            msg(hsc('Strata storage: Failed to prepare query: '.$error[2]),-1);
             return false;
         }
 
