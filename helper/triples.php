@@ -307,28 +307,44 @@ class stratastorage_sql_generator {
     function _trans_filter($gp, $fs) {
         $filters = array();
         foreach($fs as $f) {
+            if($f['lhs']['type'] == 'variable') {
+                $lhs = $this->_name($f['lhs']);
+            } else {
+                $id = $this->_alias();
+                $lhs = ':'.$id;
+                $this->literals[$id] = $f['lhs']['text'];
+            }
+
+            if($f['rhs']['type'] == 'variable') {
+                $rhs = $this->_name($f['rhs']);
+            } else {
+                $id = $this->_alias();
+                $rhs = ':'.$id;
+                $this->literals[$id] = $f['rhs']['text'];
+            }
+
             switch($f['operator']) {
                 case '=':
                 case '!=':
-                    $filters[] = '( ' . $this->_name($f['lhs']) . ' '.$f['operator'].' ' . $this->_name($f['rhs']). ' )';
+                    $filters[] = '( ' . $lhs . ' '.$f['operator'].' ' . $rhs. ' )';
                     break;
                 case '>':
                 case '<':
                 case '>=':
                 case '<=':
-                    $filters[] = '( ' . $this->_triples->_driver->castToNumber($this->_name($f['lhs'])) . ' ' . $f['operator'] . ' ' . $this->_triples->_driver->castToNumber($this->_name($f['rhs'])) . ' )';
+                    $filters[] = '( ' . $this->_triples->_driver->castToNumber($lhs) . ' ' . $f['operator'] . ' ' . $this->_triples->_driver->castToNumber($rhs) . ' )';
                     break;
                 case '~':
-                    $filters[] = '( ' . $this->_name($f['lhs']) . ' LIKE \'%\' || ' . $this->_name($f['rhs']) . ' || \'%\' )';
+                    $filters[] = '( ' . $lhs . ' LIKE \'%\' || ' . $rhs . ' || \'%\' )';
                     break;
                 case '!~':
-                    $filters[] = '( ' . $this->_name($f['lhs']) . ' NOT LIKE \'%\' || ' . $this->_name($f['rhs']). ' || \'%\' )';
+                    $filters[] = '( ' . $lhs . ' NOT LIKE \'%\' || ' . $rhs. ' || \'%\' )';
                     break;
                 case '^~':
-                    $filters[] = '( ' . $this->_name($f['lhs']) . ' LIKE ' . $this->_name($f['rhs']) . ' || \'%\' )';
+                    $filters[] = '( ' . $lhs . ' LIKE ' . $rhs . ' || \'%\' )';
                     break;
                 case '$~':
-                    $filters[] = '( ' . $this->_name($f['lhs']) . ' LIKE \'%\' || ' . $this->_name($f['rhs']). ' )';
+                    $filters[] = '( ' . $lhs . ' LIKE \'%\' || ' . $rhs. ' )';
                     break;
                 default:
             }
