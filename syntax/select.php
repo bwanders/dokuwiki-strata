@@ -103,7 +103,8 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
             foreach($data['fields'] as $field=>$meta) {
                 $fields[] = array(
                     'name'=>$field,
-                    'type'=>$this->_types->loadType($meta['type'])
+                    'type'=>$this->_types->loadType($meta['type']),
+                    'hint'=>$meta['hint']
                 );
                 $R->tableheader_open();
                 $R->doc .= $R->_xmlEntities($meta['caption']);
