@@ -157,8 +157,30 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         $generator = new stratastorage_sql_generator($this);
         
         list($sql, $literals) = $generator->translate($query);
+
+        if($this->getConf('debug')) {
+            msg('SQL: <pre>'.hsc($sql).'</pre>',2);
+            msg('Literals: <pre>'.hsc(print_r($literals,1)).'</pre>',2);
+        }
+
+        $query = $this->_prepare($sql);
+        if($query === false) {
+            $error = $query->errorInfo();
+            msg(hsc('Strata storage: Failed to prepare query: '.$error[2]),-1);
+            return false;
+        }
+
+        $res = $query->execute($literals);
+        if($res === false) {
+            $error = $query->errorInfo();
+            msg(hsc('Strata storage: Failed to execute query: '.$error[2]),-1);
+            return false;
+        }
+
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+        $query->closeCursor();
         
-        return array('sql'=>$sql,'literals'=>$literals);
+        return $result;
     }
 
     function queryResources($query) {
@@ -320,10 +342,13 @@ class stratastorage_sql_generator {
 
     function _trans_select($gp, $vars) {
         $terms = array();
+        $fields = array();
         foreach($vars as $v) {
-            $terms[] = $this->_name(array('type'=>'variable','text'=>$v));
+            $name = $this->_name(array('type'=>'variable','text'=>$v));
+            $terms[] = $name;
+            $fields[] = $name. ' AS "' . $v . '"';
         }
-        $fields = implode(', ',$terms);
+        $fields = implode(', ',$fields);
 
         return array(
             'sql'=>'SELECT '.$fields.' FROM ('.$gp['sql'].') r',
