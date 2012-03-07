@@ -244,7 +244,7 @@ class stratastorage_sql_generator {
         if(count($conditions)!=0) {
             return implode(' AND ',$conditions);
         } else {
-            return 'TRUE';
+            return '1';
         }
     }
 
@@ -282,7 +282,7 @@ class stratastorage_sql_generator {
             }
             $intersect = implode(' AND ',$intersect);
         } else {
-            $intersect = 'TRUE';
+            $intersect = '1';
         }
 
         $fields = implode(', ',$fields);
