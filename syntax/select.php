@@ -89,9 +89,29 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         $result = $this->_triples->queryRelations($data['query']);
 
         if($mode == 'xhtml') {
-            $R->preformatted(print_r($data['fields'],1));
-            $R->code($result['sql'],'sql');
-            $R->preformatted(print_r($result['literals'],1));
+            $R->table_open();
+            $R->tablerow_open();
+            $fields = array();
+            foreach($data['fields'] as $field=>$meta) {
+                $fields[] = array(
+                    'name'=>$field,
+                    'type'=>$this->_types->loadType($meta['type'])
+                );
+                $R->tableheader_open();
+                $R->doc .= $R->_xmlEntities($meta['caption']);
+                $R->tableheader_close();
+            }
+            $R->tablerow_close();
+            foreach($result as $row) {
+                $R->tablerow_open();
+                    foreach($fields as $f) {
+                        $R->tablecell_open();
+                        $f['type']->render($mode, $R, $this->_triples, $row[$f['name']], $f['hint']);
+                        $R->tablecell_close();
+                    }
+                $R->tablerow_close();
+            }
+            $R->table_close();
             return true;
         } elseif($mode == 'metadata') {
             return false;
