@@ -147,11 +147,6 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         
         list($sql, $literals) = $generator->translate($query);
 
-        if($this->getConf('debug')) {
-            msg('SQL: <pre>'.hsc($sql).'</pre>',2);
-            msg('Literals: <pre>'.hsc(print_r($literals,1)).'</pre>',2);
-        }
-
         $query = $this->_db->prepare($sql);
         if($query === false) {
             return false;
