@@ -125,7 +125,22 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
             $R->table_close();
             return true;
         } elseif($mode == 'metadata') {
-            return false;
+            foreach($data['fields'] as $field=>$meta) {
+                $fields[] = array(
+                    'name'=>$field,
+                    'type'=>$this->_types->loadType($meta['type']),
+                    'hint'=>$meta['hint']
+                );
+            }
+            foreach($result as $row) {
+                foreach($fields as $f) {
+                    if($row[$f['name']] != null) {
+                        $f['type']->render($mode, $R, $this->_triples, $row[$f['name']], $f['hint']);
+                    }
+                }
+            }
+
+            return true;
         }
 
         return false;
