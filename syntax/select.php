@@ -39,7 +39,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
     function connectTo($mode) {
         // ')' between  [^ and ] escaped to work around dokuwiki's pattern handling
         // (The lexer uses ( and ) as delimiter patterns)
-        $this->Lexer->addSpecialPattern('<select'.$this->helper->fieldsShortPattern().'*>\n.+?\n</select>',$mode, 'plugin_stratabasic_select');
+        $this->Lexer->addSpecialPattern('<select'.$this->helper->fieldsShortPattern().'* *>\n.+?\n</select>',$mode, 'plugin_stratabasic_select');
     }
 
     function handle($match, $state, $pos, &$handler) {
