@@ -154,7 +154,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
     }
 
     function queryRelations($query) {
-        $generator = new stratastorage_sql_generator();
+        $generator = new stratastorage_sql_generator($this);
         
         list($sql, $literals) = $generator->translate($query);
         
@@ -167,6 +167,10 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
 }
 
 class stratastorage_sql_generator {
+    function stratastorage_sql_generator($triples) {
+        $this->_triples = $triples;
+    }
+
     private $_aliasCounter = 0;
     function _alias() {
         return 'a'.($this->_aliasCounter++);
@@ -236,11 +240,120 @@ class stratastorage_sql_generator {
         return implode(', ',$list);
     }
 
-
     private $literals = array();
 
+    function _trans_tp($tp) {
+        return array(
+            'sql'=>'SELECT '.$this->_genPR($tp).' FROM data WHERE '.$this->_genCond($tp),
+            'terms'=>array($this->_name($tp['subject']),$this->_name($tp['predicate']), $this->_name($tp['object']))
+        );
+    }
+
+    function _trans_group($gp1, $gp2, $join) {
+        $terms = array_unique(array_merge($gp1['terms'], $gp2['terms']));
+        $common = array_intersect($gp1['terms'], $gp2['terms']);
+        $fields = array_diff($terms, $common);
+
+        if(count($common)>0) {
+            $intersect = array();
+            foreach($common as $c) {
+                $intersect[] = '(r1.'.$c.' = r2.'.$c.' OR r1.'.$c.' IS NULL OR r2.'.$c.' IS NULL)';
+                $fields[]='COALESCE(r1.'.$c.', r2.'.$c.') AS '.$c;
+            }
+            $intersect = implode(' AND ',$intersect);
+        } else {
+            $intersect = 'TRUE';
+        }
+
+        $fields = implode(', ',$fields);
+
+        return array(
+            'sql'=>'SELECT DISTINCT '.$fields.' FROM ('.$gp1['sql'].') AS r1 '.$join.' ('.$gp2['sql'].') AS r2 ON '.$intersect,
+            'terms'=>$terms
+        );
+    }
+
+
+    function _trans_opt($gp1, $gp2) {
+        return $this->_trans_group($gp1, $gp2, 'LEFT OUTER JOIN');
+    }
+
+    function _trans_and($gp1, $gp2) {
+        return $this->_trans_group($gp1, $gp2, 'INNER JOIN');
+    }
+
+    function _trans_filter($gp, $fs) {
+        $filters = array();
+        foreach($fs as $f) {
+            switch($f['operator']) {
+                case '=':
+                case '!=':
+                    $filters[] = '( ' . $this->_name($f['lhs']) . ' '.$f['operator'].' ' . $this->_name($f['rhs']). ' )';
+                    break;
+                case '>':
+                case '<':
+                case '>=':
+                case '<=':
+                    $filters[] = '( ' . $this->_triples->_driver->castToNumber($this->_name($f['lhs'])) . ' ' . $f['operator'] . ' ' . $this->_triples->_driver->castToNumber($this->_name($f['rhs'])) . ' )';
+                    break;
+                case '~':
+                    $filters[] = '( ' . $this->_name($f['lhs']) . ' LIKE \'%\' || ' . $this->_name($f['rhs']) . ' || \'%\' )';
+                    break;
+                case '!~':
+                    $filters[] = '( ' . $this->_name($f['lhs']) . ' NOT LIKE \'%\' || ' . $this->_name($f['rhs']). ' || \'%\' )';
+                    break;
+                case '^~':
+                    $filters[] = '( ' . $this->_name($f['lhs']) . ' LIKE ' . $this->_name($f['rhs']) . ' || \'%\' )';
+                    break;
+                case '$~':
+                    $filters[] = '( ' . $this->_name($f['lhs']) . ' LIKE \'%\' || ' . $this->_name($f['rhs']). ' )';
+                    break;
+                default:
+            }
+        }
+        $filters = implode(' AND ', $filters);
+        return array(
+            'sql'=>'SELECT * FROM ('.$gp['sql'].') r WHERE '.$filters,
+            'terms'=>$gp['terms']
+        );
+    }
+
+    function _trans_select($gp, $vars) {
+        $terms = array();
+        foreach($vars as $v) {
+            $terms[] = $this->_name(array('type'=>'variable','text'=>$v));
+        }
+        $fields = implode(', ',$terms);
+
+        return array(
+            'sql'=>'SELECT '.$fields.' FROM ('.$gp['sql'].') r',
+            'terms'=>$terms
+        );
+    }
+
+    function _convertQueryGroup($group) {
+        $filters = array();
+        $patterns = array();
+        foreach($group as $i) {
+            switch($i['type']) {
+                case 'triple': $patterns[]=$i; break;
+                case 'filter': $filters[] =$i; break;
+                default: break;
+            }
+        }
+
+        $gp = $this->_trans_tp($patterns[0]);
+        for($i=1; $i<count($patterns); $i++) {
+            $gp = $this->_trans_and($gp, $this->_trans_tp($patterns[$i]));
+        }
+
+        return $this->_trans_filter($gp, $filters);
+    }
+
+
     function translate($query) {
-        $sql = '';
-        return array($sql, $this->literals);
+        $q = $this->_trans_select($this->_convertQueryGroup($query['where']), $query['select']);
+
+        return array($q['sql'], $this->literals);
     }
 }
