@@ -55,7 +55,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         $driverClass = "plugin_strata_driver_$driver";
         $this->_db = new $driverClass($this->getConf('debug'));
 
-	if(!$this->_db->connect($dsn)) {
+        if(!$this->_db->connect($dsn)) {
             return false;
         }
 
