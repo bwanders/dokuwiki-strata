@@ -72,6 +72,8 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
             'minus'=>array()
         );
 
+        $variables = array();
+
         if($select) $result['select'] = $select;
 
         $block =& $result['where'];
@@ -113,6 +115,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                 list($_, $subject, $predicate, $type, $hint, $object) = $match;
                 if($subject[0] == '?') {
                     $subject = $this->variable($subject);
+                    $variables[] = $subject['text'];
                     $this->updateTypemap($typemap, $subject['text'], 'ref');
                 } else {
                     global $ID;
@@ -123,6 +126,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
                 if($predicate[0] == '?') {
                     $predicate = $this->variable($predicate);
+                    $variables[] = $predicate['text'];
                     $this->updateTypemap($typemap, $predicate['text'], 'string');
                 } else {
                     $predicate = $this->literal($predicate);
@@ -130,6 +134,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
                 if($object[0] == '?') {
                     $object = $this->variable($object);
+                    $variables[] = $object['text'];
                     $this->updateTypemap($typemap, $object['text'], $type, $hint);
                 } else {
                     if(!$type) $type = $this->_types->getConf('default_type');
@@ -148,6 +153,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
                 if($rhs[0] == '?') {
                     $rhs = $this->variable($rhs);
+                    $variables[] = $rhs['text'];
                     $this->updateTypemap($typemap, $rhs['text'], $type, $hint);
                 } else {
                     if(!$type) {
@@ -191,7 +197,9 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
             }
         }
 
-        return $result;
+        $variables = array_unique($variables);
+
+        return array($result, $variables);
     }
 
     function parseFieldsLong($lines, &$typemap) {

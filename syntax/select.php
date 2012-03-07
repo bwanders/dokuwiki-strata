@@ -69,11 +69,11 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
             }
         }
 
-        $result['query'] = $this->helper->parseQuery($lines, $typemap, array_keys($result['fields']));
+        list($result['query'], $variables) = $this->helper->parseQuery($lines, $typemap, array_keys($result['fields']));
         if(!$result['query']) return array();
 
         foreach($result['fields'] as $var=>$f) {
-            if(!array_key_exists($var, $typemap)) {
+            if(!in_array($var, $variables)) {
                 msg('Strata basic: Query selects unknown field \''.hsc($var).'\'',-1);
                 return array();
             }
