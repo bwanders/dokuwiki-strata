@@ -86,6 +86,9 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
     }
 
     function render($mode, &$R, $data) {
+        if($data == array()) {
+            return;
+        }
         $result = $this->_triples->queryRelations($data['query']);
 
         if($mode == 'xhtml') {
