@@ -362,7 +362,7 @@ class stratastorage_sql_generator {
         );
     }
 
-    function _trans_select($gp, $vars) {
+    function _trans_select($gp, $vars, $order) {
         $terms = array();
         $fields = array();
         foreach($vars as $v) {
@@ -372,8 +372,19 @@ class stratastorage_sql_generator {
         }
         $fields = implode(', ',$fields);
 
+
+        $ordering = array();
+        foreach($order as $o) {
+            $ordering[] = $this->_name(array('type'=>'variable','text'=>$o['name'])).' '. strtoupper($o['order']);
+        }
+        if(count($ordering)>0) {
+            $ordering = ' ORDER BY '.implode(', ',$ordering);
+        } else {
+            $ordering = '';
+        }
+
         return array(
-            'sql'=>'SELECT '.$fields.' FROM ('.$gp['sql'].') r',
+            'sql'=>'SELECT '.$fields.' FROM ('.$gp['sql'].') r'.$ordering,
             'terms'=>$terms
         );
     }
@@ -413,7 +424,7 @@ class stratastorage_sql_generator {
             $gp = $this->_trans_opt($gp, $this->_convertQueryGroup($opt));
         }
 
-        $q = $this->_trans_select($gp, $query['select']);
+        $q = $this->_trans_select($gp, $query['select'], $query['sort']);
 
         return array($q['sql'], $this->literals);
     }
