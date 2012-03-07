@@ -53,29 +53,18 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         }
         require_once($driverFile);
         $driverClass = "plugin_strata_driver_$driver";
-        $this->_driver = new $driverClass();
+        $this->_db = new $driverClass($this->getConf('debug'));
 
-        try {
-            $this->_db = new PDO($dsn);
-        } catch(PDOException $e) {
-            if($this->getConf('debug')) {
-                msg(hsc("Strata storage: Failed to open data source '$dsn': ".$e->getMessage()),-1);
-            } else {
-                msg('Strata storage: Failed to open data source.',-1);
-            }
+	if(!$this->_db->connect($dsn)) {
             return false;
         }
 
-        if(!$this->_driver->isInitialized($this->_db)) {
-            $this->_driver->initializeDatabase($this->_db, $dsn, $this->getConf('debug'));
+        if(!$this->_db->isInitialized()) {
+            $this->_db->initializeDatabase();
         }
 
 
         return true;
-    }
-
-   function _prepare($query) {
-        return $this->_driver->prepare($this->_db, $query);
     }
 
     function removeTriples($subject=null, $predicate=null, $object=null, $graph=null) {
@@ -91,7 +80,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
 
         $sql .= "DELETE FROM data WHERE ". implode(" AND ", $filters);
 
-        $query = $this->_prepare($sql);
+        $query = $this->_db->prepare($sql);
         if($query == false) return;
         $res = $query->execute($values);
         if($res === false) {
@@ -114,7 +103,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
 
         $sql .= "SELECT * FROM data WHERE ". implode(" AND ", $filters);
 
-        $query = $this->_prepare($sql);
+        $query = $this->_db->prepare($sql);
         if($query == false) return;
         $res = $query->execute($values);
         if($res === false) {
@@ -135,7 +124,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         $graph = $graph?:$this->getConf('default_graph');
 
         $sql = "INSERT INTO data(subject, predicate, object, graph) VALUES(?, ?, ?, ?)";
-        $query = $this->_prepare($sql);
+        $query = $this->_db->prepare($sql);
         if($query == false) return false;
 
         $this->_db->beginTransaction();
@@ -145,7 +134,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
             if($res === false) {
                 $error = $query->errorInfo();
                 msg(hsc('Strata storage: Failed to add triples: '.$error[2]),-1);
-                $this->_db->rollback();
+                $this->_db->rollBack();
                 return false;
             }
             $query->closeCursor();

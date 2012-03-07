@@ -16,8 +16,8 @@ require_once(DOKU_PLUGIN.'stratastorage/driver/driver.php');
 class plugin_strata_driver_mysql extends plugin_strata_driver {
     // Does not require overrides
 
-    public function isInitialized($db) {
-        return $db->query("SHOW TABLES LIKE 'data'")->rowCount() != 0;
+    public function isInitialized() {
+        return $this->_db->query("SHOW TABLES LIKE 'data'")->rowCount() != 0;
     }
 }
 
