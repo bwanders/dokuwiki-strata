@@ -354,6 +354,25 @@ class stratastorage_sql_generator {
         );
     }
 
+    function _trans_minus($gp1, $gp2) {
+        $common = array_intersect($gp1['terms'], $gp2['terms']);
+        $terms = array();
+        foreach($common as $c) {
+            $terms[] = '(r1.'.$c.' = r2.'.$c.')';
+        }
+
+        if(count($terms)>0) {
+            $terms = implode(' AND ',$terms);
+        } else {
+            $terms = '1';
+        }
+
+        return array(
+            'sql'=>'SELECT DISTINCT * FROM ('.$gp1['sql'].') r1 WHERE NOT EXISTS (SELECT * FROM ('.$gp2['sql'].') r2 WHERE '.$terms.')',
+            'terms'=>$gp1['terms']
+        );
+    }
+
     function _trans_select($gp, $vars) {
         $terms = array();
         $fields = array();
@@ -399,6 +418,10 @@ class stratastorage_sql_generator {
 
         foreach($query['optionals'] as $opt) {
             $gp = $this->_trans_opt($gp, $this->_convertQueryGroup($opt));
+        }
+
+        foreach($query['minus'] as $minus) {
+            $gp = $this->_trans_minus($gp, $this->_convertQueryGroup($minus));
         }
 
         $q = $this->_trans_select($gp, $query['select']);
