@@ -319,7 +319,7 @@ class stratastorage_sql_generator {
                 case '<':
                 case '>=':
                 case '<=':
-                    $filters[] = '( ' . $this->_triples->_driver->castToNumber($lhs) . ' ' . $f['operator'] . ' ' . $this->_triples->_driver->castToNumber($rhs) . ' )';
+                    $filters[] = '( ' . $this->_triples->_db->castToNumber($lhs) . ' ' . $f['operator'] . ' ' . $this->_triples->_db->castToNumber($rhs) . ' )';
                     break;
                 case '~':
                     $filters[] = '( ' . $lhs . ' LIKE \'%\' || ' . $rhs . ' || \'%\' )';
