@@ -372,7 +372,11 @@ class stratastorage_sql_generator {
             $gp = $this->_trans_and($gp, $this->_trans_tp($patterns[$i]));
         }
 
-        return $this->_trans_filter($gp, $filters);
+        if(count($filters)) {
+            $gp = $this->_trans_filter($gp, $filters);
+        }
+
+        return $gp;
     }
 
 
