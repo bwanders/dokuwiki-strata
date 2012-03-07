@@ -145,7 +145,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                 $block[] = array('type'=>'triple','subject'=>$subject, 'predicate'=>$predicate, 'object'=>$object);
 
             } elseif(in_array($blockid, array('where','optional','minus')) &&
-                     preg_match('/^(?:\?([a-zA-Z0-9]+)(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*(=|!=|>|<|>=|<=|~|!~|\^~|\$~)\s*(.+?)\s*$/S',$line, $match)) {
+                     preg_match('/^(?:\?([a-zA-Z0-9]+)(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*(!=|>=|<=|>|<|=|!~|\^~|\$~|~)\s*(.+?)\s*$/S',$line, $match)) {
                 // filter pattern
                 list($_, $lhs,$type,$hint,$operator,$rhs) = $match;
 
