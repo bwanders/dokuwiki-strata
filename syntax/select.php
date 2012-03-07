@@ -73,6 +73,11 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         if(!$result['query']) return array();
 
         foreach($result['fields'] as $var=>$f) {
+            if(!array_key_exists($var, $typemap)) {
+                msg('Strata basic: Query selects unknown field \''.hsc($var).'\'',-1);
+                return array();
+            }
+
             if(empty($f['type'])) {
                 if(!empty($typemap[$var])) {
                     $result['fields'][$var] = array_merge($result['fields'][$var],$typemap[$var]);
