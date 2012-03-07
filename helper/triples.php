@@ -152,7 +152,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
             msg('Literals: <pre>'.hsc(print_r($literals,1)).'</pre>',2);
         }
 
-        $query = $this->_prepare($sql);
+        $query = $this->_db->prepare($sql);
         if($query === false) {
             return false;
         }
