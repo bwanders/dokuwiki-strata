@@ -106,7 +106,9 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
                 $R->tablerow_open();
                     foreach($fields as $f) {
                         $R->tablecell_open();
-                        $f['type']->render($mode, $R, $this->_triples, $row[$f['name']], $f['hint']);
+                        if($row[$f['name']] != null) {
+                            $f['type']->render($mode, $R, $this->_triples, $row[$f['name']], $f['hint']);
+                        }
                         $R->tablecell_close();
                     }
                 $R->tablerow_close();
