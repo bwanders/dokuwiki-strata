@@ -1,2 +1,12 @@
-CREATE TABLE data (eid INTEGER PRIMARY KEY, subject, predicate, object, graph);
-CREATE INDEX idx_all ON data(subject, predicate, object);
+CREATE TABLE data (
+    subject TEXT COLLATE NOCASE,
+    predicate TEXT COLLATE NOCASE,
+    object TEXT COLLATE NOCASE,
+    graph TEXT COLLATE NOCASE
+);
+
+-- index for subject-primary retrieval (index prefixes: s, sp)
+CREATE INDEX idx_spo ON data(subject, predicate, object);
+
+-- index for predicate-primary retrieval (i.e. property fetch)
+CREATE INDEX idx_pso ON data(subject, predicate, object);
