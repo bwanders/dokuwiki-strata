@@ -89,14 +89,19 @@ abstract class plugin_strata_driver {
         $sqlfile = DOKU_PLUGIN . "stratastorage/sql/setup-$driver.sql";
 
         $sql = io_readFile($sqlfile, false);
+        $lines = explode("\n",$sql);
+
+        $sql = '';
+        foreach($lines as $line) {
+            if(trim($line," \t\n\r") == '') continue;
+            if(preg_match('/^--.*$/',trim($line," \t\n\r"))) continue;
+            $sql .= $line;
+        }
         $sql = explode(';', $sql);
 
         $this->beginTransaction();
         foreach($sql as $s) {
-            $s = preg_replace('/^\s*--.*$/','',$s);
-            $s = trim($s);
-            if($s == '') continue;
-
+            if(trim($s) == '') continue;
             if ($this->_debug) msg(hsc('Strata storage: Executing \'' . $s . '\'.'));
             if(!$this->query($s, 'Failed to set up database')) {
                 $this->rollBack();
