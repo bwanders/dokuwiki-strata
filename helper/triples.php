@@ -186,9 +186,12 @@ class stratastorage_sql_generator {
             return 'v_'.$term['text'];
         } elseif($term['type'] == 'literal') {
             if(empty($this->_literalLookup[$term['text']])) {
-                // use double-quotes literal names as test
-                // shouldn't do this in production
-                $this->_literalLookup[$term['text']] = '"'.str_replace('"','""',$term['text']).'"';
+                if($this->_triples->getConf('debug')) {
+                    // use double-quotes literal names as test
+                    $this->_literalLookup[$term['text']] = '"'.str_replace('"','""',$term['text']).'"';
+                } else {
+                    $this->_literalLookup[$term['text']] = $this->_alias();
+                }
             }
             return $this->_literalLookup[$term['text']];
         }
