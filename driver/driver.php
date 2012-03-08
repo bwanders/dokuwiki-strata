@@ -47,6 +47,16 @@ abstract class plugin_strata_driver {
     }
 
     /**
+     * Casts the given value to a case insensitive variant.
+     *
+     * This cast can, for example, be using a case insensitive collation or using the function 'lower' (default).
+     * @param val string the thing make case insensitive
+     */
+    public function ci($val='?') {
+        return "lower($val)";
+    }
+
+    /**
      * Open the database connection.
      *
      * @param dsn string the dsn to use for connecting

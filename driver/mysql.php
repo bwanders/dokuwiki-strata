@@ -14,7 +14,10 @@ require_once(DOKU_PLUGIN.'stratastorage/driver/driver.php');
  * The MySQL database driver.
  */
 class plugin_strata_driver_mysql extends plugin_strata_driver {
-    // Does not require overrides
+
+    public function ci($val='?') {
+        return "$val COLLATE utf8mb4_unicode_ci";
+    }
 
     public function isInitialized() {
         return $this->_db->query("SHOW TABLES LIKE 'data'")->rowCount() != 0;
