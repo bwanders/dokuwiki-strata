@@ -101,7 +101,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
             }
         }
 
-        $sql .= "SELECT * FROM data WHERE ". implode(" AND ", $filters);
+        $sql .= "SELECT subject, predicate, object, graph FROM data WHERE ". implode(" AND ", $filters);
 
         $query = $this->_db->prepare($sql);
         if($query == false) return;

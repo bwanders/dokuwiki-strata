@@ -12,9 +12,9 @@ class storage_removes_test extends Strata_UnitTestCase {
 		$OK =$this->_triples->addTriple('Alice', 'dislikes', 'Carol');
 		$this->assertTrue($OK);
 
-		$this->expected1 = array('eid' => 1, 'subject' => 'Bob', 'predicate' => 'knows', 'object' => 'Alice', 'graph' => 'wiki');
-		$this->expected2 = array('eid' => 2, 'subject' => 'Alice', 'predicate' => 'knows', 'object' => 'Carol', 'graph' => 'wiki');
-		$this->expected3 = array('eid' => 3, 'subject' => 'Alice', 'predicate' => 'dislikes', 'object' => 'Carol', 'graph' => 'wiki');
+		$this->expected1 = array('subject' => 'Bob', 'predicate' => 'knows', 'object' => 'Alice', 'graph' => 'wiki');
+		$this->expected2 = array('subject' => 'Alice', 'predicate' => 'knows', 'object' => 'Carol', 'graph' => 'wiki');
+		$this->expected3 = array('subject' => 'Alice', 'predicate' => 'dislikes', 'object' => 'Carol', 'graph' => 'wiki');
 
 		$data = $this->_triples->fetchTriples();
 		$this->assertEqual($data, array($this->expected1, $this->expected2, $this->expected3));

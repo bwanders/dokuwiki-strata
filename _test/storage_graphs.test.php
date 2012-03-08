@@ -8,8 +8,8 @@ class storage_graphs_test extends Strata_UnitTestCase {
 		$OK = $this->_triples->addTriple('Alice', 'knows', 'Carol', 'knowledgebase of alice');
 		$this->assertTrue($OK);
 
-		$expected1 = array('eid' => 1, 'subject' => 'Bob', 'predicate' => 'knows', 'object' => 'Alice', 'graph' => 'knowledgebase of bob');
-		$expected2 = array('eid' => 2, 'subject' => 'Alice', 'predicate' => 'knows', 'object' => 'Carol', 'graph' => 'knowledgebase of alice');
+		$expected1 = array('subject' => 'Bob', 'predicate' => 'knows', 'object' => 'Alice', 'graph' => 'knowledgebase of bob');
+		$expected2 = array('subject' => 'Alice', 'predicate' => 'knows', 'object' => 'Carol', 'graph' => 'knowledgebase of alice');
 
 		// Retrieve the wiki graph
 		$data = $this->_triples->fetchTriples();

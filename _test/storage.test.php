@@ -7,7 +7,7 @@ class storage_test extends Strata_UnitTestCase {
 		$this->assertTrue($OK);
 		$data = $this->_triples->fetchTriples();
 		$expected = array(
-			array('eid' => 1, 'subject' => 'Bob', 'predicate' => 'knows', 'object' => 'Alice', 'graph' => 'wiki')
+			array('subject' => 'Bob', 'predicate' => 'knows', 'object' => 'Alice', 'graph' => 'wiki')
 		);
 		$this->assertEqual($data, $expected);
 	}
@@ -17,7 +17,7 @@ class storage_test extends Strata_UnitTestCase {
 		$this->assertTrue($OK);
 		$data = $this->_triples->fetchTriples();
 		$expected = array(
-			array('eid' => 1, 'subject' => 'Bob', 'predicate' => 'knows', 'object' => 'Alice', 'graph' => 'wiki')
+			array('subject' => 'Bob', 'predicate' => 'knows', 'object' => 'Alice', 'graph' => 'wiki')
 		);
 		$this->assertEqual($data, $expected);
 	}
@@ -29,8 +29,8 @@ class storage_test extends Strata_UnitTestCase {
 		$this->assertTrue($OK);
 		$data = $this->_triples->fetchTriples();
 		$expected = array(
-			array('eid' => 1, 'subject' => 'Bob', 'predicate' => 'knows', 'object' => 'Alice', 'graph' => 'wiki'),
-			array('eid' => 2, 'subject' => 'Alice', 'predicate' => 'knows', 'object' => 'Carol', 'graph' => 'wiki')
+			array('subject' => 'Bob', 'predicate' => 'knows', 'object' => 'Alice', 'graph' => 'wiki'),
+			array('subject' => 'Alice', 'predicate' => 'knows', 'object' => 'Carol', 'graph' => 'wiki')
 		);
 		$this->assertEqual($data, $expected);
 	}
@@ -44,9 +44,9 @@ class storage_test extends Strata_UnitTestCase {
 		$this->assertTrue($OK);
 		$data = $this->_triples->fetchTriples();
 		$expected = array(
-			array('eid' => 1, 'subject' => '*', 'predicate' => 'select', 'object' => '%', 'graph' => 'wiki'),
-			array('eid' => 2, 'subject' => '_', 'predicate' => '(', 'object' => '`', 'graph' => 'wiki'),
-			array('eid' => 3, 'subject' => ';', 'predicate' => '\'', 'object' => '"', 'graph' => 'wiki')
+			array('subject' => '*', 'predicate' => 'select', 'object' => '%', 'graph' => 'wiki'),
+			array('subject' => '_', 'predicate' => '(', 'object' => '`', 'graph' => 'wiki'),
+			array('subject' => ';', 'predicate' => '\'', 'object' => '"', 'graph' => 'wiki')
 		);
 		$this->assertEqual($data, $expected);
 	}
