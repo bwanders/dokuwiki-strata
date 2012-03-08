@@ -9,4 +9,4 @@ CREATE TABLE data (
 CREATE INDEX idx_spo ON data(subject, predicate, object);
 
 -- index for predicate-primary retrieval (i.e. property fetch)
-CREATE INDEX idx_pso ON data(subject, predicate, object);
+CREATE INDEX idx_pso ON data(predicate, subject, object);
