@@ -70,7 +70,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
     function removeTriples($subject=null, $predicate=null, $object=null, $graph=null) {
         $graph = $graph?:$this->getConf('default_graph');
 
-        $filters = array('1');
+        $filters = array('1 = 1');
         foreach(array('subject','predicate','object','graph') as $param) {
             if($$param != null) {
                 $filters[]="$param LIKE ?";
@@ -93,7 +93,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
     function fetchTriples($subject=null, $predicate=null, $object=null, $graph=null) {
         $graph = $graph?:$this->getConf('default_graph');
 
-        $filters = array('1');
+        $filters = array('1 = 1');
         foreach(array('subject','predicate','object','graph') as $param) {
             if($$param != null) {
                 $filters[]="$param LIKE ?";
