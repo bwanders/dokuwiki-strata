@@ -16,6 +16,12 @@ class Strata_UnitTestCase extends Doku_UnitTestCase {
 		// CREATE DATABASE strata_test;
 		// GRANT ALL ON strata_test.* TO ''@localhost;
 		//$this->_triples->initialize('mysql:dbname=strata_test');
+
+		// Use PostgreSQL, which is set up with:
+		// createuser -SDR strata
+		// createdb -E UTF8 -T template0 strata_test
+		//$this->_triples->initialize('pgsql:dbname=strata_test;user=strata');
+
 	}
 
 	function teardown() {
