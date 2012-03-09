@@ -67,13 +67,21 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         return true;
     }
 
+    function _ci($a) {
+        return $this->_db->ci($a);
+    }
+
+    function _cic($a, $b) {
+        return $this->_ci($a).' '.$this->_db->stringCompare().' '.$this->_ci($b);
+    }
+
     function removeTriples($subject=null, $predicate=null, $object=null, $graph=null) {
         $graph = $graph?:$this->getConf('default_graph');
 
         $filters = array('1 = 1');
         foreach(array('subject','predicate','object','graph') as $param) {
             if($$param != null) {
-                $filters[]="$param LIKE ?";
+                $filters[]=$this->_cic($param, '?');
                 $values[] = $$param;
             }
         }
@@ -96,7 +104,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         $filters = array('1 = 1');
         foreach(array('subject','predicate','object','graph') as $param) {
             if($$param != null) {
-                $filters[]="$param LIKE ?";
+                $filters[]=$this->_cic($param,'?');
                 $values[] = $$param;
             }
         }
@@ -173,6 +181,11 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
 class stratastorage_sql_generator {
     function stratastorage_sql_generator($triples) {
         $this->_triples = $triples;
+        $this->_db = $this->_triples->_db;
+    }
+
+    function _ci($a) {
+        return $this->_triples->_ci($a);
     }
 
     private $_aliasCounter = 0;
@@ -205,27 +218,27 @@ class stratastorage_sql_generator {
         $conditions = array();
         if($tp['subject']['type'] != 'variable') {
             $id = $this->_alias();
-            $conditions[] = 'subject = :'.$id;
+            $conditions[] = $this->_ci('subject').' = '.$this->_ci(':'.$id);
             $this->literals[$id] = $tp['subject']['text'];
         }
         if($tp['predicate']['type'] != 'variable') {
             $id = $this->_alias();
-            $conditions[] = 'predicate = :'.$id;
+            $conditions[] = $this->_ci('predicate').' = '.$this->_ci(':'.$id);
             $this->literals[$id] = $tp['predicate']['text'];
         }
         if($tp['object']['type'] != 'variable') {
             $id = $this->_alias();
-            $conditions[] = 'object = :'.$id;
+            $conditions[] = $this->_ci('object').' = '.$this->_ci(':'.$id);
             $this->literals[$id] = $tp['object']['text'];
         }
         if($this->_patternEquals($tp['subject'],$tp['predicate'])) {
-            $conditions[] = 'subject = predicate';
+            $conditions[] = $this->_ci('subject').' = '.$this->_ci('predicate');
         }
         if($this->_patternEquals($tp['subject'],$tp['object'])) {
-            $conditions[] = 'subject = object';
+            $conditions[] = $this->_ci('subject').' = '.$this->_ci('object');
         }
         if($this->_patternEquals($tp['predicate'],$tp['object'])) {
-            $conditions[] = 'predicate = object';
+            $conditions[] = $this->_ci('predicate').' = '.$this->_ci('object');
         }
 
         if(count($conditions)!=0) {
@@ -264,7 +277,7 @@ class stratastorage_sql_generator {
         if(count($common)>0) {
             $intersect = array();
             foreach($common as $c) {
-                $intersect[] = '(r1.'.$c.' = r2.'.$c.' OR r1.'.$c.' IS NULL OR r2.'.$c.' IS NULL)';
+                $intersect[] = '('.$this->_ci('r1.'.$c).' = '.$this->_ci('r2.'.$c).' OR r1.'.$c.' IS NULL OR r2.'.$c.' IS NULL)';
                 $fields[]='COALESCE(r1.'.$c.', r2.'.$c.') AS '.$c;
             }
             $intersect = implode(' AND ',$intersect);
@@ -311,7 +324,7 @@ class stratastorage_sql_generator {
             switch($f['operator']) {
                 case '=':
                 case '!=':
-                    $filters[] = '( ' . $lhs . ' '.$f['operator'].' ' . $rhs. ' )';
+                    $filters[] = '( ' . $this->_ci($lhs) . ' '.$f['operator'].' ' . $this->_ci($rhs). ' )';
                     break;
                 case '>':
                 case '<':
@@ -320,16 +333,16 @@ class stratastorage_sql_generator {
                     $filters[] = '( ' . $this->_triples->_db->castToNumber($lhs) . ' ' . $f['operator'] . ' ' . $this->_triples->_db->castToNumber($rhs) . ' )';
                     break;
                 case '~':
-                    $filters[] = '( ' . $lhs . ' LIKE \'%\' || ' . $rhs . ' || \'%\' )';
+                    $filters[] = '( ' . $this->_ci($lhs) . ' '.$this->_db->stringCompare().' '. $this->_ci('(\'%\' || ' . $rhs . ' || \'%\')') . ')';
                     break;
                 case '!~':
-                    $filters[] = '( ' . $lhs . ' NOT LIKE \'%\' || ' . $rhs. ' || \'%\' )';
+                    $filters[] = '( ' . $this->_ci($lhs) . ' NOT '.$this->_db->stringCompare().' '. $this->_ci('(\'%\' || ' . $rhs. ' || \'%\')') . ')';
                     break;
                 case '^~':
-                    $filters[] = '( ' . $lhs . ' LIKE ' . $rhs . ' || \'%\' )';
+                    $filters[] = '( ' . $this->_ci($lhs) . ' '.$this->_db->stringCompare().' ' .$this->_ci('('. $rhs . ' || \'%\')'). ')';
                     break;
                 case '$~':
-                    $filters[] = '( ' . $lhs . ' LIKE \'%\' || ' . $rhs. ' )';
+                    $filters[] = '( ' . $this->_ci($lhs) . ' '.$this->_db->stringCompare().' '.$this->_ci('(\'%\' || ' . $rhs. ')') . ')';
                     break;
                 default:
             }
@@ -345,7 +358,7 @@ class stratastorage_sql_generator {
         $common = array_intersect($gp1['terms'], $gp2['terms']);
         $terms = array();
         foreach($common as $c) {
-            $terms[] = '(r1.'.$c.' = r2.'.$c.')';
+            $terms[] = '('.$this->_ci('r1.'.$c).' = '.$this->_ci('r2.'.$c).')';
         }
 
         if(count($terms)>0) {
@@ -373,7 +386,7 @@ class stratastorage_sql_generator {
 
         $ordering = array();
         foreach($order as $o) {
-            $ordering[] = $this->_name(array('type'=>'variable','text'=>$o['name'])).' '. strtoupper($o['order']);
+            $ordering[] = $this->_ci($this->_name(array('type'=>'variable','text'=>$o['name']))).' '. strtoupper($o['order']);
         }
         if(count($ordering)>0) {
             $ordering = ' ORDER BY '.implode(', ',$ordering);
