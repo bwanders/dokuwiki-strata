@@ -394,7 +394,7 @@ class stratastorage_sql_generator {
         if(count($conditions)!=0) {
             return implode(' AND ',$conditions);
         } else {
-            return '1';
+            return '1 = 1';
         }
     }
 
