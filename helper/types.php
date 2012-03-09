@@ -24,7 +24,7 @@ class helper_plugin_stratastorage_types extends DokuWiki_Plugin {
             'params'=> array(
                 'type'=>'string'
             ),
-            'return' => 'object'
+            'return' => array('type'=>'object')
         );
 
         return $result;
