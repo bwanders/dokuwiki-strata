@@ -15,6 +15,9 @@ if (!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
 
 require_once(DOKU_PLUGIN.'stratastorage/driver/driver.php');
 
+/**
+ * The triples helper is responsible for querying.
+ */
 class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
     function getMethods() {
         $result = array();
@@ -26,18 +29,89 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
             ),
             'return' => array('success'=>'boolean')
         );
+        $result[] = array(
+            'name'=>'removeTriples',
+            'desc'=>'Removes triples according to a triple pattern.',
+            'params'=> array(
+                'subject (optional)'=>'string',
+                'predicate (optional)'=>'string',
+                'object (optional)'=>'string',
+                'graph (optional)'=>'string'
+            ),
+            'return' => array()
+        );
+        $result[] = array(
+            'name'=>'fetchTriples',
+            'desc'=>'Fetches all triples matching the given triple pattern.',
+            'params'=> array(
+                'subject (optional)'=>'string',
+                'predicate (optional)'=>'string',
+                'object (optional)'=>'string',
+                'graph (optional)'=>'string'
+            ),
+            'return' => array('resultset'=>'array')
+        );
+        $result[] = array(
+            'name'=>'addTriple',
+            'desc'=>'Adds a single triple to the store.',
+            'params'=> array(
+                'subject'=>'string',
+                'predicate'=>'string',
+                'object'=>'string',
+                'graph (optional)'=>'string'
+            ),
+            'return' => array('success'=>'boolean')
+        );
+        $result[] = array(
+            'name'=>'addTriples',
+            'desc'=>'Adds a batch of triples to the store.',
+            'params'=> array(
+                'triples'=>'array with triples',
+                'graph (optional)'=>'string'
+            ),
+            'return' => array('success'=>'boolean')
+        );
+        $result[] = array(
+            'name'=>'queryRelations',
+            'desc'=>'Executes a query, given as an abstract query tree, and returns the resulting rows.',
+            'params'=> array(
+                'querytree'=>'array'
+            ),
+            'return' => array('resultset'=>'array')
+        );
+        $result[] = array(
+            'name'=>'queryResources',
+            'desc'=>'Executes a query, given as an abstract query tree, and return the resulting resources.',
+            'params'=> array(
+                'querytree'=>'array'
+            ),
+            'return' => array('resources'=>'array')
+        );
 
         return $result;
     }
 
+    /**
+     * Expands tokens in the DSN.
+     * 
+     * @param str string the string to process
+     * @return a string with replaced tokens
+     */
     function _expandTokens($str) {
         global $conf;
         $tokens    = array('@METADIR@');
         $replacers = array($conf['metadir']);
         return str_replace($tokens,$replacers,$str);
     }
-    
+
+    /**
+     * Initializes the triple helper.
+     * 
+     * @param dsn string an optional alternative DSN
+     * @return true if initialization succeeded, false otherwise
+     */
     function initialize($dsn=null) {
+        // load default DSN
         if($dsn == null) {
             $dsn = $this->getConf('default_dsn');
             $dsn = $this->_expandTokens($dsn);
@@ -45,6 +119,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
 
         $this->_dsn = $dsn;
 
+        // construct driver
         list($driver,$connection) = explode(':',$dsn,2);
         $driverFile = DOKU_PLUGIN."stratastorage/driver/$driver.php";
         if(!@file_exists($driverFile)) {
@@ -55,10 +130,12 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         $driverClass = "plugin_strata_driver_$driver";
         $this->_db = new $driverClass($this->getConf('debug'));
 
+        // connect driver
         if(!$this->_db->connect($dsn)) {
             return false;
         }
 
+        // initialize database if necessary
         if(!$this->_db->isInitialized()) {
             $this->_db->initializeDatabase();
         }
@@ -67,17 +144,38 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         return true;
     }
 
+    /**
+     * Makes the an SQL expression case insensitive.
+     * 
+     * @param a string the expression to process
+     * @return a SQL expression
+     */
     function _ci($a) {
         return $this->_db->ci($a);
     }
 
+    /**
+     * Constructs a case insensitive string comparison in SQL.
+     *
+     * @param a string the left-hand side
+     * @param b string the right-hand side
+     *
+     * @return a case insensitive SQL string comparison
+     */
     function _cic($a, $b) {
         return $this->_ci($a).' '.$this->_db->stringCompare().' '.$this->_ci($b);
     }
 
+    /**
+     * Removes all triples matching the given triple pattern. The parameters
+     * subject, predicate and object can be left out to indicate 'any'. If graph
+     * is left out, this indicates the use of the default graph.
+     */
     function removeTriples($subject=null, $predicate=null, $object=null, $graph=null) {
+        // don't nuke all graphs
         $graph = $graph?:$this->getConf('default_graph');
 
+        // construct triple filter
         $filters = array('1 = 1');
         foreach(array('subject','predicate','object','graph') as $param) {
             if($$param != null) {
@@ -88,19 +186,30 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
 
         $sql .= "DELETE FROM data WHERE ". implode(" AND ", $filters);
 
+        // prepare query
         $query = $this->_db->prepare($sql);
         if($query == false) return;
+
+        // execute query
         $res = $query->execute($values);
         if($res === false) {
             $error = $query->errorInfo();
             msg(hsc('Strata storage: Failed to remove triples: '.$error[2]),-1);
         }
+
         $query->closeCursor();
     }
 
+    /**
+     * Fetches all triples matching the given triple pattern. The parameters
+     * subject, predicate and object can be left out to indicate 'any'. If graph
+     * is left out, this indicates the use of the default graph.
+     */
     function fetchTriples($subject=null, $predicate=null, $object=null, $graph=null) {
+        // use default graph
         $graph = $graph?:$this->getConf('default_graph');
 
+        // construct filter
         $filters = array('1 = 1');
         foreach(array('subject','predicate','object','graph') as $param) {
             if($$param != null) {
@@ -111,34 +220,59 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
 
         $sql .= "SELECT subject, predicate, object, graph FROM data WHERE ". implode(" AND ", $filters);
 
+        // prepare queyr
         $query = $this->_db->prepare($sql);
         if($query == false) return;
+
+        // execute query
         $res = $query->execute($values);
         if($res === false) {
             $error = $query->errorInfo();
             msg(hsc('Strata storage: Failed to fetch triples: '.$error[2]),-1);
         }
 
+        // fetch results and return them
         $result = $query->fetchAll(PDO::FETCH_ASSOC);
         $query->closeCursor();
+
         return $result;
     }
 
+    /**
+     * Adds a single triple.
+     * @param subject string
+     * @param predicate string
+     * @param object string
+     * @param graph string optional graph name, will use default graph of none given.
+     * @return true of triple was added succesfully, false if not
+     */
     function addTriple($subject, $predicate, $object, $graph=null) {
         return $this->addTriples(array(array('subject'=>$subject, 'predicate'=>$predicate, 'object'=>$object)), $graph);
     }
 
+    /**
+     * Adds multiple triples.
+     * @param triples array contains all triples as arrays with subject, predicate and object keys
+     * @param graph string optional graph name, uses default graph if omitted
+     * @return true if the triples were comitted, false otherwise
+     */
     function addTriples($triples, $graph=null) {
+        // handle null graph
         $graph = $graph?:$this->getConf('default_graph');
 
+        // prepare insertion query
         $sql = "INSERT INTO data(subject, predicate, object, graph) VALUES(?, ?, ?, ?)";
         $query = $this->_db->prepare($sql);
         if($query == false) return false;
 
+        // put the batch in a transaction
         $this->_db->beginTransaction();
         foreach($triples as $t) {
+            // insert a single triple
             $values = array($t['subject'],$t['predicate'],$t['object'],$graph);
             $res = $query->execute($values);
+            
+            // handle errors
             if($res === false) {
                 $error = $query->errorInfo();
                 msg(hsc('Strata storage: Failed to add triples: '.$error[2]),-1);
@@ -147,19 +281,28 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
             }
             $query->closeCursor();
         }
+
+        // commit and return
         return $this->_db->commit();
     }
 
+    /**
+     * Executes the given abstract query tree as a query on the store.
+     * @param query array an abstract query tree
+     * @return an array with the resulting rows
+     */
     function queryRelations($query) {
+        // create the SQL generator, and generate the SQL query
         $generator = new stratastorage_sql_generator($this);
-        
         list($sql, $literals) = $generator->translate($query);
 
+        // prepare the query
         $query = $this->_db->prepare($sql);
         if($query === false) {
             return false;
         }
 
+        // execute the query
         $res = $query->execute($literals);
         if($res === false) {
             $error = $query->errorInfo();
@@ -167,13 +310,20 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
             return false;
         }
 
+        // fetch all results and return them
         $result = $query->fetchAll(PDO::FETCH_ASSOC);
         $query->closeCursor();
         
         return $result;
     }
 
+    /**
+     * Executes the abstract query tree, and returns all properties of the matching subjects.
+     * @param query array the abstract query tree
+     * @return an array of resources
+     */
     function queryResources($query) {
+        //TODO: Implementation
         return array();
     }
 }

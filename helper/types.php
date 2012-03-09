@@ -13,7 +13,13 @@ if (!defined('DOKU_LF')) define('DOKU_LF', "\n");
 if (!defined('DOKU_TAB')) define('DOKU_TAB', "\t");
 if (!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
 
+/**
+ * The types helper is used to cached types.
+ */
 class helper_plugin_stratastorage_types extends DokuWiki_Plugin {
+    /**
+     * The currently loaded types.
+     */
     var $loaded = array();
 
     function getMethods() {
@@ -30,10 +36,16 @@ class helper_plugin_stratastorage_types extends DokuWiki_Plugin {
         return $result;
     }
 
+    /**
+     * Loads a type.
+     */
     function loadType($type) {
+        // handle null type
         if($type == null) {
             $type = $this->getConf('default_type');
         }
+
+        // use cached if possible
         if(!isset($this->loaded[$type])) {
             $class = "plugin_strata_type_".$type;
             $this->loaded[$type] = new $class();
