@@ -102,25 +102,35 @@ abstract class plugin_strata_driver {
      * @return boolean true if the database was initialised successfully
      */
     public function initializeDatabase() {
+        // determine driver
         list($driver, $connection) = explode(':', $this->_dsn, 2);
         if ($this->_debug) msg('Strata storage: Setting up ' . $driver . ' database.');
 
+        // load SQL script
         $sqlfile = DOKU_PLUGIN . "stratastorage/sql/setup-$driver.sql";
 
         $sql = io_readFile($sqlfile, false);
         $lines = explode("\n",$sql);
 
+        // remove empty lines and comment lines
+        // (this makes sure that a semicolon in the comment doesn't break the script)
         $sql = '';
         foreach($lines as $line) {
             if(trim($line," \t\n\r") == '') continue;
             if(preg_match('/^--.*$/',trim($line," \t\n\r"))) continue;
             $sql .= $line;
         }
+
+        // split the script into distinct statements
         $sql = explode(';', $sql);
 
+        // execute the database initialisation script in a transaction
+        // (doesn't work in all databases, but provides some failsafe where it works)
         $this->beginTransaction();
         foreach($sql as $s) {
+            // skip empty lines (usually the last line is empty, due to the final semicolon)
             if(trim($s) == '') continue;
+
             if ($this->_debug) msg(hsc('Strata storage: Executing \'' . $s . '\'.'));
             if(!$this->query($s, 'Failed to set up database')) {
                 $this->rollBack();
@@ -161,12 +171,12 @@ abstract class plugin_strata_driver {
     }
 
      /**
-     * Executes a query and reports any problems to Dokuwiki.
-     *
-     * @param query string the query to execute
-     * @param message string message to report when executing the query fails
-     * @return whether querying succeeded
-     */
+      * Executes a query and reports any problems to Dokuwiki.
+      *
+      * @param query string the query to execute
+      * @param message string message to report when executing the query fails
+      * @return whether querying succeeded
+      */
     public function query($query, $message="Query failed") {
         $res = $this->_db->query($query);
         if ($res === false) {
@@ -177,14 +187,23 @@ abstract class plugin_strata_driver {
         return true;
     }
 
+    /**
+     * Begins a transaction.
+     */
     public function beginTransaction() {
         return $this->_db->beginTransaction();
     }
 
+    /**
+     * Commits the current transaction.
+     */
     public function commit() {
         return $this->_db->commit();
     }
 
+    /**
+     * Rolls back the current transaction.
+     */
     public function rollBack() {
         return $this->_db->rollBack();
     }
