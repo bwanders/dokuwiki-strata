@@ -15,6 +15,11 @@ if (!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
 
 require_once DOKU_PLUGIN.'syntax.php';
 
+/**
+ * Simple plugin to list the available types. This plugin uses
+ * the same syntax as the info plugin, but only accepts a specific
+ * info category.
+ */
 class syntax_plugin_stratastorage_typelist extends DokuWiki_Syntax_Plugin {
     public function syntax_plugin_stratastorage_typelist() {
         $this->_types =& plugin_load('helper', 'stratastorage_types');
@@ -29,6 +34,7 @@ class syntax_plugin_stratastorage_typelist extends DokuWiki_Syntax_Plugin {
     }
 
     public function getSort() {
+        // sort just before info plugin
         return 154;
     }
 
@@ -40,9 +46,13 @@ class syntax_plugin_stratastorage_typelist extends DokuWiki_Syntax_Plugin {
     public function handle($match, $state, $pos, &$handler){
         $data = array();
 
+        // get a list of all types...
         foreach(glob(DOKU_PLUGIN."*/types/*.php") as $type) {
             if(preg_match('@/([^/]+)/types/([^/]+)\.php@',$type,$matches)) {
+                // ...load each type...
                 $meta = $this->_types->loadType($matches[2])->getInfo();
+
+                // ...and check if it's synthetic (i.e., not user-usable)
                 if(!isset($meta['synthetic']) || !$meta['synthetic']) {
                     $data[] = array(
                         'name'=>$matches[2],
@@ -58,6 +68,8 @@ class syntax_plugin_stratastorage_typelist extends DokuWiki_Syntax_Plugin {
 
     public function render($mode, &$R, $data) {
         if($mode == 'xhtml') {
+            // render a list of types. Each type lists it's name, source plugin
+            // and a short description of the type.
             $R->listu_open();
             foreach($data as $data){
                 $R->listitem_open(1);
