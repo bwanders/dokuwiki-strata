@@ -15,6 +15,10 @@ require_once(DOKU_PLUGIN.'stratastorage/driver/driver.php');
  */
 class plugin_strata_driver_pgsql extends plugin_strata_driver {
 
+    public function stringCompare() {
+        return 'ILIKE';
+    }
+
     public function isInitialized() {
         return $this->_db->query("SELECT * FROM pg_tables WHERE schemaname = 'public' AND tablename = 'data'")->rowCount() != 0;
     }

@@ -57,6 +57,15 @@ abstract class plugin_strata_driver {
     }
 
     /**
+     * Returns the syntax for case-insensitive string comparison.
+     *
+     * Preferably, this syntax should allow % as a wildcard (e.g. as done by LIKE).
+     */
+    public function stringCompare() {
+        return 'LIKE';
+    }
+
+    /**
      * Open the database connection.
      *
      * @param dsn string the dsn to use for connecting
