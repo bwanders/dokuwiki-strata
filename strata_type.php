@@ -10,6 +10,11 @@ if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
 
 /**
  * This base class defines the methods required by Strata types.
+ *
+ * There are two kinds of types: normal types and synthetic types.
+ * Normal types are meant for users, while synthetic types exist to
+ * keep the plugin working. (i.e., unloadable types are faked by a 
+ * synthetic type, and non-user types should be synthetic).
  */
 class plugin_strata_type {
     /**
@@ -20,6 +25,7 @@ class plugin_strata_type {
      * @param triples ref reference to the current triples helper
      * @param value string the value to render (this should be a normalized value)
      * @param hint string a type hint
+     * @return true if the mode was handled, false if it was not
      */
     function render($mode, &$renderer, &$triples, $value, $hint) {
         if($mode == 'xhtml') {
@@ -35,11 +41,20 @@ class plugin_strata_type {
      *
      * @param value string the value to normalize
      * @param hint string a type hint
+     * @return the normalized value
      */
     function normalize($value, $hint) {
         return $value;
     }
 
+    /**
+     * Returns meta-data on the type. This method returns an array with
+     * the following keys:
+     *   - desc: A human-readable description of the type.
+     *   - synthetic: an optional boolean indicating that the type is synthethic.
+     *
+     * @return an array containing
+     */
     function getInfo() {
         return array(
             'desc'=>'The generic type.',
