@@ -83,8 +83,14 @@ abstract class plugin_strata_driver {
             }
             return false;
         }
+        $this->initializeConnection();
         return true;
     }
+
+    /**
+     * Initialises a connection directly after the connection was made (e.g. by setting the character set of the connection).
+     */
+    protected function initializeConnection() {}
 
     /**
      * Determines whether the database is initialised.

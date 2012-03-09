@@ -23,6 +23,10 @@ class plugin_strata_driver_mysql extends plugin_strata_driver {
         return "$val COLLATE utf8mb4_unicode_ci";
     }
 
+    protected function initializeConnection() {
+        $this->query('SET NAMES utf8mb4');
+    }
+
     public function isInitialized() {
         return $this->_db->query("SHOW TABLES LIKE 'data'")->rowCount() != 0;
     }
