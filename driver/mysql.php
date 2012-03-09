@@ -15,6 +15,10 @@ require_once(DOKU_PLUGIN.'stratastorage/driver/driver.php');
  */
 class plugin_strata_driver_mysql extends plugin_strata_driver {
 
+    public function castToNumber($val) {
+        return "CAST($val AS DECIMAL)";
+    }
+
     public function ci($val='?') {
         return "$val COLLATE utf8mb4_unicode_ci";
     }
