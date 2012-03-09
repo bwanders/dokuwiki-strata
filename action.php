@@ -21,16 +21,29 @@ require_once DOKU_PLUGIN.'action.php';
  */
 class action_plugin_stratastorage extends DokuWiki_Action_Plugin {
 
+    /**
+     * Register function called by DokuWiki to allow us
+     * to register events we're interested in.
+     *
+     * @param controller object the controller to register with
+     */
     public function register(Doku_Event_Handler &$controller) {
         $controller->register_hook('IO_WIKIPAGE_WRITE', 'BEFORE', $this, '_remove_data');
     }
 
+    /**
+     * Removes all data for a page.
+     * 
+     * @param event array the event that triggers this hook
+     */
     public function _remove_data(&$event, $param) {
+        // get triples helper
         $triples =& plugin_load('helper', 'stratastorage_triples');
         $triples->initialize();
 
-        $id = ltrim($event->data[1].':'.$event->data[2],':');
+        // only remove triples if page is a new revision, or if it is removed
         if($event->data[3] == false || $event->data[0][1] == '') {
+            $id = ltrim($event->data[1].':'.$event->data[2],':');
             $triples->removeTriples($id);
             $triples->removeTriples($id.'#%');
         }
@@ -38,6 +51,13 @@ class action_plugin_stratastorage extends DokuWiki_Action_Plugin {
 
 }
 
+/**
+ * Strata 'pluggable' autoloader. This function is responsible
+ * for autoloading classes that should be pluggable by external
+ * plugins.
+ *
+ * @param fullname string the name of the class to load
+ */
 function plugin_stratastorage_autoload($fullname) {
     // only load matching components
     if(!preg_match('/^plugin_strata_(type)_(.*)$/',$fullname, $matches)) {
@@ -65,5 +85,6 @@ function plugin_stratastorage_autoload($fullname) {
     return true;
 }
 
+// register autoloader with SPL loader stack
 spl_autoload_register('plugin_stratastorage_autoload');
 
