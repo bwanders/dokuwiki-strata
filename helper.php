@@ -1,7 +1,6 @@
 <?php
-
 /**
- * DokuWiki Plugin skeleton (Helper Component)
+ * DokuWiki Plugin stratabasic (Helper Component)
  *
  * @license GPL 2 http://www.gnu.org/licenses/gpl-2.0.html
  * @author  Brend Wanders <b.wanders@utwente.nl>
@@ -14,15 +13,29 @@ if (!defined('DOKU_LF')) define('DOKU_LF', "\n");
 if (!defined('DOKU_TAB')) define('DOKU_TAB', "\t");
 if (!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
 
+/**
+ * Helper plugin for common syntax parsing.
+ */
 class helper_plugin_stratabasic extends DokuWiki_Plugin {
     function helper_plugin_stratabasic() {
         $this->_types =& plugin_load('helper', 'stratastorage_types');
     }
 
+    /**
+     * Determines whether a line can be ignored.
+     */
     function ignorableLine($line) {
         return $line == '' || substr($line,0,2) == '--';
     }
 
+    /**
+     * Updates the given typemap with new information.
+     *
+     * @param typemap array a typemap
+     * @param var string the name of the variable
+     * @param type string the type of the variable
+     * @param hint string the type hint of the variable
+     */
     function updateTypemap(&$typemap, $var, $type, $hint=null) {
         if(empty($typemap[$var]) && $type) {
             $typemap[$var] = array('type'=>$type,'hint'=>$hint);
@@ -32,15 +45,30 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         return false;
     }
 
+    /**
+     * Constructs a literal with the given text.
+     */
     function literal($val) {
         return array('type'=>'literal', 'text'=>$val);
     }
 
+    /**
+     * Constructs a variable with the given name.
+     */
     function variable($var) {
         if($var[0] == '?') $var = substr($var,1);
         return array('type'=>'variable', 'text'=>$var);
     }
 
+    /**
+     * Extracts a block from the array of lines. The block
+     * should not contain nested blocks.
+     * 
+     * @param lines array the lines to extract from
+     * @param blockname string the name of the blocka
+     * @return an array with two members: the lines in the block, and the 
+     *         lines outside of the block
+     */
     function extractBlock($lines, $blockname) {
         $block = array();
         $rest = array();
@@ -63,6 +91,15 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         return array($block, $rest);
     }
 
+    /**
+     * Parses a query. Uses the given typemap, and optionally
+     * uses the already determined projection.
+     * 
+     * @param lines array a list of lines
+     * @param typemap array the typemap to use
+     * @param select array an optional array with projection information
+     * @return an array with the abstract query tree and a list of used variables
+     */
     function parseQuery($lines, &$typemap, $select = null) {
         $result = array(
             'select'=>array(),
@@ -76,12 +113,12 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
         if($select) $result['select'] = $select;
 
+        // start with the base group
         $block =& $result['where'];
         $blockid = 'where';
 
-        $lineno = 0;
         foreach($lines as $line) {
-            $lineno++;
+            // we only parse useful lines
             $line = trim($line);
             if($this->ignorableLine($line)) continue;
 
@@ -202,6 +239,9 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         return array($result, $variables);
     }
 
+    /**
+     * Parses a projection group in 'long syntax'.
+     */
     function parseFieldsLong($lines, &$typemap) {
         $result = array();
 
@@ -223,6 +263,9 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         return $result;
     }
 
+    /**
+     * Parses a projection group in 'short syntax'.
+     */
     function parseFieldsShort($line, &$typemap) {
         $result = array();
 
@@ -238,6 +281,10 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         return $result;
     }
 
+    /**
+     * Returns the regex pattern used by the 'short syntax' for projection. This methods can
+     * be used to get a dokuwiki-lexer-safe regex to embed into your own syntax pattern.
+     */
     function fieldsShortPattern() {
         return '(?:\s+\?[a-zA-Z0-9]+(?:\s*\([^_\)]*(?:_[a-z0-9]*(?:\([^\)]*\))?)?\))?)';
     }

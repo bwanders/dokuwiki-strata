@@ -2,8 +2,6 @@
 /**
  * Strata Basic, data entry plugin
  *
- * The syntax is a work in progress.
- *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author     Brend Wanders <b.wanders@utwente.nl>
  */
@@ -13,8 +11,7 @@ if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
 require_once(DOKU_PLUGIN.'syntax.php');
  
 /**
- * All DokuWiki plugins to extend the parser/rendering mechanism
- * need to inherit from this class
+ * Select syntax for basic query handling.
  */
 class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
     function syntax_plugin_stratabasic_select() {
@@ -37,12 +34,11 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
     }
 
     function connectTo($mode) {
-        // ')' between  [^ and ] escaped to work around dokuwiki's pattern handling
-        // (The lexer uses ( and ) as delimiter patterns)
         $this->Lexer->addSpecialPattern('<select'.$this->helper->fieldsShortPattern().'* *>\n.+?\n</select>',$mode, 'plugin_stratabasic_select');
     }
 
     function handle($match, $state, $pos, &$handler) {
+        // split into lines and remove header and footer
         $lines = explode("\n",$match);
         $header = array_shift($lines);
         $footer = array_pop($lines);
@@ -53,12 +49,15 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
 
         $typemap = array();
 
+        // parse projection information in 'short syntax' if available
         if($header != '<select>') {
             $result['fields'] = $this->helper->parseFieldsShort($header,$typemap);
         }
 
+        // extract the projection information in 'long syntax' if available
         list($fields, $lines) = $this->helper->extractBlock($lines, 'fields');
 
+        // parse 'long syntax' if we don't have projection information yet
         if(count($fields)) {
             if(count($result['fields'])) {
                 msg('Strata basic: Query contains both \'fields\' group and column.',-1);
@@ -69,9 +68,11 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
             }
         }
 
+        // parse the query itself
         list($result['query'], $variables) = $this->helper->parseQuery($lines, $typemap, array_keys($result['fields']));
         if(!$result['query']) return array();
 
+        // check projected variables and load types
         foreach($result['fields'] as $var=>$f) {
             if(!in_array($var, $variables)) {
                 msg('Strata basic: Query selects unknown field \''.hsc($var).'\'',-1);
@@ -94,9 +95,12 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         if($data == array()) {
             return;
         }
+
+        // execute the query
         $result = $this->_triples->queryRelations($data['query']);
 
         if($mode == 'xhtml') {
+            // render header
             $R->table_open();
             $R->tablerow_open();
             $fields = array();
@@ -111,6 +115,8 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
                 $R->tableheader_close();
             }
             $R->tablerow_close();
+
+            // render each row
             foreach($result as $row) {
                 $R->tablerow_open();
                     foreach($fields as $f) {
@@ -122,6 +128,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
                     }
                 $R->tablerow_close();
             }
+
             $R->table_close();
             return true;
         } elseif($mode == 'metadata') {
@@ -132,6 +139,8 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
                     'hint'=>$meta['hint']
                 );
             }
+
+            // render all rows in metadata mode to enable things like backlinks
             foreach($result as $row) {
                 foreach($fields as $f) {
                     if($row[$f['name']] != null) {
