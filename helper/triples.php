@@ -24,7 +24,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
             'params'=> array(
                 'dsn (optional)'=>'string'
             ),
-            'return' => 'boolean'
+            'return' => array('success'=>'boolean')
         );
 
         return $result;
