@@ -328,65 +328,104 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
     }
 }
 
+/**
+ * SQL generator.
+ */
 class stratastorage_sql_generator {
     function stratastorage_sql_generator($triples) {
         $this->_triples = $triples;
         $this->_db = $this->_triples->_db;
     }
 
+    /**
+     * Wrap SQL expression in case insensitivisation.
+     */
     function _ci($a) {
         return $this->_triples->_ci($a);
     }
 
+    /**
+     * Alias generator.
+     */
     private $_aliasCounter = 0;
     function _alias() {
         return 'a'.($this->_aliasCounter++);
     }
 
+    /**
+     * All used literals.
+     */
     private $_literalLookup = array();
+
+    /**
+     * Name generator.
+     */
     function _name($term) {
         if($term['type'] == 'variable') {
+            // variables are just prefixed
             return 'v_'.$term['text'];
         } elseif($term['type'] == 'literal') {
+            // always try the cache
             if(empty($this->_literalLookup[$term['text']])) {
                 if($this->_triples->getConf('debug')) {
                     // use double-quotes literal names as test
                     $this->_literalLookup[$term['text']] = '"'.str_replace('"','""',$term['text']).'"';
                 } else {
+                    // use aliases to represent literals
                     $this->_literalLookup[$term['text']] = $this->_alias();
                 }
             }
+
+            // return literal name
             return $this->_literalLookup[$term['text']];
         }
     }
 
+    /**
+     * Test whether two things are equal (i.e., equal variables, or equal literals)
+     */
     function _patternEquals($pa, $pb) {
         return $pa['type'] == $pb['type'] && $pa['text'] == $pb['text'];
     }
 
+    /**
+     * Generates a conditional for the given triple pattern.
+     */
     function _genCond($tp) {
         $conditions = array();
+
+        // the subject is a variable
         if($tp['subject']['type'] != 'variable') {
             $id = $this->_alias();
             $conditions[] = $this->_ci('subject').' = '.$this->_ci(':'.$id);
             $this->literals[$id] = $tp['subject']['text'];
         }
+
+        // the predicate is a variable
         if($tp['predicate']['type'] != 'variable') {
             $id = $this->_alias();
             $conditions[] = $this->_ci('predicate').' = '.$this->_ci(':'.$id);
             $this->literals[$id] = $tp['predicate']['text'];
         }
+
+        // the object is a variable
         if($tp['object']['type'] != 'variable') {
             $id = $this->_alias();
             $conditions[] = $this->_ci('object').' = '.$this->_ci(':'.$id);
             $this->literals[$id] = $tp['object']['text'];
         }
+
+        // subject equals predicate
         if($this->_patternEquals($tp['subject'],$tp['predicate'])) {
             $conditions[] = $this->_ci('subject').' = '.$this->_ci('predicate');
         }
+
+        // subject equals object
         if($this->_patternEquals($tp['subject'],$tp['object'])) {
             $conditions[] = $this->_ci('subject').' = '.$this->_ci('object');
         }
+
+        // predicate equals object
         if($this->_patternEquals($tp['predicate'],$tp['object'])) {
             $conditions[] = $this->_ci('predicate').' = '.$this->_ci('object');
         }
@@ -398,20 +437,36 @@ class stratastorage_sql_generator {
         }
     }
 
+    /**
+     * Generates a projection for the given triple pattern.
+     */
     function _genPR($tp) {
         $list = array();
+
+        // always project the subject
         $list[] = 'subject AS '.$this->_name($tp['subject']);
+
+        // project the predicate if it's different from the subject
         if(!$this->_patternEquals($tp['subject'], $tp['predicate'])) {
             $list[] = 'predicate AS '.$this->_name($tp['predicate']);
         }
+
+        // project the object if it's different from the subject and different from the predicate
         if(!$this->_patternEquals($tp['subject'], $tp['object']) && !$this->_patternEquals($tp['predicate'],$tp['object'])) {
             $list[] = 'object AS '.$this->_name($tp['object']);
         }
+
         return implode(', ',$list);
     }
 
+    /**
+     * Stores all literal values keyed to their placeholder.
+     */
     private $literals = array();
 
+    /**
+     * Translates a triple pattern into a graph pattern.
+     */
     function _trans_tp($tp) {
         return array(
             'sql'=>'SELECT '.$this->_genPR($tp).' FROM data WHERE '.$this->_genCond($tp),
@@ -419,11 +474,20 @@ class stratastorage_sql_generator {
         );
     }
 
+    /**
+     * Translates a group operation on the two graph patterns.
+     */
     function _trans_group($gp1, $gp2, $join) {
+        // determine the resulting terms
         $terms = array_unique(array_merge($gp1['terms'], $gp2['terms']));
+
+        // determine the overlapping terms (we need to coalesce these)
         $common = array_intersect($gp1['terms'], $gp2['terms']);
+
+        // determine the non-overlapping terms (we can project them directly)
         $fields = array_diff($terms, $common);
 
+        // handle overlapping terms by coalescing them into a single term
         if(count($common)>0) {
             $intersect = array();
             foreach($common as $c) {
@@ -443,18 +507,28 @@ class stratastorage_sql_generator {
         );
     }
 
-
+    /**
+     * Translate an optional operation.
+     */
     function _trans_opt($gp1, $gp2) {
         return $this->_trans_group($gp1, $gp2, 'LEFT OUTER JOIN');
     }
 
+    /**
+     * Translate an and operation.
+     */
     function _trans_and($gp1, $gp2) {
         return $this->_trans_group($gp1, $gp2, 'INNER JOIN');
     }
 
+    /**
+     * Translate a filter operation. The filters are a conjunction of separate expressions.
+     */
     function _trans_filter($gp, $fs) {
         $filters = array();
+
         foreach($fs as $f) {
+            // determine representation of left-hand side
             if($f['lhs']['type'] == 'variable') {
                 $lhs = $this->_name($f['lhs']);
             } else {
@@ -463,6 +537,7 @@ class stratastorage_sql_generator {
                 $this->literals[$id] = $f['lhs']['text'];
             }
 
+            // determine representation of right-hand side
             if($f['rhs']['type'] == 'variable') {
                 $rhs = $this->_name($f['rhs']);
             } else {
@@ -471,6 +546,7 @@ class stratastorage_sql_generator {
                 $this->literals[$id] = $f['rhs']['text'];
             }
 
+            // handle different operators
             switch($f['operator']) {
                 case '=':
                 case '!=':
@@ -497,15 +573,23 @@ class stratastorage_sql_generator {
                 default:
             }
         }
+
         $filters = implode(' AND ', $filters);
+
         return array(
             'sql'=>'SELECT * FROM ('.$gp['sql'].') r WHERE '.$filters,
             'terms'=>$gp['terms']
         );
     }
 
+    /**
+     * Translate minus operation.
+     */
     function _trans_minus($gp1, $gp2) {
+        // determine overlapping terms (we need to substitute these)
         $common = array_intersect($gp1['terms'], $gp2['terms']);
+
+        // create conditional that 'substitutes' terms by requiring equality
         $terms = array();
         foreach($common as $c) {
             $terms[] = '('.$this->_ci('r1.'.$c).' = '.$this->_ci('r2.'.$c).')';
@@ -523,9 +607,14 @@ class stratastorage_sql_generator {
         );
     }
 
+    /**
+     * Translate projection and ordering.
+     */
     function _trans_select($gp, $vars, $order) {
         $terms = array();
         $fields = array();
+
+        // determine exact projection
         foreach($vars as $v) {
             $name = $this->_name(array('type'=>'variable','text'=>$v));
             $terms[] = $name;
@@ -534,6 +623,7 @@ class stratastorage_sql_generator {
         $fields = implode(', ',$fields);
 
 
+        // assign ordering if required
         $ordering = array();
         foreach($order as $o) {
             $ordering[] = $this->_ci($this->_name(array('type'=>'variable','text'=>$o['name']))).' '. strtoupper($o['order']);
@@ -550,9 +640,14 @@ class stratastorage_sql_generator {
         );
     }
 
+    /**
+     * Converts a query group.
+     */
     function _convertQueryGroup($group) {
         $filters = array();
         $patterns = array();
+
+        // sort out the mix of filters and triples
         foreach($group as $i) {
             switch($i['type']) {
                 case 'triple': $patterns[]=$i; break;
@@ -561,11 +656,13 @@ class stratastorage_sql_generator {
             }
         }
 
+        // build a graph pattern of the conjunction of all triples
         $gp = $this->_trans_tp($patterns[0]);
         for($i=1; $i<count($patterns); $i++) {
             $gp = $this->_trans_and($gp, $this->_trans_tp($patterns[$i]));
         }
 
+        // apply the filters to the graph pattern
         if(count($filters)) {
             $gp = $this->_trans_filter($gp, $filters);
         }
@@ -574,17 +671,24 @@ class stratastorage_sql_generator {
     }
 
 
+    /**
+     * Translates an abstract query tree to SQL.
+     */
     function translate($query) {
+        // convert the base group
         $gp = $this->_convertQueryGroup($query['where']);
 
+        // apply all minus operations first
         foreach($query['minus'] as $minus) {
             $gp = $this->_trans_minus($gp, $this->_convertQueryGroup($minus));
         }
 
+        // apply all optional operations (after exclusion by minuses)
         foreach($query['optionals'] as $opt) {
             $gp = $this->_trans_opt($gp, $this->_convertQueryGroup($opt));
         }
 
+        // project and order
         $q = $this->_trans_select($gp, $query['select'], $query['sort']);
 
         return array($q['sql'], $this->literals);
