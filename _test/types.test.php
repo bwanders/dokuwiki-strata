@@ -57,6 +57,11 @@ class types_test extends Doku_UnitTestCase {
 		// Unicode
 		$s = $type->normalize('Één ís één.', '');
 		$this->assertEqual($s, 'een_is_een');
+		// Relative pathes
+		$s = $type->normalize('..:.:Bob', 'master:user');
+		$this->assertEqual($s, 'master:bob');
+		$s = $type->normalize('.:..:Bob', 'master:user');
+		$this->assertEqual($s, 'master:bob');
 	}
 
 	function testRef() {
@@ -82,6 +87,11 @@ class types_test extends Doku_UnitTestCase {
 		// Unicode
 		$s = $type->normalize('Één ís één.', '');
 		$this->assertEqual($s, 'een_is_een');
+		// Relative pathes
+		$s = $type->normalize('..:.:Bob', 'master:user');
+		$this->assertEqual($s, 'master:bob');
+		$s = $type->normalize('.:..:Bob', 'master:user');
+		$this->assertEqual($s, 'master:bob');
 	}
 
 	function testImage() {
