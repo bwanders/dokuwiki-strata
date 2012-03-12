@@ -103,6 +103,8 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
             // render header
             $R->table_open();
             $R->tablerow_open();
+
+            // prepare and render all columns
             $fields = array();
             foreach($data['fields'] as $field=>$meta) {
                 $fields[] = array(
@@ -130,8 +132,10 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
             }
 
             $R->table_close();
+
             return true;
         } elseif($mode == 'metadata') {
+            // prepare all columns
             foreach($data['fields'] as $field=>$meta) {
                 $fields[] = array(
                     'name'=>$field,
