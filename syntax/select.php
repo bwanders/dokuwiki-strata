@@ -156,21 +156,25 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         // execute the query
         $result = $this->triples->queryRelations($data['query']);
 
+        // prepare all columns
+        foreach($data['fields'] as $field=>$meta) {
+            $fields[] = array(
+                'name'=>$field,
+                'caption'=>$meta['caption'],
+                'type'=>$this->types->loadType($meta['type']),
+                'hint'=>$meta['hint']
+            );
+        }
+
         if($mode == 'xhtml') {
             // render header
             $R->table_open();
             $R->tablerow_open();
 
-            // prepare and render all columns
-            $fields = array();
-            foreach($data['fields'] as $field=>$meta) {
-                $fields[] = array(
-                    'name'=>$field,
-                    'type'=>$this->types->loadType($meta['type']),
-                    'hint'=>$meta['hint']
-                );
+            // render all columns
+            foreach($fields as $f) {
                 $R->tableheader_open();
-                $R->doc .= $R->_xmlEntities($meta['caption']);
+                $R->doc .= $R->_xmlEntities($f['caption']);
                 $R->tableheader_close();
             }
             $R->tablerow_close();
@@ -192,15 +196,6 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
 
             return true;
         } elseif($mode == 'metadata') {
-            // prepare all columns
-            foreach($data['fields'] as $field=>$meta) {
-                $fields[] = array(
-                    'name'=>$field,
-                    'type'=>$this->types->loadType($meta['type']),
-                    'hint'=>$meta['hint']
-                );
-            }
-
             // render all rows in metadata mode to enable things like backlinks
             foreach($result as $row) {
                 foreach($fields as $f) {
