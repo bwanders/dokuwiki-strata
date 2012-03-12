@@ -43,14 +43,12 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         $header = array_shift($lines);
         $footer = array_pop($lines);
 
-        $result = array(
-            'fields'=>array()
-        );
+        $result = array();
 
         $typemap = array();
 
         // parse projection information in 'short syntax' if available
-        if($header != '<select>') {
+        if(!preg_match('/^<select *>$/',$header)) {
             $result['fields'] = $this->helper->parseFieldsShort($header,$typemap);
         }
 
@@ -60,12 +58,17 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         // parse 'long syntax' if we don't have projection information yet
         if(count($fields)) {
             if(count($result['fields'])) {
-                msg('Strata basic: Query contains both \'fields\' group and column.',-1);
+                msg('Strata basic: Query contains both \'fields\' group and normal selection.',-1);
                 return array();
             } else {
                 $result['fields'] = $this->helper->parseFieldsLong($fields, $typemap);
                 if(!$result['fields']) return array();
             }
+        }
+
+        if(empty($result['fields']) || count($result['fields']) == 0) {
+            msg('Strata basic: I don\'t know which fields to select!',-1);
+            return array();
         }
 
         // parse the query itself
