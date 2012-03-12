@@ -56,7 +56,9 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
 
         // process the fragment if necessary
         $result['entry'] = $header[2];
-        if($result['entry'] != '') $result['data'][] = array('key'=>'title','value'=>$result['entry'], 'type'=>'string', 'hint'=>null);
+        if($result['entry'] != '') {
+            $result['data'][] = array('key'=>'title','value'=>$result['entry'], 'type'=>'string', 'hint'=>null);
+        }
 
         // now handle all other lines
         foreach($lines as $line) {
