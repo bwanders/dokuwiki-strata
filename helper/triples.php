@@ -310,11 +310,8 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
             return false;
         }
 
-        // fetch all results and return them
-        $result = $query->fetchAll(PDO::FETCH_ASSOC);
-        $query->closeCursor();
-        
-        return $result;
+        // wrap the results in an iterator, and return it
+        return new stratastorage_relations_iterator($query);
     }
 
     /**
@@ -692,5 +689,53 @@ class stratastorage_sql_generator {
         $q = $this->_trans_select($gp, $query['select'], $query['sort']);
 
         return array($q['sql'], $this->literals);
+    }
+}
+
+/**
+ * This iterator is used to offer an interface over a
+ * relations query result.
+ */
+class stratastorage_relations_iterator implements Iterator {
+    function __construct($pdostatement) {
+        $this->data = $pdostatement;
+        $this->id = 0;
+        $this->closed = false;
+        $this->next();
+    }
+    
+    function current() {
+        return $this->row;
+    }
+
+    function key() {
+        return $this->id;
+    }
+
+    function next() {
+        $this->row = $this->data->fetch(PDO::FETCH_ASSOC);
+        $this->id++;
+
+        if(!$this->valid()) {
+            $this->closeCursor();
+        }
+    }
+
+    function rewind() {
+        // noop
+    }
+
+    function valid() {
+        return $this->row != null;
+    }
+
+    /**
+     * Closes this result set.
+     */
+    function closeCursor() {
+        if(!$this->closed) {
+            $this->data->closeCursor();
+            $this->closed = true;
+        }
     }
 }
