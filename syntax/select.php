@@ -191,6 +191,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
                     }
                 $R->tablerow_close();
             }
+            $result->closeCursor();
 
             $R->table_close();
 
@@ -204,6 +205,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
                     }
                 }
             }
+            $result->closeCursor();
 
             return true;
         }

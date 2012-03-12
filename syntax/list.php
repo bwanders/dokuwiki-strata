@@ -62,6 +62,7 @@ class syntax_plugin_stratabasic_list extends syntax_plugin_stratabasic_select {
                 $R->listcontent_close();
                 $R->listitem_close();
             }
+            $result->closeCursor();
 
             $R->listu_close();
 
@@ -75,6 +76,7 @@ class syntax_plugin_stratabasic_list extends syntax_plugin_stratabasic_select {
                     }
                 }
             }
+            $result->closeCursor();
 
             return true;
         }
