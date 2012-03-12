@@ -16,9 +16,9 @@ require_once(DOKU_PLUGIN.'syntax.php');
 class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
     function syntax_plugin_stratabasic_select() {
         $this->helper =& plugin_load('helper', 'stratabasic');
-        $this->_types =& plugin_load('helper', 'stratastorage_types');
-        $this->_triples =& plugin_load('helper', 'stratastorage_triples', false);
-        $this->_triples->initialize();
+        $this->types =& plugin_load('helper', 'stratastorage_types');
+        $this->triples =& plugin_load('helper', 'stratastorage_triples', false);
+        $this->triples->initialize();
     }
 
     function getType() {
@@ -83,7 +83,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
                 if(!empty($typemap[$var])) {
                     $result['fields'][$var] = array_merge($result['fields'][$var],$typemap[$var]);
                 } else {
-                    $result['fields'][$var]['type'] = $this->_types->getConf('default_type');
+                    $result['fields'][$var]['type'] = $this->types->getConf('default_type');
                 }
             }
         }
@@ -97,7 +97,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         }
 
         // execute the query
-        $result = $this->_triples->queryRelations($data['query']);
+        $result = $this->triples->queryRelations($data['query']);
 
         if($mode == 'xhtml') {
             // render header
@@ -109,7 +109,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
             foreach($data['fields'] as $field=>$meta) {
                 $fields[] = array(
                     'name'=>$field,
-                    'type'=>$this->_types->loadType($meta['type']),
+                    'type'=>$this->types->loadType($meta['type']),
                     'hint'=>$meta['hint']
                 );
                 $R->tableheader_open();
@@ -124,7 +124,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
                     foreach($fields as $f) {
                         $R->tablecell_open();
                         if($row[$f['name']] != null) {
-                            $f['type']->render($mode, $R, $this->_triples, $row[$f['name']], $f['hint']);
+                            $f['type']->render($mode, $R, $this->triples, $row[$f['name']], $f['hint']);
                         }
                         $R->tablecell_close();
                     }
@@ -139,7 +139,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
             foreach($data['fields'] as $field=>$meta) {
                 $fields[] = array(
                     'name'=>$field,
-                    'type'=>$this->_types->loadType($meta['type']),
+                    'type'=>$this->types->loadType($meta['type']),
                     'hint'=>$meta['hint']
                 );
             }
@@ -148,7 +148,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
             foreach($result as $row) {
                 foreach($fields as $f) {
                     if($row[$f['name']] != null) {
-                        $f['type']->render($mode, $R, $this->_triples, $row[$f['name']], $f['hint']);
+                        $f['type']->render($mode, $R, $this->triples, $row[$f['name']], $f['hint']);
                     }
                 }
             }

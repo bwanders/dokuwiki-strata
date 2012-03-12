@@ -15,10 +15,10 @@ require_once(DOKU_PLUGIN.'syntax.php');
  */
 class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
     function syntax_plugin_stratabasic_entry() {
-        $this->_helper =& plugin_load('helper', 'stratabasic');
-        $this->_types =& plugin_load('helper', 'stratastorage_types');
-        $this->_triples =& plugin_load('helper', 'stratastorage_triples', false);
-        $this->_triples->initialize();
+        $this->helper =& plugin_load('helper', 'stratabasic');
+        $this->types =& plugin_load('helper', 'stratastorage_types');
+        $this->triples =& plugin_load('helper', 'stratastorage_triples', false);
+        $this->triples->initialize();
     }
 
     function getType() {
@@ -66,7 +66,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
             if($line == '</data>') break;
 
             // ignore line if it's a comment
-            if($this->_helper->ignorableLine($line)) continue;
+            if($this->helper->ignorableLine($line)) continue;
 
             // match a "property_type(hint)*: value" pattern
             // (the * is only used to indicate that the value is actually a comma-seperated list)
@@ -85,7 +85,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                 foreach($values as $v) {
                     if($v == '') continue;
                     if(!isset($type) || $type == '') {
-                        $type = $this->_types->getConf('default_type');
+                        $type = $this->types->getConf('default_type');
                     }
                     $result['data'][] = array('key'=>$property,'value'=>$v,'type'=>$type,'hint'=>($hint?:null));
                 }
@@ -96,7 +96,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
 
         // normalize data
         foreach($result['data'] as &$triple) {
-            $type = $this->_types->loadType($triple['type']);
+            $type = $this->types->loadType($triple['type']);
             $triple['value'] = $type->normalize($triple['value'], $triple['hint']);
         }
 
@@ -142,8 +142,8 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                 for($i=0;$i<count($values);$i++) {
                     $triple =& $values[$i];
                     if($i!=0) $R->doc .= ', ';
-                    $type = $this->_types->loadType($triple['type']);
-                    $type->render($mode, $R, $this->_triples, $triple['value'], $triple['hint']);
+                    $type = $this->types->loadType($triple['type']);
+                    $type->render($mode, $R, $this->triples, $triple['value'], $triple['hint']);
                 }
                 $R->doc .= ')';
                 $R->emphasis_close();
@@ -162,8 +162,8 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                 for($i=0;$i<count($values);$i++) {
                     $triple =& $values[$i];
                     if($i!=0) $R->doc .= ', ';
-                    $type = $this->_types->loadType($triple['type']);
-                    $type->render($mode, $R, $this->_triples, $triple['value'], $triple['hint']);
+                    $type = $this->types->loadType($triple['type']);
+                    $type->render($mode, $R, $this->triples, $triple['value'], $triple['hint']);
                 }
                 $R->tablecell_close();
                 $R->tablerow_open();
@@ -183,15 +183,15 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
 
             foreach($data['data'] as $triple) {
                 // render values for things like backlinks
-                $type = $this->_types->loadType($triple['type']);
-                $type->render($mode, $R, $this->_triples, $triple['value'], $triple['hint']);
+                $type = $this->types->loadType($triple['type']);
+                $type->render($mode, $R, $this->triples, $triple['value'], $triple['hint']);
 
                 // prepare triples for storage
                 $triples[] = array('subject'=>$subject, 'predicate'=>$triple['key'], 'object'=>$triple['value']);
             }
 
             // batch-store triples
-            $this->_triples->addTriples($triples);
+            $this->triples->addTriples($triples);
             return true;
         }
 
