@@ -122,8 +122,8 @@ abstract class plugin_strata_driver {
         // (this makes sure that a semicolon in the comment doesn't break the script)
         $sql = '';
         foreach($lines as $line) {
+            $line = preg_replace('/--.*$/','',$line);
             if(trim($line," \t\n\r") == '') continue;
-            if(preg_match('/^--.*$/',trim($line," \t\n\r"))) continue;
             $sql .= $line;
         }
 
