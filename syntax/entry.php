@@ -15,6 +15,7 @@ require_once(DOKU_PLUGIN.'syntax.php');
  */
 class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
     function syntax_plugin_stratabasic_entry() {
+        $this->_helper =& plugin_load('helper', 'stratabasic');
         $this->_types =& plugin_load('helper', 'stratastorage_types');
         $this->_triples =& plugin_load('helper', 'stratastorage_triples', false);
         $this->_triples->initialize();
@@ -62,7 +63,10 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
             // abort if this is the closing line
             if($line == '</data>') break;
 
-            // match a property_type(hint)*: value pattern
+            // ignore line if it's a comment
+            if($this->_helper->ignorableLine($line)) continue;
+
+            // match a "property_type(hint)*: value" pattern
             // (the * is only used to indicate that the value is actually a comma-seperated list)
             if(preg_match('/^([-a-zA-Z0-9 ]+)(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?(\*)?:(.*)$/',$line,$parts)) {
                 // determine values, splitting on commas if necessary
@@ -81,7 +85,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                     $result['data'][] = array('key'=>$parts[1],'value'=>$v,'type'=>$parts[2],'hint'=>($parts[3]?:null));
                 }
             } else {
-                msg('I don\'t understand data entry \''.htmlentities($line).'\'.', -1);
+                msg('I don\'t understand data entry line \''.htmlentities($line).'\'.', -1);
             }
         }
 
