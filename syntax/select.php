@@ -47,10 +47,18 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
 
         $typemap = array();
 
+
+        // allow subclass header handling
+        $header = $this->handleHeader($header, $result, $typemap);
+
         // parse projection information in 'short syntax' if available
-        if(!preg_match('/^<select *>$/',$header)) {
-            $result['fields'] = $this->helper->parseFieldsShort($header,$typemap);
+        if(trim($header) != '') {
+            $result['fields'] = $this->helper->parseFieldsShort($header, $typemap);
         }
+
+
+        // allow subclass body handling
+        $lines = $this->handleBody($lines, $result, $typemap);
 
         // extract the projection information in 'long syntax' if available
         list($fields, $lines) = $this->helper->extractBlock($lines, 'fields');
@@ -75,6 +83,10 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         list($result['query'], $variables) = $this->helper->parseQuery($lines, $typemap, array_keys($result['fields']));
         if(!$result['query']) return array();
 
+
+        // allow subclass footer handling
+        $footer = $this->handleFooter($footer, &$result, &$typemap, &$variable);
+
         // check projected variables and load types
         foreach($result['fields'] as $var=>$f) {
             if(!in_array($var, $variables)) {
@@ -92,6 +104,48 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         }
 
         return $result;
+    }
+
+    /**
+     * Handles the header of the syntax. This method is called before
+     * the header is handled.
+     *
+     * @param header string the complete header
+     * @param result array the result array passed to the render method
+     * @param typemap array the type map
+     * @return a string containing the unhandled parts of the header
+     */
+    function handleHeader($header, &$result, &$typemap) {
+        // remove prefix and suffix
+        return preg_replace('/(^<select)|( *>$)/','',$header);
+    }
+
+    /**
+     * Handles the body of the syntax. This method is called before any
+     * of the body is handled.
+     *
+     * @param lines array a list of lines in the body
+     * @param result array the result array passed to the render method
+     * @param typemap array the type map
+     * @return an array containing all unhandled lines
+     */
+    function handleBody($lines, &$result, &$typemap) {
+        return $lines;
+    }
+
+    /**
+     * Handles the footer of the syntax. This method is called after the
+     * query has been parsed, but before the typemap is applied to determine
+     * all field types.
+     * 
+     * @param footer string the footer string
+     * @param result array the result array passed to the render method
+     * @param typemape array the type map
+     * @param variables array of variables used in query
+     * @return a string containing the unhandled parts of the footer
+     */
+    function handleFooter($footer, &$result, &$typemap, &$variables) {
+        return $footer;
     }
 
     function render($mode, &$R, $data) {
