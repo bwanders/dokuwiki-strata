@@ -71,20 +71,23 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
             // match a "property_type(hint)*: value" pattern
             // (the * is only used to indicate that the value is actually a comma-seperated list)
             if(preg_match('/^([-a-zA-Z0-9 ]+)(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?(\*)?:(.*)$/',$line,$parts)) {
+                // assign useful names
+                list($match, $property, $type, $hint, $multi, $values) = $parts;
+
                 // determine values, splitting on commas if necessary
-                if($parts[4] == '*') {
-                    $values = array_map('trim',explode(',',$parts[5]));
+                if($multi == '*') {
+                    $values = array_map('trim',explode(',',$values));
                 } else {
-                    $values = array(trim($parts[5]));
+                    $values = array(trim($values));
                 }
 
                 // generate triples from the values
                 foreach($values as $v) {
                     if($v == '') continue;
-                    if(!isset($parts[2]) || $parts[2] == '') {
-                        $parts[2] = $this->_types->getConf('default_type');
+                    if(!isset($type) || $type == '') {
+                        $type = $this->_types->getConf('default_type');
                     }
-                    $result['data'][] = array('key'=>$parts[1],'value'=>$v,'type'=>$parts[2],'hint'=>($parts[3]?:null));
+                    $result['data'][] = array('key'=>$property,'value'=>$v,'type'=>$type,'hint'=>($hint?:null));
                 }
             } else {
                 msg('I don\'t understand data entry line \''.htmlentities($line).'\'.', -1);
