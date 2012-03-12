@@ -62,6 +62,70 @@ class types_test extends Doku_UnitTestCase {
 		$this->assertEqual($s, 'master:bob');
 		$s = $type->normalize('.:..:Bob', 'master:user');
 		$this->assertEqual($s, 'master:bob');
+        // Fragments in url
+		$s = $type->normalize('.#Bob', 'master:user');
+		$this->assertEqual($s, 'master:user#bob');
+		$s = $type->normalize('..#Bob', 'master:user');
+		$this->assertEqual($s, 'master#bob');
+		$s = $type->normalize('#Bob', 'master:user');
+		$this->assertEqual($s, 'master:user#bob');
+	}
+
+	function testPageWithID() {
+		// Set ID
+		global $ID;
+		$this->assertEqual($ID, null); // Test whether the test suite is initialised as expected.
+		$ID = 'an_id:sub:current_page';
+
+		$type = $this->_types->loadType('page'); 
+		// Empty hint
+		$s = $type->normalize('bob', '');
+		$this->assertEqual($s, 'an_id:sub:bob');
+		// Empty hint
+		$s = $type->normalize('Bob', '');
+		$this->assertEqual($s, 'an_id:sub:bob');
+		// Numerical hint
+		$s = $type->normalize('Bob', 10);
+		$this->assertEqual($s, '10:bob');
+		// String hint
+		$s = $type->normalize('Bob', 'master');
+		$this->assertEqual($s, 'master:bob');
+		// Whitespace
+		$s = $type->normalize('  Bob   ', '');
+		$this->assertEqual($s, 'an_id:sub:bob');
+		// Special characters
+		$s = $type->normalize('Bob & Alice', '');
+		$this->assertEqual($s, 'an_id:sub:bob_alice');
+		// Unicode
+		$s = $type->normalize('Één ís één.', '');
+		$this->assertEqual($s, 'an_id:sub:een_is_een');
+		// Relative pathes w.r.t. given namespace
+		$s = $type->normalize('..:.:Bob', 'master:user');
+		$this->assertEqual($s, 'master:bob');
+		$s = $type->normalize('.:..:Bob', 'master:user');
+		$this->assertEqual($s, 'master:bob');
+        // Fragments in url w.r.t. given namespace
+		$s = $type->normalize('.#Bob', 'master:user');
+		$this->assertEqual($s, 'master:user#bob');
+		$s = $type->normalize('..#Bob', 'master:user');
+		$this->assertEqual($s, 'master#bob');
+		$s = $type->normalize('#Bob', 'master:user');
+		$this->assertEqual($s, 'master:user#bob');
+		// Relative pathes w.r.t. ID
+		$s = $type->normalize('..:.:Bob', '');
+		$this->assertEqual($s, 'an_id:bob');
+		$s = $type->normalize('.:..:Bob', '');
+		$this->assertEqual($s, 'an_id:bob');
+        // Fragments in url w.r.t. ID
+		$s = $type->normalize('.#Bob', '');
+		$this->assertEqual($s, 'an_id:sub:current_page#bob');
+		$s = $type->normalize('..#Bob', '');
+		$this->assertEqual($s, 'an_id:sub#bob');
+		$s = $type->normalize('#Bob', '');
+		$this->assertEqual($s, 'an_id:sub:current_page#bob');
+
+		// Restore global to avoid interference with other tests
+		$ID = null;
 	}
 
 	function testRef() {
@@ -92,6 +156,13 @@ class types_test extends Doku_UnitTestCase {
 		$this->assertEqual($s, 'master:bob');
 		$s = $type->normalize('.:..:Bob', 'master:user');
 		$this->assertEqual($s, 'master:bob');
+        // Fragments in url
+		$s = $type->normalize('.#Bob', 'master:user');
+		$this->assertEqual($s, 'master:user#bob');
+		$s = $type->normalize('..#Bob', 'master:user');
+		$this->assertEqual($s, 'master#bob');
+		$s = $type->normalize('#Bob', 'master:user');
+		$this->assertEqual($s, 'master:user#bob');
 	}
 
 	function testImage() {
