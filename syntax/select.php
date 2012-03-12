@@ -145,7 +145,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
      * @return a string containing the unhandled parts of the footer
      */
     function handleFooter($footer, &$result, &$typemap, &$variables) {
-        return $footer;
+        return '';
     }
 
     function render($mode, &$R, $data) {
