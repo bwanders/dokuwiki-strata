@@ -94,10 +94,9 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
             }
         }
 
-        // load types, and normalize data
+        // normalize data
         foreach($result['data'] as &$triple) {
             $type = $this->_types->loadType($triple['type']);
-            $triple['type'] = $type;
             $triple['value'] = $type->normalize($triple['value'], $triple['hint']);
         }
 
@@ -143,7 +142,8 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                 for($i=0;$i<count($values);$i++) {
                     $triple =& $values[$i];
                     if($i!=0) $R->doc .= ', ';
-                    $triple['type']->render($mode, $R, $this->_triples, $triple['value'], $triple['hint']);
+                    $type = $this->_types->loadType($triple['type']);
+                    $type->render($mode, $R, $this->_triples, $triple['value'], $triple['hint']);
                 }
                 $R->doc .= ')';
                 $R->emphasis_close();
@@ -162,7 +162,8 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                 for($i=0;$i<count($values);$i++) {
                     $triple =& $values[$i];
                     if($i!=0) $R->doc .= ', ';
-                    $triple['type']->render($mode, $R, $this->_triples, $triple['value'], $triple['hint']);
+                    $type = $this->_types->loadType($triple['type']);
+                    $type->render($mode, $R, $this->_triples, $triple['value'], $triple['hint']);
                 }
                 $R->tablecell_close();
                 $R->tablerow_open();
@@ -182,7 +183,8 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
 
             foreach($data['data'] as $triple) {
                 // render values for things like backlinks
-                $triple['type']->render($mode, $R, $this->_triples, $triple['value'], $triple['hint']);
+                $type = $this->_types->loadType($triple['type']);
+                $type->render($mode, $R, $this->_triples, $triple['value'], $triple['hint']);
 
                 // prepare triples for storage
                 $triples[] = array('subject'=>$subject, 'predicate'=>$triple['key'], 'object'=>$triple['value']);
