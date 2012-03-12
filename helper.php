@@ -25,7 +25,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
      * Determines whether a line can be ignored.
      */
     function ignorableLine($line) {
-        return $line == '' || substr($line,0,2) == '--';
+        return $line == '' || substr(ltrim($line),0,2) == '--';
     }
 
     /**
