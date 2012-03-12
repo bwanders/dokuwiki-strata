@@ -56,6 +56,7 @@ class syntax_plugin_stratabasic_list extends syntax_plugin_stratabasic_select {
                 foreach($fields as $f) {
                     if($row[$f['name']] != null) {
                         $f['type']->render($mode, $R, $this->triples, $row[$f['name']], $f['hint']);
+                        $R->doc .= ' ';
                     }
                 }
                 $R->listcontent_close();
