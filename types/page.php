@@ -20,7 +20,7 @@ class plugin_strata_type_page extends plugin_strata_type {
         // check for local link, and prefix full page id
         // (local links don't get resolved by resolve_pageid)
         if(preg_match('/^#.+/',$value)) {
-            $value = $ID.':'.$value;
+            $value = $ID.$value;
         }
 
         // resolve page id with respect to selected base
