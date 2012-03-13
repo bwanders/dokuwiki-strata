@@ -320,7 +320,14 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
      * @return an array of resources
      */
     function queryResources($query) {
-        //TODO: Implementation
+        // We transform the given query into a resource-centric query as follows:
+        //   Remember the single projected variable Vx.
+        //   Append two variables ?__p and ?__o to the projection
+        //   Add an extra triple pattern (Vx, ?__p, ?__o)
+        //   Append Vx to the ordering
+        // The query is ready for execution. Result set can be transformed into a
+        // resource-centric view by fetching all triples related to a single subject
+        // (each subject is in a single continuous block, due to the ordering)
         return array();
     }
 }
