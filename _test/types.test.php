@@ -105,24 +105,26 @@ class types_test extends Doku_UnitTestCase {
 		$s = $type->normalize('.:..:Bob', 'master:user');
 		$this->assertEqual($s, 'master:bob');
         // Fragments in url w.r.t. given namespace
-		$s = $type->normalize('.#Bob', 'master:user');
-		$this->assertEqual($s, 'master:user#bob');
-		$s = $type->normalize('..#Bob', 'master:user');
-		$this->assertEqual($s, 'master#bob');
+		$s = $type->normalize('.:#Bob', 'master:user');
+		$this->assertEqual($s, 'master:user:start#bob');
+		$s = $type->normalize('..:#Bob', 'master:user');
+		$this->assertEqual($s, 'master:start#bob');
 		$s = $type->normalize('#Bob', 'master:user');
-		$this->assertEqual($s, 'master:user#bob');
+		$this->assertEqual($s, 'an_id:sub:current_page#bob');
 		// Relative pathes w.r.t. ID
 		$s = $type->normalize('..:.:Bob', '');
 		$this->assertEqual($s, 'an_id:bob');
 		$s = $type->normalize('.:..:Bob', '');
 		$this->assertEqual($s, 'an_id:bob');
         // Fragments in url w.r.t. ID
-		$s = $type->normalize('.#Bob', '');
-		$this->assertEqual($s, 'an_id:sub:current_page#bob');
-		$s = $type->normalize('..#Bob', '');
-		$this->assertEqual($s, 'an_id:sub#bob');
+		$s = $type->normalize('.:#Bob', '');
+		$this->assertEqual($s, 'an_id:sub:start#bob');
+		$s = $type->normalize('..:#Bob', '');
+		$this->assertEqual($s, 'an_id:start#bob');
 		$s = $type->normalize('#Bob', '');
 		$this->assertEqual($s, 'an_id:sub:current_page#bob');
+		$s = $type->normalize('Other Page#Bob', '');
+		$this->assertEqual($s, 'an_id:sub:other_page#bob');
 
 		// Restore global to avoid interference with other tests
 		$ID = null;
