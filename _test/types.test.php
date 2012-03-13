@@ -62,13 +62,13 @@ class types_test extends Doku_UnitTestCase {
 		$this->assertEqual($s, 'master:bob');
 		$s = $type->normalize('.:..:Bob', 'master:user');
 		$this->assertEqual($s, 'master:bob');
-        // Fragments in url
-		$s = $type->normalize('.#Bob', 'master:user');
-		$this->assertEqual($s, 'master:user#bob');
-		$s = $type->normalize('..#Bob', 'master:user');
-		$this->assertEqual($s, 'master#bob');
-		$s = $type->normalize('#Bob', 'master:user');
-		$this->assertEqual($s, 'master:user#bob');
+        // Fragments in url (link to namespace start)
+		$s = $type->normalize(':#Bob', 'master:user');
+		$this->assertEqual($s, 'start#bob');
+		$s = $type->normalize('.:#Bob', 'master:user');
+		$this->assertEqual($s, 'master:user:start#bob');
+		$s = $type->normalize('..:#Bob', 'master:user');
+		$this->assertEqual($s, 'master:start#bob');
 	}
 
 	function testPageWithID() {
