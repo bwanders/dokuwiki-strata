@@ -679,7 +679,7 @@ class stratastorage_sql_generator {
         // assign ordering if required
         $ordering = array();
         foreach($order as $o) {
-            $ordering[] = $this->_ci($this->_name(array('type'=>'variable','text'=>$o['variable']))).' '. strtoupper($o['direction']);
+            $ordering[] = $this->_db->orderBy($this->_name(array('type'=>'variable','text'=>$o['variable'])), $o['direction'] == 'asc');
         }
         if(count($ordering)>0) {
             $ordering = ' ORDER BY '.implode(', ',$ordering);
