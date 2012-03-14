@@ -315,7 +315,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         foreach($root['cs'] as $i=>&$tree) {
             if($tree['tag'] == $tag) {
                 $result[] =& $tree;
-                unset($root['cs'][$i]
+                array_splice($root['cs'],$i,1);
             }
         }
         return $result;
@@ -334,7 +334,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         foreach($root['cs'] as $i=>&$tree) {
             if(is_array($tree)) continue;
             $result[] =& $tree;
-            unset($root['cs'][$i]);
+            array_splice($root['cs'],$i,1);
         }
         return $result;
     }
