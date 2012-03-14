@@ -62,37 +62,6 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
     }
 
     /**
-     * Extracts a block from the array of lines. The block
-     * should not contain nested blocks.
-     * 
-     * @param lines array the lines to extract from
-     * @param blockname string the name of the blocka
-     * @return an array with two members: the lines in the block, and the 
-     *         lines outside of the block
-     */
-    function extractBlock($lines, $blockname) {
-        $block = array();
-        $rest = array();
-
-        $inblock = false;
-        foreach($lines as $line) {
-            if(preg_match('/^'.preg_quote($blockname).'\s*{$/',$line)) {
-                $inblock = true;
-            } elseif($inblock && $line == '}') {
-                $inblock = false;
-            } else {
-                if($inblock) {
-                    $block[] = $line;
-                } else {
-                    $rest[] = $line;
-                }
-            }
-        }
-
-        return array($block, $rest);
-    }
-
-    /**
      * Parses a query. Uses the given typemap, and optionally
      * uses the already determined projection.
      * 
