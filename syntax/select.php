@@ -56,20 +56,31 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
             $result['fields'] = $this->helper->parseFieldsShort($header, $typemap);
         }
 
+        $tree = $this->helper->constructTree($lines);
 
         // allow subclass body handling
-        $lines = $this->handleBody($lines, $result, $typemap);
+        $this->handleBody($tree, $result, $typemap);
 
         // extract the projection information in 'long syntax' if available
-        list($fields, $lines) = $this->helper->extractBlock($lines, 'fields');
+        $fieldsGroups = $this->helper->extractGroups($tree, 'fields');
 
         // parse 'long syntax' if we don't have projection information yet
-        if(count($fields)) {
+        if(count($fieldsGroups)) {
             if(count($result['fields'])) {
                 msg('Strata basic: Query contains both \'fields\' group and normal selection.',-1);
                 return array();
             } else {
-                $result['fields'] = $this->helper->parseFieldsLong($fields, $typemap);
+                if(count($fieldsGroups) > 1) {
+                    msg('Strata basic: I don\'t know how to handle a query containing multiple \'fields\' groups.',-1);
+                    return array();
+                }
+
+                $fieldsLines = $this->helper->extractText($fieldsGroups[0]);
+                if(count($fieldsGroups[0]['cs'])) {
+                    msg('Strata basic: I don\'t know what to do with a group in the \'fields\' group.',-1);
+                    return array();
+                }
+                $result['fields'] = $this->helper->parseFieldsLong($fieldsLines, $typemap);
                 if(!$result['fields']) return array();
             }
         }
@@ -80,7 +91,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         }
 
         // parse the query itself
-        list($result['query'], $variables) = $this->helper->parseQuery($lines, $typemap, array_keys($result['fields']));
+        list($result['query'], $variables) = $this->helper->constructQuery($tree, $typemap, array_keys($result['fields']));
         if(!$result['query']) return array();
 
 
@@ -124,13 +135,12 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
      * Handles the body of the syntax. This method is called before any
      * of the body is handled.
      *
-     * @param lines array a list of lines in the body
+     * @param tree array the parsed tree
      * @param result array the result array passed to the render method
      * @param typemap array the type map
      * @return an array containing all unhandled lines
      */
-    function handleBody($lines, &$result, &$typemap) {
-        return $lines;
+    function handleBody(&$tree, &$result, &$typemap) {
     }
 
     /**
