@@ -25,7 +25,8 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
      * Determines whether a line can be ignored.
      */
     function ignorableLine($line) {
-        return $line == '' || substr(ltrim($line),0,2) == '--';
+        $line = trim($line);
+        return $line == '' || substr($line,0,2) == '--';
     }
 
     /**
@@ -287,5 +288,87 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
      */
     function fieldsShortPattern() {
         return '(?:\s+\?[a-zA-Z0-9]+(?:\s*\([^_\)]*(?:_[a-z0-9]*(?:\([^\)]*\))?)?\))?)';
+    }
+
+    /**
+     * Constructs a tagged tree from the given list of lines.
+     *
+     * @return a tagged tree
+     */
+    function constructTree($lines) {
+        $root = array(
+            'tag'=>'',
+            'cs'=>array()
+        );
+
+        $stack = array();
+        $stack[] =& $root;
+        $top = count($stack)-1;
+
+        foreach($lines as $line) {
+            if($this->ignorableLine($line)) continue;
+
+            if(preg_match('/^([a-zA-Z0-9]*) *{$/',trim($line),$match)) {
+                list($line, $tag) = $match;
+
+                $stack[$top]['cs'][] = array(
+                    'tag'=>$tag,
+                    'cs'=>array()
+                );
+                $stack[] =& $stack[$top]['cs'][count($stack[$top]['cs'])-1];
+                $top = count($stack)-1;
+
+            } elseif(preg_match('/^}$/',trim($line))) {
+                array_pop($stack);
+                $top = count($stack)-1;
+
+            } else {
+                $stack[$top]['cs'][] = $line;
+            }
+        }
+
+        if(count($stack) != 1 || $stack[0] != $root) {
+            msg('Strata basic: unmatched braces in query syntax',-1);
+        }
+
+        return $root;
+    }
+
+    /**
+     * Extract all occurences of tagged groups from the given tree.
+     * This method does not remove the tagged groups from subtrees of
+     * the given root.
+     *
+     * @param root array the tree to operate on
+     * @param tag string the tag to remove
+     * @return an array of groups
+     */
+    function extractGroups(&$root, $tag) {
+        $result = array();
+        foreach($root['cs'] as $i=>&$tree) {
+            if($tree['tag'] == $tag) {
+                $result[] =& $tree;
+                unset($root['cs'][$i]
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Extracts all text elements from the given tree.
+     * This method does not remove the text elements from subtrees
+     * of the root.
+     *
+     * @param root array the tree to operate on
+     * @return array an array of text elements
+     */
+    function extractText(&$root) {
+        $result = array();
+        foreach($root['cs'] as $i=>&$tree) {
+            if(is_array($tree)) continue;
+            $result[] =& $tree;
+            unset($root['cs'][$i]);
+        }
+        return $result;
     }
 }
