@@ -18,7 +18,7 @@ if (!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
  */
 class helper_plugin_stratabasic extends DokuWiki_Plugin {
     function helper_plugin_stratabasic() {
-        $this->_types =& plugin_load('helper', 'stratastorage_types');
+        $this->types =& plugin_load('helper', 'stratastorage_types');
     }
 
     /**
@@ -61,79 +61,233 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         return array('type'=>'variable', 'text'=>$var);
     }
 
+    function _fail($message) {
+        msg($message,-1);
+        throw new Exception();
+    }
+
     /**
-     * Parses a query. Uses the given typemap, and optionally
-     * uses the already determined projection.
-     * 
-     * @param lines array a list of lines
-     * @param typemap array the typemap to use
-     * @param select array an optional array with projection information
-     * @return an array with the abstract query tree and a list of used variables
+     * Constructs a query from the give tree.
+     *
+     * @param root array the tree to transform
+     * @param typemap array the type information collected so far
+     * @param projection array the variables to project
+     * @return a query structure
      */
-    function parseQuery($lines, &$typemap, $select = null) {
-        $result = array(
-            'select'=>array(),
-            'where'=>array(),
-            'sort'=>array(),
-            'optionals'=>array(),
-            'minus'=>array()
-        );
+    function constructQuery(&$root, &$typemap, $projection) {
+        try {
+            $result = array(
+                'group'=>array(),
+                'select'=>$projection,
+                'ordering'=>array()
+            );
+    
+            // extract sort groups
+            $ordering = $this->extractGroups($root, 'sort');
+    
+            // transform actual group
+            list($group, $scope) = $this->transformGroup($root, $typemap);
+            $result['group'] = $group;
+            if(!$group) return false;
+    
+            // handle sort groups
+            if(count($ordering)) {
+                if(count($ordering) > 1) {
+                    $this->_fail('Strata basic: I don\'t know what to do with multiple \'sort\' groups.',-1);
+                }
+   
+                // handle each line in the group 
+                foreach($ordering[0]['cs'] as $line) {
+                    if(is_array($line)) {
+                        $this->_fail('Strata basic: I can\'t handle groups in a \'sort\' group.',-1);
+                    }
+    
+                    if(preg_match('/^\?([a-zA-Z0-9]+)\s*(?:\((asc|desc)(?:ending)?\))?$/S',trim($line),$match)) {
+                        if(!in_array($match[1], $scope)) {
+                            $this->_fail('Strata basic: \'sort\' group uses out-of-scope variable \''.hsc($match[1]).'\'.',-1);
+                        }
+    
+                        $result['ordering'][] = array('variable'=>$match[1], 'direction'=>($match[2]?:'asc'));
+                    } else {
+                        $this->_fail('Strata basic: I can\'t handle line \''.hsc($line).'\' in the \'sort\' group.',-1);
+                    }
+                }
+            }
+    
+            foreach($projection as $var) {
+                if(!in_array($var, $scope)) {
+                    $this->_fail('Strata basic: selected variable \''.hsc($var).'\' is out-of-scope.',-1);
+                }
+            }
+    
+            // return final query structure
+            return array($result, $scope);
+        } catch(Exception $e) {
+            // we failed somewhere in the transformation
+            return false;
+        }
+    }
 
-        $variables = array();
+    /**
+     * Transforms a full query group.
+     * 
+     * @param root array the tree to transform
+     * @param typemap array the type information
+     * @return the transformed group and a list of in-scope variables
+     */
+    function transformGroup(&$root, &$typemap) {
+        // extract patterns and split them in triples and filters
+        $patterns = $this->extractText($root);
 
-        if($select) $result['select'] = $select;
+        // extract union groups
+        $unions = $this->extractGroups($root, 'union');
 
-        // start with the base group
-        $block =& $result['where'];
-        $blockid = 'where';
+        // extract minus groups
+        $minuses = $this->extractGroups($root,'minus');
+
+        // extract optional groups
+        $optionals = $this->extractGroups($root,'optional');
+
+        // check for leftovers
+        if(count($root['cs'])) {
+            $this->_fail('Strata basic: Invalid group \''.hsc($root['cs'][0]['tag']).'\' in query.',-1);
+        }
+
+        // split patterns into triples and filters
+        list($patterns, $filters, $scope) = $this->transformPatterns($patterns, $typemap);
+
+        // convert each union into a pattern
+        foreach($unions as $union) {
+            list($u, $s) = $this->transformUnion($union, $typemap);
+            $scope = array_merge($scope, $s);
+            $patterns[] = $u;
+        }
+
+        // chain all patterns with ANDs 
+        $result = array_shift($patterns);
+        foreach($patterns as $pattern) {
+            $result = array(
+                'type'=>'and',
+                'lhs'=>$result,
+                'rhs'=>$pattern
+            );
+        }
+
+        // add all filters; these are a bit weird, as only a single FILTER is really supported
+        // (we have defined multiple filters as being a conjunction)
+        if(count($filters)) {
+            $result = array(
+                'type'=>'filter',
+                'lhs'=>$result,
+                'rhs'=>$filters
+            );
+        }
+
+        // apply all minuses
+        if(count($minuses)) {
+            foreach($minuses as $minus) {
+                // convert each minus, and discard their scope
+                list($minus, $s) = $this->transformGroup($minus, $typemap);
+                $result = array(
+                    'type'=>'minus',
+                    'lhs'=>$result,
+                    'rhs'=>$minus
+                );
+            }
+        }
+
+        // apply all optionals
+        if(count($optionals)) {
+            foreach($optionals as $optional) {
+                // convert eacfh optional
+                list($optional, $s) = $this->transformGroup($optional, $typemap);
+                $scope = array_merge($scope, $s);
+                $result = array(
+                    'type'=>'optional',
+                    'lhs'=>$result,
+                    'rhs'=>$optional
+                );
+            }
+        }
+
+        return array($result, $scope);
+    }
+
+    /**
+     * Transforms a union group with multiple subgroups
+     * 
+     * @param root array the union group to transform
+     * @param typemap array the type information
+     * @return the transformed group and a list of in-scope variables
+     */
+    function transformUnion(&$root, &$typemap) {
+        // fetch all child patterns
+        $subs = $this->extractGroups($root,null);
+
+        // do sanity checks
+        if(count($root['cs'])) {
+            $this->_fail('Strata basic: I can only handle unnamed groups inside a \'union\' group.',-1);
+        }
+
+        if(count($subs) < 2) {
+            $this->_fail('Strata basic: I need at least 2 groups inside a \'union\' group.',-1); 
+        }
+
+        // transform the first group
+        list($result,$scope) = $this->transformGroup(array_shift($subs), $typemap);
+
+        // transform each subsequent group
+        foreach($subs as $sub) {
+            list($rhs, $s) = $this->transformGroup($sub, $typemap);
+            $scope = array_merge($scope, $s);
+            $result = array(
+                'type'=>'union',
+                'lhs'=>$result,
+                'rhs'=>$rhs
+            );
+        }
+
+        return array($result, $scope);
+    }
+
+    /**
+     * Transforms a list of patterns into a list of triples and a
+     * list of filters.
+     *
+     * @param lines array a list of lines to transform
+     * @param typemap array the type information
+     * @return a list of triples, a list of filters and a list of in-scope variables
+     */
+    function transformPatterns(&$lines, &$typemap) {
+        // we need this to resolve things
+        global $ID;
+
+        // result holders
+        $scope = array();
+        $triples = array();
+        $filters = array();
 
         foreach($lines as $line) {
-            // we only parse useful lines
             $line = trim($line);
-            if($this->ignorableLine($line)) continue;
 
-            if(preg_match('/^([a-z]+)\s*\{$/S', $line, $match)) {
-                // block opener
-                switch($match[1]) {
-                case 'sort':
-                    if(count($result['sort'])) {
-                        msg('Strata basic: Query contains double \'<code>sort</code>\' block.',-1);
-                        return false;
-                    }
-                    $block =& $result['sort'];
-                    break;
-                case 'optional':
-                    $new = array();
-                    $block =& $new;
-                    break;
-                case 'minus':
-                    $new = array();
-                    $block =& $new;
-                    break;
-                default:
-                    msg('Strata basic: Query contains weird block \'<code>'.$match[1].'</code>\'', -1);
-                    return false;
-                }
-                $blockid = $match[1];
-
-            } elseif(in_array($blockid, array('where','optional','minus')) && 
-                     preg_match('/^((?:\?[a-zA-Z0-9]+)|(?:\[\[[^]]+\]\]))\s+(?:((?:[-a-zA-Z0-9 ]+)|(?:\?[a-zA-Z0-9]+))(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?):\s*(.+?)\s*$/S',$line,$match)) {
+            if(preg_match('/^((?:\?[a-zA-Z0-9]+)|(?:\[\[[^]]+\]\]))\s+(?:((?:[-a-zA-Z0-9 ]+)|(?:\?[a-zA-Z0-9]+))(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?):\s*(.+?)\s*$/S',$line,$match)) {
                 // triple pattern
                 list($_, $subject, $predicate, $type, $hint, $object) = $match;
                 if($subject[0] == '?') {
                     $subject = $this->variable($subject);
-                    $variables[] = $subject['text'];
+                    $scope[] = $subject['text'];
                     $this->updateTypemap($typemap, $subject['text'], 'ref');
                 } else {
                     global $ID;
                     $subject = substr($subject,2,-2);
+                    // FIXME: Correct fragment handling (use 'ref' or 'page' type?)
                     resolve_pageid(getNS($ID), $subject, $exists);
                     $subject = $this->literal($subject);
                 }
 
                 if($predicate[0] == '?') {
                     $predicate = $this->variable($predicate);
-                    $variables[] = $predicate['text'];
+                    $scope[] = $predicate['text'];
                     $this->updateTypemap($typemap, $predicate['text'], 'string');
                 } else {
                     $predicate = $this->literal($predicate);
@@ -141,18 +295,17 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
                 if($object[0] == '?') {
                     $object = $this->variable($object);
-                    $variables[] = $object['text'];
+                    $scope[] = $object['text'];
                     $this->updateTypemap($typemap, $object['text'], $type, $hint);
                 } else {
-                    if(!$type) $type = $this->_types->getConf('default_type');
-                    $type = $this->_types->loadType($type);
+                    if(!$type) $type = $this->types->getConf('default_type');
+                    $type = $this->types->loadType($type);
                     $object = $this->literal($type->normalize($object,$hint));
                 }
 
-                $block[] = array('type'=>'triple','subject'=>$subject, 'predicate'=>$predicate, 'object'=>$object);
+                $triples[] = array('type'=>'triple','subject'=>$subject, 'predicate'=>$predicate, 'object'=>$object);
 
-            } elseif(in_array($blockid, array('where','optional','minus')) &&
-                     preg_match('/^(?:\?([a-zA-Z0-9]+)(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*(!=|>=|<=|>|<|=|!~|\^~|\$~|~)\s*(.+?)\s*$/S',$line, $match)) {
+            } elseif(preg_match('/^(?:\?([a-zA-Z0-9]+)(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*(!=|>=|<=|>|<|=|!~|\^~|\$~|~)\s*(.+?)\s*$/S',$line, $match)) {
                 // filter pattern
                 list($_, $lhs,$type,$hint,$operator,$rhs) = $match;
 
@@ -160,53 +313,28 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
                 if($rhs[0] == '?') {
                     $rhs = $this->variable($rhs);
-                    $variables[] = $rhs['text'];
+                    $scope[] = $rhs['text'];
                     $this->updateTypemap($typemap, $rhs['text'], $type, $hint);
                 } else {
                     if(!$type) {
                         if(!empty($typemap[$variable])) {
                             extract($typemap[$variable]);
                         } else {
-                            $type = $this->_types->getConf('default_type');
+                            $type = $this->types->getConf('default_type');
                         }
                     }
-                    $type = $this->_types->loadType($type);
+                    $type = $this->types->loadType($type);
                     $rhs = $this->literal($type->normalize($rhs,$hint));
                 }
 
-                $block[] = array('type'=>'filter','lhs'=>$lhs, 'operator'=>$operator, 'rhs'=>$rhs);
-
-            } elseif(in_array($blockid, array('sort')) &&
-                     preg_match('/^\?([a-zA-Z0-9]+)\s*(?:\((asc|desc)(?:ending)?\))?$/S',$line,$match)) {
-                // sort pattern
-                $block[] = array('name'=>$match[1], 'order'=>($match[2]?:'asc'));
-
-            } elseif($line == '}') {
-                // block closer
-                switch($blockid) {
-                case 'optional':
-                    $result['optionals'][] = $block;
-                    break;
-                case 'minus':
-                    $result['minus'][] = $block;
-                    break;
-                case 'sort':
-                    break;
-                default:
-                    msg('Strata basic: Query contains weird closing bracket.', -1);
-                    return false;
-                }
-                $blockid = 'where';
-                $block =& $result['where'];
+                $filters[] = array('type'=>'filter','lhs'=>$lhs, 'operator'=>$operator, 'rhs'=>$rhs);
             } else {
-                msg('Strata basic: Query contains weird line \'<code>'.hsc($line).'</code>\'.',-1);
-                return false;
+                // unknown lines are fail
+                $this->_fail('Strata basic: Unknown pattern \''.hsc($line).'\'.',-1);
             }
         }
 
-        $variables = array_unique($variables);
-
-        return array($result, $variables);
+        return array($triples, $filters, $scope);
     }
 
     /**
@@ -279,7 +407,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                 list($line, $tag) = $match;
 
                 $stack[$top]['cs'][] = array(
-                    'tag'=>$tag,
+                    'tag'=>$tag?:null,
                     'cs'=>array()
                 );
                 $stack[] =& $stack[$top]['cs'][count($stack[$top]['cs'])-1];
@@ -313,7 +441,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
     function extractGroups(&$root, $tag) {
         $result = array();
         foreach($root['cs'] as $i=>&$tree) {
-            if($tree['tag'] == $tag) {
+            if($tree['tag'] == $tag || (($tag=='' || $tag==null) && $tree['tag'] == null) ) {
                 $result[] =& $tree;
                 array_splice($root['cs'],$i,1);
             }
