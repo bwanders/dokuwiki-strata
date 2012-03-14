@@ -77,8 +77,9 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
     function constructQuery(&$root, &$typemap, $projection) {
         try {
             $result = array(
+                'type'=>'select',
                 'group'=>array(),
-                'select'=>$projection,
+                'projection'=>$projection,
                 'ordering'=>array()
             );
     
