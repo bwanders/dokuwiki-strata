@@ -217,9 +217,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
         foreach($lines as $line) {
             $line = trim($line);
-            if($this->ignorableLine($line)) {
-                continue;
-            } elseif(preg_match('/^(?:([^_]*)(?:_([a-z0-9]*)(?:\(([^)]+)\))?)?(:))?\s*\?([a-zA-Z0-9]+)$/S',$line, $match)) {
+            if(preg_match('/^(?:([^_]*)(?:_([a-z0-9]*)(?:\(([^)]+)\))?)?(:))?\s*\?([a-zA-Z0-9]+)$/S',$line, $match)) {
                 list($_, $caption, $type, $hint, $nocaphint, $variable) = $match;
                 if(!$nocaphint || (!$nocaphint && !$caption && !$type)) $caption = ucfirst($variable);
                 $this->updateTypemap($typemap, $variable, $type, $hint);
