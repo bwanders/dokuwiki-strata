@@ -514,21 +514,28 @@ class stratastorage_sql_generator {
     /**
      * Translate an optional operation.
      */
-    function _trans_opt($gp1, $gp2) {
+    function _trans_opt($query) {
+        $gp1 = $this->_dispatch($query['lhs']);
+        $gp2 = $this->_dispatch($query['rhs']);
         return $this->_trans_group($gp1, $gp2, 'LEFT OUTER JOIN');
     }
 
     /**
      * Translate an and operation.
      */
-    function _trans_and($gp1, $gp2) {
+    function _trans_and($query) {
+        $gp1 = $this->_dispatch($query['lhs']);
+        $gp2 = $this->_dispatch($query['rhs']);
         return $this->_trans_group($gp1, $gp2, 'INNER JOIN');
     }
 
     /**
      * Translate a filter operation. The filters are a conjunction of separate expressions.
      */
-    function _trans_filter($gp, $fs) {
+    function _trans_filter($query) {
+        $gp = $this->_dispatch($query['lhs']);
+        $fs = $query['rhs'];
+
         $filters = array();
 
         foreach($fs as $f) {
@@ -589,7 +596,10 @@ class stratastorage_sql_generator {
     /**
      * Translate minus operation.
      */
-    function _trans_minus($gp1, $gp2) {
+    function _trans_minus($query) {
+        $gp1 = $this->_dispatch($query['lhs']);
+        $gp2 = $this->_dispatch($query['rhs']);
+
         // determine overlapping terms (we need to substitute these)
         $common = array_intersect($gp1['terms'], $gp2['terms']);
 
@@ -612,9 +622,48 @@ class stratastorage_sql_generator {
     }
 
     /**
+     * Translate union operation.
+     */
+    function _trans_union($query) {
+        $gp1 = $this->_dispatch($query['lhs']);
+        $gp2 = $this->_dispatch($query['rhs']);
+
+        // determine non-overlapping terms
+        $ta = array_diff($gp1['terms'], $gp2['terms']);
+        $tb = array_diff($gp2['terms'], $gp1['terms']);
+
+        // determine overlapping terms
+        $tc = array_intersect($gp1['terms'], $gp2['terms']);
+
+        // determine final terms
+        $terms = array_unique(array_merge($gp1['terms'], $gp2['terms']));
+
+        // construct selected term list
+        $sa = array_merge($ta, $tb);
+        $sb = array_merge($ta, $tb);
+
+        // append common terms with renaming
+        foreach($tc as $c) {
+            $sa[] = 'r1.'.$c.' AS '.$c;
+            $sb[] = 'r3.'.$c.' AS '.$c;
+        }
+
+        $sa = implode(', ', $sa);
+        $sb = implode(', ', $sb);
+
+        return  array(
+            'sql'=>'SELECT DISTINCT '.$sa.' FROM ('.$gp1['sql'].') r1 LEFT OUTER JOIN ('.$gp2['sql'].') r2 ON (1=0) UNION SELECT DISTINCT '.$sb.' FROM ('.$gp2['sql'].') r3 LEFT OUTER JOIN ('.$gp1['sql'].') r4 ON (1=0)',
+            'terms'=>$terms
+        );
+    }
+
+    /**
      * Translate projection and ordering.
      */
-    function _trans_select($gp, $vars, $order) {
+    function _trans_select($query) {
+        $gp = $this->_dispatch($query['group']);
+        $vars = $query['projection'];
+        $order = $query['ordering'];
         $terms = array();
         $fields = array();
 
@@ -630,7 +679,7 @@ class stratastorage_sql_generator {
         // assign ordering if required
         $ordering = array();
         foreach($order as $o) {
-            $ordering[] = $this->_ci($this->_name(array('type'=>'variable','text'=>$o['name']))).' '. strtoupper($o['order']);
+            $ordering[] = $this->_ci($this->_name(array('type'=>'variable','text'=>$o['variable']))).' '. strtoupper($o['direction']);
         }
         if(count($ordering)>0) {
             $ordering = ' ORDER BY '.implode(', ',$ordering);
@@ -644,57 +693,33 @@ class stratastorage_sql_generator {
         );
     }
 
-    /**
-     * Converts a query group.
-     */
-    function _convertQueryGroup($group) {
-        $filters = array();
-        $patterns = array();
-
-        // sort out the mix of filters and triples
-        foreach($group as $i) {
-            switch($i['type']) {
-                case 'triple': $patterns[]=$i; break;
-                case 'filter': $filters[] =$i; break;
-                default: break;
-            }
+    function _dispatch($query) {
+        switch($query['type']) {
+            case 'select':
+                return $this->_trans_select($query);
+            case 'union':
+                return $this->_trans_union($query);
+            case 'minus':
+                return $this->_trans_minus($query);
+            case 'optional':
+                return $this->_trans_opt($query);
+            case 'filter':
+                return $this->_trans_filter($query);
+            case 'triple':
+                return $this->_trans_tp($query);
+            case 'and':
+                return $this->_trans_and($query);
+            default:
+                msg('Strata storage: unkown abstract query tree node \''.hsc($query['type']).'\'.',-1);
+                return array('sql'=>'<<INVALID QUERY NODE>>', array());
         }
-
-        // build a graph pattern of the conjunction of all triples
-        $gp = $this->_trans_tp($patterns[0]);
-        for($i=1; $i<count($patterns); $i++) {
-            $gp = $this->_trans_and($gp, $this->_trans_tp($patterns[$i]));
-        }
-
-        // apply the filters to the graph pattern
-        if(count($filters)) {
-            $gp = $this->_trans_filter($gp, $filters);
-        }
-
-        return $gp;
     }
-
 
     /**
      * Translates an abstract query tree to SQL.
      */
     function translate($query) {
-        // convert the base group
-        $gp = $this->_convertQueryGroup($query['where']);
-
-        // apply all minus operations first
-        foreach($query['minus'] as $minus) {
-            $gp = $this->_trans_minus($gp, $this->_convertQueryGroup($minus));
-        }
-
-        // apply all optional operations (after exclusion by minuses)
-        foreach($query['optionals'] as $opt) {
-            $gp = $this->_trans_opt($gp, $this->_convertQueryGroup($opt));
-        }
-
-        // project and order
-        $q = $this->_trans_select($gp, $query['select'], $query['sort']);
-
+        $q = $this->_dispatch($query);
         return array($q['sql'], $this->literals);
     }
 }
