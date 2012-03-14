@@ -602,7 +602,7 @@ class stratastorage_sql_generator {
         if(count($terms)>0) {
             $terms = implode(' AND ',$terms);
         } else {
-            $terms = '1';
+            $terms = '1=1';
         }
 
         return array(
