@@ -19,6 +19,12 @@ class plugin_strata_driver_pgsql extends plugin_strata_driver {
         return 'ILIKE';
     }
 
+    public function orderBy($val, $asc=true) {
+        $order = $asc ? 'ASC' : 'DESC';
+        // Sort first on numeric prefix and then on full string
+        return "substring($val from '^(-?[0-9]+\.?[0-9]*)')::numeric $order, $val $order";
+    }
+
     public function isInitialized() {
         return $this->_db->query("SELECT * FROM pg_tables WHERE schemaname = 'public' AND tablename = 'data'")->rowCount() != 0;
     }

@@ -66,6 +66,19 @@ abstract class plugin_strata_driver {
     }
 
     /**
+     * Returns the syntax for ordering by the given value.
+     *
+     * Ideally, the ordering should be natural, that is '2 apples' is sorted before '10 pears'.
+     * However, depending on the supported database, ordering can vary between string and natural ordering, including any compromises.
+     * @param val string the thing to sort on
+     * @param asc bool whether sorting should be ascending (true) or descending (false)
+     */
+    public function orderBy($val, $asc=true) {
+        $order = $asc ? 'ASC' : 'DESC';
+        return "$val $order";
+    }
+
+    /**
      * Open the database connection.
      *
      * @param dsn string the dsn to use for connecting

@@ -23,6 +23,12 @@ class plugin_strata_driver_mysql extends plugin_strata_driver {
         return "$val COLLATE utf8mb4_unicode_ci";
     }
 
+    public function orderBy($val, $asc=true) {
+        $order = $asc ? 'ASC' : 'DESC';
+        // Sort first on numeric prefix and then on full string
+        return "CAST($val AS DECIMAL) $order, $val $order";
+    }
+
     protected function initializeConnection() {
         $this->query('SET NAMES utf8mb4');
     }

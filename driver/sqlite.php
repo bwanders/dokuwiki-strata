@@ -19,6 +19,12 @@ class plugin_strata_driver_sqlite extends plugin_strata_driver {
         return "$val COLLATE NOCASE";
     }
 
+    public function orderBy($val, $asc=true) {
+        $order = $asc ? 'ASC' : 'DESC';
+        // Sort first on numeric prefix and then on full string
+        return "CAST($val AS NUMERIC) $order, $val $order";
+    }
+
     public function isInitialized() {
         return $this->_db->query("SELECT count(*) FROM sqlite_master WHERE name = 'data'")->fetchColumn() != 0;
     }
