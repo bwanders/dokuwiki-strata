@@ -90,7 +90,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                     $result['data'][] = array('key'=>$property,'value'=>$v,'type'=>$type,'hint'=>($hint?:null));
                 }
             } else {
-                msg('I don\'t understand data entry line \''.htmlentities($line).'\'.', -1);
+                msg('I don\'t understand data entry line \'<code>'.htmlentities($line).'</code>\'.', -1);
             }
         }
 
