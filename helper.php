@@ -94,30 +94,30 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
             // handle sort groups
             if(count($ordering)) {
                 if(count($ordering) > 1) {
-                    $this->_fail('Strata basic: I don\'t know what to do with multiple \'sort\' groups.',-1);
+                    $this->_fail('Strata basic: I don\'t know what to do with multiple <code>sort</code> groups.',-1);
                 }
    
                 // handle each line in the group 
                 foreach($ordering[0]['cs'] as $line) {
                     if(is_array($line)) {
-                        $this->_fail('Strata basic: I can\'t handle groups in a \'sort\' group.',-1);
+                        $this->_fail('Strata basic: I can\'t handle groups in a </code>sort<code> group.',-1);
                     }
     
                     if(preg_match('/^\?([a-zA-Z0-9]+)\s*(?:\((asc|desc)(?:ending)?\))?$/S',trim($line),$match)) {
                         if(!in_array($match[1], $scope)) {
-                            $this->_fail('Strata basic: \'sort\' group uses out-of-scope variable \''.hsc($match[1]).'\'.',-1);
+                            $this->_fail('Strata basic: <code>sort</code> group uses out-of-scope variable \'<code>'.hsc($match[1]).'</code>\'.',-1);
                         }
     
                         $result['ordering'][] = array('variable'=>$match[1], 'direction'=>($match[2]?:'asc'));
                     } else {
-                        $this->_fail('Strata basic: I can\'t handle line \''.hsc($line).'\' in the \'sort\' group.',-1);
+                        $this->_fail('Strata basic: I can\'t handle line \'<code>'.hsc($line).'</code>\' in the <code>sort</code> group.',-1);
                     }
                 }
             }
     
             foreach($projection as $var) {
                 if(!in_array($var, $scope)) {
-                    $this->_fail('Strata basic: selected variable \''.hsc($var).'\' is out-of-scope.',-1);
+                    $this->_fail('Strata basic: selected variable \'<code>'.hsc($var).'</code>\' is out-of-scope.',-1);
                 }
             }
     
@@ -151,7 +151,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
         // check for leftovers
         if(count($root['cs'])) {
-            $this->_fail('Strata basic: Invalid group \''.hsc($root['cs'][0]['tag']).'\' in query.',-1);
+            $this->_fail('Strata basic: Invalid '.( isset($root['cs'][0]['tag']) ? 'group \'<code>'.hsc($root['cs'][0]['tag']).'</code>\'' : 'unnamed group').' in query.',-1);
         }
 
         // split patterns into triples and filters
@@ -177,6 +177,15 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         // add all filters; these are a bit weird, as only a single FILTER is really supported
         // (we have defined multiple filters as being a conjunction)
         if(count($filters)) {
+            foreach($filters as $f) {
+                if($f['lhs']['type'] == 'variable' && !in_array($f['lhs']['text'], $scope)) {
+                    $this->_fail('Strata basic: filter uses out-of-scope variable \'<code>'.$f['lhs']['text'].'<code>\'.');
+                }
+                if($f['rhs']['type'] == 'variable' && !in_array($f['rhs']['text'], $scope)) {
+                    $this->_fail('Strata basic: filter uses out-of-scope variable \'<code>'.$f['rhs']['text'].'</code>\'.');
+                }
+            }
+
             $result = array(
                 'type'=>'filter',
                 'lhs'=>$result,
@@ -227,11 +236,11 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
         // do sanity checks
         if(count($root['cs'])) {
-            $this->_fail('Strata basic: I can only handle unnamed groups inside a \'union\' group.',-1);
+            $this->_fail('Strata basic: I can only handle unnamed groups inside a <code>union</code> group.',-1);
         }
 
         if(count($subs) < 2) {
-            $this->_fail('Strata basic: I need at least 2 groups inside a \'union\' group.',-1); 
+            $this->_fail('Strata basic: I need at least 2 groups inside a <code>union</code> group.',-1);
         }
 
         // transform the first group
@@ -330,7 +339,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                 $filters[] = array('type'=>'filter','lhs'=>$lhs, 'operator'=>$operator, 'rhs'=>$rhs);
             } else {
                 // unknown lines are fail
-                $this->_fail('Strata basic: Unknown pattern \''.hsc($line).'\'.',-1);
+                $this->_fail('Strata basic: Unknown triple pattern or filter \'<code>'.hsc($line).'</code>\'.',-1);
             }
         }
 
