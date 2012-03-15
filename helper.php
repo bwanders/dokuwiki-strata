@@ -343,8 +343,8 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                     $this->updateTypemap($typemap, $rhs['text'], $type, $hint);
                 } else {
                     if(!$type) {
-                        if(!empty($typemap[$variable])) {
-                            extract($typemap[$variable]);
+                        if(!empty($typemap[$lhs['text']])) {
+                            extract($typemap[$lhs['text']]);
                         } else {
                             $type = $this->types->getConf('default_type');
                         }
