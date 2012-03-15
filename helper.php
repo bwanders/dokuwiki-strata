@@ -311,7 +311,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                 if($predicate[0] == '?') {
                     $predicate = $this->variable($predicate);
                     $scope[] = $predicate['text'];
-                    $this->updateTypemap($typemap, $predicate['text'], 'string');
+                    $this->updateTypemap($typemap, $predicate['text'], 'text');
                 } else {
                     $predicate = $this->literal($predicate);
                 }
