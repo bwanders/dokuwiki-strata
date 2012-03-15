@@ -113,7 +113,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                 // handle each line in the group 
                 foreach($ordering[0]['cs'] as $line) {
                     if(is_array($line)) {
-                        $this->_fail('Strata basic: I can\'t handle groups in a </code>sort<code> group.',-1);
+                        $this->_fail('Strata basic: I can\'t handle groups in a <code>sort</code> group.',-1);
                     }
     
                     if(preg_match('/^\?([a-zA-Z0-9]+)\s*(?:\((asc|desc)(?:ending)?\))?$/S',trim($line),$match)) {
