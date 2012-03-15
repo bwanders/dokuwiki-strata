@@ -303,8 +303,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                 } else {
                     global $ID;
                     $subject = substr($subject,2,-2);
-                    // FIXME: Correct fragment handling (use 'ref' or 'page' type?)
-                    resolve_pageid(getNS($ID), $subject, $exists);
+                    $subject = $this->types->loadType('ref')->normalize($subject,null);
                     $subject = $this->literal($subject);
                 }
 
