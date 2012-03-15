@@ -36,7 +36,7 @@ class plugin_strata_type_image extends plugin_strata_type {
 
     function getInfo() {
         return array(
-            'desc'=>'The value is used as a wiki media id and shown if appropriate. The optional hint is treated as the width to scale the image to.'
+            'desc'=>'Displays an image. The optional hint is treated as the width to scale the image to.'
         );
     }
 }

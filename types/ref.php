@@ -27,7 +27,7 @@ class plugin_strata_type_ref extends plugin_strata_type_page {
 
     function getInfo() {
         return array(
-            'desc'=>'The value is used as a reference to another piece of data or wiki page and linked accordingly. The optional hint is used as namespace for the link.'
+            'desc'=>'References another piece of data or wiki page, and creates a link. The optional hint is used as namespace for the link.'
         );
     }
 }
