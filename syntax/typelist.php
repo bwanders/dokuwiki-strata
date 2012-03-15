@@ -61,7 +61,11 @@ class syntax_plugin_stratastorage_typelist extends DokuWiki_Syntax_Plugin {
                     );
                 }
             }
-        }       
+        }
+
+        usort($data, function($a, $b) {
+            return strcmp($a['name'], $b['name']);
+        });
 
         return $data;
     }
