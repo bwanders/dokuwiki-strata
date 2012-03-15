@@ -87,7 +87,20 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
             $ordering = $this->extractGroups($root, 'sort');
     
             // transform actual group
-            list($group, $scope) = $this->transformGroup($root, $typemap);
+            $where = $this->extractGroups($root, 'where');
+            $tree = null;
+            if(count($where)==0) {
+                $tree =& $root;
+            } elseif(count($where)==1) {
+                $tree =& $where[0];
+                if(count($root['cs'])) {
+                    $this->_fail('Strata basic: I don\'t know what to do with things outside of the <code>where</code> group.');
+                }
+            } else {
+                $this->_fail('Strata basic: A query should contain at most a single <code>where</code> group.');
+            }
+
+            list($group, $scope) = $this->transformGroup($tree, $typemap);
             $result['group'] = $group;
             if(!$group) return false;
     
