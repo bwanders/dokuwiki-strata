@@ -67,17 +67,17 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         // parse 'long syntax' if we don't have projection information yet
         if(count($fieldsGroups)) {
             if(count($result['fields'])) {
-                msg('Strata basic: Query contains both \'fields\' group and normal selection.',-1);
+                msg('Strata basic: Query contains both <code>fields</code> group and normal selection.',-1);
                 return array();
             } else {
                 if(count($fieldsGroups) > 1) {
-                    msg('Strata basic: I don\'t know how to handle a query containing multiple \'fields\' groups.',-1);
+                    msg('Strata basic: I don\'t know how to handle a query containing multiple <code>fields</code> groups.',-1);
                     return array();
                 }
 
                 $fieldsLines = $this->helper->extractText($fieldsGroups[0]);
                 if(count($fieldsGroups[0]['cs'])) {
-                    msg('Strata basic: I don\'t know what to do with a group in the \'fields\' group.',-1);
+                    msg('Strata basic: I don\'t know what to do with '.( isset($fieldsGroups[0]['cs'][0]['tag']) ? 'the \'<code>'.hsc($fieldsGroups[0]['cs'][0]['tag']).'</code>\' group' : 'the unnamed group').' in the <code>fields</code> group.',-1);
                     return array();
                 }
                 $result['fields'] = $this->helper->parseFieldsLong($fieldsLines, $typemap);
@@ -101,7 +101,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         // check projected variables and load types
         foreach($result['fields'] as $var=>$f) {
             if(!in_array($var, $variables)) {
-                msg('Strata basic: Query selects unknown field \''.hsc($var).'\'',-1);
+                msg('Strata basic: Query selects unknown field \'<code>'.hsc($var).'</code>\'',-1);
                 return array();
             }
 
