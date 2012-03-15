@@ -10,7 +10,7 @@ class types_test extends Doku_UnitTestCase {
 	}
 
 	function testString() {
-		$type = $this->_types->loadType('string'); 
+		$type = $this->_types->loadType('text'); 
 		// Empty hint
 		$s = $type->normalize('bob', '');
 		$this->assertEqual($s, 'bob');
