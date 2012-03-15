@@ -314,7 +314,6 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
                 if($rhs[0] == '?') {
                     $rhs = $this->variable($rhs);
-                    $scope[] = $rhs['text'];
                     $this->updateTypemap($typemap, $rhs['text'], $type, $hint);
                 } else {
                     if(!$type) {
