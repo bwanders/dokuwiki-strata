@@ -34,7 +34,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
     }
 
     function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('<select'.$this->helper->fieldsShortPattern().'* *>\n.+?\n</select>',$mode, 'plugin_stratabasic_select');
+        $this->Lexer->addSpecialPattern('<table'.$this->helper->fieldsShortPattern().'* *>\n.+?\n</table>',$mode, 'plugin_stratabasic_select');
     }
 
     function handle($match, $state, $pos, &$handler) {
@@ -128,7 +128,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
      */
     function handleHeader($header, &$result, &$typemap) {
         // remove prefix and suffix
-        return preg_replace('/(^<select)|( *>$)/','',$header);
+        return preg_replace('/(^<table)|( *>$)/','',$header);
     }
 
     /**
