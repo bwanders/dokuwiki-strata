@@ -86,7 +86,7 @@ class syntax_plugin_stratastorage_typelist extends DokuWiki_Syntax_Plugin {
                 $R->strong_close();
 
                 if($data['meta']['hint']) {
-                    $R->doc .= ' (hint: '.$R->_xmlEntities($data['meta']['hint']).')';
+                    $R->doc .= ' (type hint: '.$R->_xmlEntities($data['meta']['hint']).')';
                 }
 
                 $R->linebreak();
