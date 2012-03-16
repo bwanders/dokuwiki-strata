@@ -84,6 +84,8 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                 // generate triples from the values
                 foreach($values as $v) {
                     if($v == '') continue;
+                    // replace the [[]] quasi-magic token with the empty string
+                    if($v == '[[]]') $v = '';
                     if(!isset($type) || $type == '') {
                         $type = $this->types->getConf('default_type');
                     }
