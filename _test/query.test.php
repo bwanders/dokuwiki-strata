@@ -309,9 +309,13 @@ class query_test extends Strata_Query_UnitTestCase {
                 'tax'
             ),
             'ordering' => array (
-                    array (
+                array (
                     'variable' => 'p',
                     'direction' => 'desc'
+                ),
+                array (
+                    'variable' => 'knows',
+                    'direction' => 'asc'
                 )
             )
         );
@@ -353,9 +357,6 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $relations = $this->_triples->queryRelations($query);
         $this->assertIteratorsEqual($relations, new ArrayIterator($expected));
-        foreach ($relations as $r) {
-            echo '<pre>'; var_export($r); echo '</pre>';
-        }
         $relations->closeCursor();
     }
 
