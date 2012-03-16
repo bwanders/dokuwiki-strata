@@ -51,7 +51,9 @@ class plugin_strata_type_date extends plugin_strata_type {
         
     function getInfo() {
         return array(
-            'desc'=>'Stores and displays dates in the YYYY-MM-DD format. The optional hint can give a different format to use.'
+            'desc'=>'Stores and displays dates in the YYYY-MM-DD format. The optional hint can give a different format to use.',
+            'tags'=>array('numeric'),
+            'hint'=>'different date format'
         );
     }
 }

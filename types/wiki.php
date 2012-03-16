@@ -28,7 +28,8 @@ class plugin_strata_type_wiki extends plugin_strata_type {
 
     function getInfo() {
         return array(
-            'desc'=>'Allows the use of normal dokuwiki syntax. The hint is ignored.'
+            'desc'=>'Allows the use of normal dokuwiki syntax. The hint is ignored.',
+            'tags'=>array('experimental')
         );
     }
 }

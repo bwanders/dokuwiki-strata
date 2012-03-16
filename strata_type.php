@@ -58,7 +58,9 @@ class plugin_strata_type {
     function getInfo() {
         return array(
             'desc'=>'The generic type.',
-            'synthetic'=>true
+            'hint'=>false,
+            'synthetic'=>true,
+            'tags'=>array()
         );
     }
 }

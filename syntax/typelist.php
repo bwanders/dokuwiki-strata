@@ -80,12 +80,27 @@ class syntax_plugin_stratastorage_typelist extends DokuWiki_Syntax_Plugin {
             foreach($data as $data){
                 $R->listitem_open(1);
                 $R->listcontent_open();
+
                 $R->strong_open();
                 $R->doc .= $data['name'];
                 $R->strong_close();
-                $R->doc .=' (in '.$data['plugin'].' plugin)';
+
+                if($data['meta']['hint']) {
+                    $R->doc .= ' (hint: '.$R->_xmlEntities($data['meta']['hint']).')';
+                }
+
                 $R->linebreak();
                 $R->doc .= $R->_xmlEntities($data['meta']['desc']);
+
+                if(count($data['meta']['tags'])) {
+                    $R->doc .=' (';
+                    $R->emphasis_open();
+                    $R->doc .= $R->_xmlEntities(hsc(implode(', ',$data['meta']['tags'])));
+                    $R->emphasis_close();
+                    $R->doc .= ')';
+                }
+                // $R->doc .= ' in '.$data['plugin'].' plugin';
+
                 $R->listcontent_close();
                 $R->listitem_close();
             }

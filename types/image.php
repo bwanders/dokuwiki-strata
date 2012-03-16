@@ -36,7 +36,8 @@ class plugin_strata_type_image extends plugin_strata_type {
 
     function getInfo() {
         return array(
-            'desc'=>'Displays an image. The optional hint is treated as the width to scale the image to.'
+            'desc'=>'Displays an image. The optional hint is treated as the width to scale the image to.',
+            'hint'=>'width to scale the image to'
         );
     }
 }
