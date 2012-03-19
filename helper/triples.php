@@ -307,6 +307,10 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         if($res === false) {
             $error = $query->errorInfo();
             msg(hsc('Strata storage: Failed to execute query: '.$error[2]),-1);
+            if($this->getConf('debug')) {
+                msg('Debug SQL: <code>'.hsc($sql).'</code>',-1);
+                msg('Debug Literals: <pre>'.hsc(print_r($literals,1)).'</pre>',-1);
+            }
             return false;
         }
 
