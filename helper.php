@@ -321,8 +321,8 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                     $scope[] = $object['text'];
                     $this->updateTypemap($typemap, $object['text'], $type, $hint);
                 } else {
+                    // check for empty string token
                     if($object == '[[]]') {
-                        // Handle self reference by replacing it with empty string
                         $object='';
                     }
                     if(!$type) $type = $this->types->getConf('default_type');
@@ -349,6 +349,12 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                             $type = $this->types->getConf('default_type');
                         }
                     }
+
+                    // check for empty string token
+                    if($rhs == '[[]]') {
+                        $rhs = '';
+                    }
+
                     $type = $this->types->loadType($type);
                     $rhs = $this->literal($type->normalize($rhs,$hint));
                 }
