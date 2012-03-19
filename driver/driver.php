@@ -121,6 +121,8 @@ abstract class plugin_strata_driver {
      * @return boolean true if the database was initialised successfully
      */
     public function initializeDatabase() {
+        if($this->_db == false) return false;
+
         // determine driver
         list($driver, $connection) = explode(':', $this->_dsn, 2);
         if ($this->_debug) msg('Strata storage: Setting up ' . $driver . ' database.');
@@ -179,6 +181,8 @@ abstract class plugin_strata_driver {
      * @return the prepared statement
      */
     public function prepare($query) {
+        if($this->_db == false) return false;
+
         $result = $this->_db->prepare($query);
         if ($result === false) {
             $error = $this->_db->errorInfo();
@@ -197,6 +201,8 @@ abstract class plugin_strata_driver {
       * @return whether querying succeeded
       */
     public function query($query, $message="Query failed") {
+        if($this->_db == false) return false;
+
         $res = $this->_db->query($query);
         if ($res === false) {
             $error = $this->_db->errorInfo();
@@ -210,6 +216,8 @@ abstract class plugin_strata_driver {
      * Begins a transaction.
      */
     public function beginTransaction() {
+        if($this->_db == false) return false;
+
         return $this->_db->beginTransaction();
     }
 
@@ -217,6 +225,8 @@ abstract class plugin_strata_driver {
      * Commits the current transaction.
      */
     public function commit() {
+        if($this->_db == false) return false;
+
         return $this->_db->commit();
     }
 
@@ -224,6 +234,8 @@ abstract class plugin_strata_driver {
      * Rolls back the current transaction.
      */
     public function rollBack() {
+        if($this->_db == false) return false;
+
         return $this->_db->rollBack();
     }
 }
