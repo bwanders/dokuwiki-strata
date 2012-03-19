@@ -375,13 +375,8 @@ class stratastorage_sql_generator {
         } elseif($term['type'] == 'literal') {
             // always try the cache
             if(empty($this->_literalLookup[$term['text']])) {
-                if($this->_triples->getConf('debug')) {
-                    // use double-quotes literal names as test
-                    $this->_literalLookup[$term['text']] = '"'.str_replace('"','""',$term['text']).'"';
-                } else {
-                    // use aliases to represent literals
-                    $this->_literalLookup[$term['text']] = $this->_alias();
-                }
+                // use aliases to represent literals
+                $this->_literalLookup[$term['text']] = $this->_alias();
             }
 
             // return literal name
