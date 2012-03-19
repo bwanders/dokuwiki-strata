@@ -26,6 +26,14 @@ class plugin_strata_type_page extends plugin_strata_type {
         // resolve page id with respect to selected base
         resolve_pageid($base,$value,$exists);
 
+        // if the value is empty after resolving, it is a reference to the
+        // root starting page. (We can not put the emtpy string into the
+        // database as a normalized reference -- this will create problems)
+        if($value == '') {
+            global $conf;
+            $value = $conf['start'];
+        }
+
         return $value;
     }
 
