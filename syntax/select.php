@@ -166,6 +166,10 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         // execute the query
         $result = $this->triples->queryRelations($data['query']);
 
+        if($result == false) {
+            return;
+        }
+
         // prepare all columns
         foreach($data['fields'] as $field=>$meta) {
             $fields[] = array(
