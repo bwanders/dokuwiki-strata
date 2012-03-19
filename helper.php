@@ -293,7 +293,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         foreach($lines as $line) {
             $line = trim($line);
 
-            if(preg_match('/^((?:\?[a-zA-Z0-9]+)|(?:\[\[[^]]*\]\]))\s+(?:((?:[-a-zA-Z0-9 ]+)|(?:\?[a-zA-Z0-9]+))(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?):\s*(.+?)\s*$/S',$line,$match)) {
+            if(preg_match('/^((?:\?[a-zA-Z0-9]+)|(?:\[\[[^]]*\]\]))\s+(?:((?:[-a-zA-Z0-9 ]+)|(?:\?[a-zA-Z0-9]+))(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*:\s*(.+?)\s*$/S',$line,$match)) {
                 // triple pattern
                 list($_, $subject, $predicate, $type, $hint, $object) = $match;
 
