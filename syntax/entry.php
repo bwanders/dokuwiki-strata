@@ -70,9 +70,12 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
 
             // match a "property_type(hint)*: value" pattern
             // (the * is only used to indicate that the value is actually a comma-seperated list)
-            if(preg_match('/^([-a-zA-Z0-9 ]+)(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?(\*)?\s*:(.*)$/',$line,$parts)) {
+            if(preg_match('/^([-a-zA-Z0-9 ]+?)(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?(\*)?\s*:(.*)$/',$line,$parts)) {
                 // assign useful names
                 list($match, $property, $type, $hint, $multi, $values) = $parts;
+
+                // trim property so we don't get accidental 'name   ' keys
+                $property = trim($property);
 
                 // determine values, splitting on commas if necessary
                 if($multi == '*') {
