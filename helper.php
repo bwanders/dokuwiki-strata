@@ -249,11 +249,11 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
         // do sanity checks
         if(count($root['cs'])) {
-            $this->_fail('Strata basic: I can only handle unnamed groups inside a <code>union</code> group.',-1);
+            $this->_fail('Strata basic: Lines or named groups inside a <code>union</code> group; I can only handle unnamed groups inside a <code>union</code> group.',-1);
         }
 
         if(count($subs) < 2) {
-            $this->_fail('Strata basic: I need at least 2 groups inside a <code>union</code> group.',-1);
+            $this->_fail('Strata basic: I need at least 2 unnamed groups inside a <code>union</code> group.',-1);
         }
 
         // transform the first group
