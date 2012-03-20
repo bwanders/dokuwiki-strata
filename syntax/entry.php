@@ -51,13 +51,13 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
         // process the classes into triples
         foreach(preg_split('/\s+/',trim($header[1])) as $class) {
             if($class == '') continue;
-            $result['data'][] = array('key'=>$this->triples->isaKey(),'value'=>$class,'type'=>'text', 'hint'=>null);
+            $result['data'][] = array('key'=>$this->triples->getIsaKey(),'value'=>$class,'type'=>'text', 'hint'=>null);
         }
 
         // process the fragment if necessary
         $result['entry'] = $header[2];
         if($result['entry'] != '') {
-            $result['data'][] = array('key'=>$this->triples->titleKey(),'value'=>$result['entry'], 'type'=>'text', 'hint'=>null);
+            $result['data'][] = array('key'=>$this->triples->getTitleKey(),'value'=>$result['entry'], 'type'=>'text', 'hint'=>null);
         }
 
         // now handle all other lines
@@ -127,9 +127,9 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
 
             // determine actual header text
             $heading = '';
-            if(isset($keys[$this->triples->titleKey()])) {
+            if(isset($keys[$this->triples->getTitleKey()])) {
                 // use title triple of possible
-                $heading = $keys[$this->triples->titleKey()][0]['value'];
+                $heading = $keys[$this->triples->getTitleKey()][0]['value'];
             } elseif (useHeading('content')) {
                 // fall back to page title, depending on wiki configuration
                 $heading = p_get_first_heading($ID);
@@ -140,10 +140,10 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
             $R->doc .= $R->_xmlEntities($heading);
 
             // display a comma-separated list of classes if the entry has classes
-            if(isset($keys[$this->triples->isaKey()])) {
+            if(isset($keys[$this->triples->getIsaKey()])) {
                 $R->emphasis_open();
                 $R->doc .= ' (';
-                $values = $keys[$this->triples->isaKey()];
+                $values = $keys[$this->triples->getIsaKey()];
                 for($i=0;$i<count($values);$i++) {
                     $triple =& $values[$i];
                     if($i!=0) $R->doc .= ', ';
@@ -158,7 +158,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
 
             // render a row for each key, displaying the values as comma-separated list
             foreach($keys as $key=>$values) {
-                if($key == $this->triples->titleKey() || $key == $this->triples->isaKey()) continue;
+                if($key == $this->triples->getTitleKey() || $key == $this->triples->getIsaKey()) continue;
                 $R->tablerow_open();
                 $R->tableheader_open();
                 $R->doc .= $R->_xmlEntities($key);
