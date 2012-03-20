@@ -65,8 +65,8 @@ class Strata_Query_UnitTestCase extends Strata_UnitTestCase {
 
     function assertIteratorsEqual($x, $y) {
         do {
-            $this->assertEqual($x->valid(), $y->valid());
-            $this->assertEqual($x->current(), $y->current());
+            $this->assertEqual($x->valid(), $y->valid(), 'Number of result and expected rows differ: %s');
+            $this->assertEqual($x->current(), $y->current(), 'Result row differs from expected one: %s');
             $x->next();
             $y->next();
         } while ($x->valid() || $y->valid());

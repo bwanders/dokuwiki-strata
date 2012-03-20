@@ -1036,6 +1036,10 @@ class query_test extends Strata_Query_UnitTestCase {
                 array (
                     'variable' => 'p',
                     'direction' => 'asc'
+                ),
+                array (
+                    'variable' => 'knows',
+                    'direction' => 'asc'
                 )
             )
         );
@@ -1302,6 +1306,10 @@ class query_test extends Strata_Query_UnitTestCase {
                 array (
                     'variable' => 'p',
                     'direction' => 'asc'
+                ),
+                array (
+                    'variable' => 'knows',
+                    'direction' => 'asc'
                 )
             )
         );
@@ -1332,3 +1340,4 @@ class query_test extends Strata_Query_UnitTestCase {
         $this->assertQueryResult($query, $expected);
     }
 }
+
