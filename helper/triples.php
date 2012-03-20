@@ -321,8 +321,6 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
             }
             return false;
         }
-                msg('Debug SQL: <code>'.hsc($sql).'</code>',-1);
-                msg('Debug Literals: <pre>'.hsc(print_r($literals,1)).'</pre>',-1);
 
         // wrap the results in an iterator, and return it
         return new stratastorage_relations_iterator($query);
@@ -641,8 +639,14 @@ class stratastorage_sql_generator {
      * Translate union operation.
      */
     function _trans_union($query) {
+        // dispatch the child graph patterns
         $gp1 = $this->_dispatch($query['lhs']);
         $gp2 = $this->_dispatch($query['rhs']);
+
+        // dispatch them again to get new literal binding aliases
+        // (This is required by PDO, as no named variable may be used twice)
+        $gp1x = $this->_dispatch($query['lhs']);
+        $gp2x = $this->_dispatch($query['rhs']);
 
         // determine non-overlapping terms
         $ta = array_diff($gp1['terms'], $gp2['terms']);
@@ -668,7 +672,7 @@ class stratastorage_sql_generator {
         $sb = implode(', ', $sb);
 
         return  array(
-            'sql'=>'SELECT DISTINCT '.$sa.' FROM ('.$gp1['sql'].') r1 LEFT OUTER JOIN ('.$gp2['sql'].') r2 ON (1=0) UNION SELECT DISTINCT '.$sb.' FROM ('.$gp2['sql'].') r3 LEFT OUTER JOIN ('.$gp1['sql'].') r4 ON (1=0)',
+            'sql'=>'SELECT DISTINCT '.$sa.' FROM ('.$gp1['sql'].') r1 LEFT OUTER JOIN ('.$gp2['sql'].') r2 ON (1=0) UNION SELECT DISTINCT '.$sb.' FROM ('.$gp2x['sql'].') r3 LEFT OUTER JOIN ('.$gp1x['sql'].') r4 ON (1=0)',
             'terms'=>$terms
         );
     }
