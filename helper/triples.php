@@ -91,6 +91,14 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         return $result;
     }
 
+    function isaKey() {
+        return $this->getConf('isa_key');
+    }
+
+    function titleKey() {
+        return $this->getConf('title_key');
+    }
+
     /**
      * Expands tokens in the DSN.
      * 

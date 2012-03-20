@@ -3,4 +3,6 @@
 $conf['default_type'] = 'text';
 $conf['default_dsn'] = 'sqlite:@METADIR@/strata.sqlite';
 $conf['default_graph'] = 'wiki';
+$conf['isa_key'] = 'is a';
+$conf['title_key'] = 'entry title';
 $conf['debug'] = 0;
