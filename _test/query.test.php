@@ -1080,18 +1080,36 @@ class query_test extends Strata_Query_UnitTestCase {
                     'type' => 'union',
                     'lhs' => $this->_personRating,
                     'rhs' => array (
-                        'type' => 'triple',
-                        'subject' => array (
-                            'type' => 'variable',
-                            'text' => 'p'
+                        'type' => 'and',
+                        'lhs' => array (
+                            'type' => 'triple',
+                            'subject' => array (
+                                'type' => 'variable',
+                                'text' => 'p'
+                            ),
+                            'predicate' => array (
+                                'type' => 'literal',
+                                'text' => 'likes'
+                            ),
+                            'object' => array (
+                                'type' => 'variable',
+                                'text' => 'rating'
+                            )
                         ),
-                        'predicate' => array (
-                            'type' => 'literal',
-                            'text' => 'likes'
-                        ),
-                        'object' => array (
-                            'type' => 'variable',
-                            'text' => 'rating'
+                        'rhs' => array (
+                            'type' => 'triple',
+                            'subject' => array (
+                                'type' => 'variable',
+                                'text' => 'p'
+                            ),
+                            'predicate' => array (
+                                'type' => 'literal',
+                                'text' => 'likes'
+                            ),
+                            'object' => array (
+                                'type' => 'variable',
+                                'text' => 'likes'
+                            )
                         )
                     )
                 )
@@ -1104,6 +1122,10 @@ class query_test extends Strata_Query_UnitTestCase {
                 array (
                     'variable' => 'p',
                     'direction' => 'asc'
+                ),
+                array (
+                    'variable' => 'likes',
+                    'direction' => 'desc'
                 )
             )
         );
