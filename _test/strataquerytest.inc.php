@@ -53,6 +53,16 @@ class Strata_Query_UnitTestCase extends Strata_UnitTestCase {
         $this->_triples->addTriple($carol, 'tax rate', '2%');
     }
 
+    function assertQueryResult($query, $expectedResult) {
+        $relations = $this->_triples->queryRelations($query);
+        if ($relations === false) {
+            $this->fail('Query failed');
+        } else {
+            $this->assertIteratorsEqual($relations, new ArrayIterator($expectedResult));
+            $relations->closeCursor();
+        }
+    }
+
     function assertIteratorsEqual($x, $y) {
         do {
             $this->assertEqual($x->valid(), $y->valid());

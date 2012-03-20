@@ -229,9 +229,7 @@ class query_test extends Strata_Query_UnitTestCase {
             )
         );
 
-        $relations = $this->_triples->queryRelations($query);
-        $this->assertIteratorsEqual($relations, new ArrayIterator($expected));
-        $relations->closeCursor();
+        $this->assertQueryResult($query, $expected);
     }
 
     function testAllPersons() {
@@ -355,9 +353,7 @@ class query_test extends Strata_Query_UnitTestCase {
             )
         );
 
-        $relations = $this->_triples->queryRelations($query);
-        $this->assertIteratorsEqual($relations, new ArrayIterator($expected));
-        $relations->closeCursor();
+        $this->assertQueryResult($query, $expected);
     }
 
     function testAllPersonsExceptBob() {
@@ -389,9 +385,7 @@ class query_test extends Strata_Query_UnitTestCase {
             )
         );
 
-        $relations = $this->_triples->queryRelations($query);
-        $this->assertIteratorsEqual($relations, new ArrayIterator($expected));
-        $relations->closeCursor();
+        $this->assertQueryResult($query, $expected);
     }
 
     function testAllPersonsThatKnowAlice() {
@@ -455,9 +449,7 @@ class query_test extends Strata_Query_UnitTestCase {
             )
         );
 
-        $relations = $this->_triples->queryRelations($query);
-        $this->assertIteratorsEqual($relations, new ArrayIterator($expected));
-        $relations->closeCursor();
+        $this->assertQueryResult($query, $expected);
     }
 
     function testAllPersonsRelatedToAlice() {
@@ -528,9 +520,7 @@ class query_test extends Strata_Query_UnitTestCase {
             )
         );
 
-        $relations = $this->_triples->queryRelations($query);
-        $this->assertIteratorsEqual($relations, new ArrayIterator($expected));
-        $relations->closeCursor();
+        $this->assertQueryResult($query, $expected);
     }
 
     function testAllPersonsAndRelationWithAlice() {
@@ -605,9 +595,7 @@ class query_test extends Strata_Query_UnitTestCase {
             )
         );
 
-        $relations = $this->_triples->queryRelations($query);
-        $this->assertIteratorsEqual($relations, new ArrayIterator($expected));
-        $relations->closeCursor();
+        $this->assertQueryResult($query, $expected);
     }
 
     function testAllPersonsAndSpecialRelationWithAlice() {
@@ -695,9 +683,7 @@ class query_test extends Strata_Query_UnitTestCase {
             )
         );
 
-        $relations = $this->_triples->queryRelations($query);
-        $this->assertIteratorsEqual($relations, new ArrayIterator($expected));
-        $relations->closeCursor();
+        $this->assertQueryResult($query, $expected);
     }
 
     function testAllPersonsSpecialRelationWithAlice() {
@@ -777,9 +763,7 @@ class query_test extends Strata_Query_UnitTestCase {
             )
         );
 
-        $relations = $this->_triples->queryRelations($query);
-        $this->assertIteratorsEqual($relations, new ArrayIterator($expected));
-        $relations->closeCursor();
+        $this->assertQueryResult($query, $expected);
     }
 
     function testBobUnionAlice() {
@@ -806,9 +790,7 @@ class query_test extends Strata_Query_UnitTestCase {
             )
         );
 
-        $relations = $this->_triples->queryRelations($query);
-        $this->assertIteratorsEqual($relations, new ArrayIterator($expected));
-        $relations->closeCursor();
+        $this->assertQueryResult($query, $expected);
     }
 
     function testBobUnionAliceWithRating() {
@@ -850,9 +832,7 @@ class query_test extends Strata_Query_UnitTestCase {
             )
         );
 
-        $relations = $this->_triples->queryRelations($query);
-        $this->assertIteratorsEqual($relations, new ArrayIterator($expected));
-        $relations->closeCursor();
+        $this->assertQueryResult($query, $expected);
     }
 
     function testCarolUnionBobUnionAlice() {
@@ -886,9 +866,7 @@ class query_test extends Strata_Query_UnitTestCase {
             )
         );
 
-        $relations = $this->_triples->queryRelations($query);
-        $this->assertIteratorsEqual($relations, new ArrayIterator($expected));
-        $relations->closeCursor();
+        $this->assertQueryResult($query, $expected);
     }
 
     function testBobUnionBobUnionAlice() {
@@ -919,9 +897,7 @@ class query_test extends Strata_Query_UnitTestCase {
             )
         );
 
-        $relations = $this->_triples->queryRelations($query);
-        $this->assertIteratorsEqual($relations, new ArrayIterator($expected));
-        $relations->closeCursor();
+        $this->assertQueryResult($query, $expected);
     }
 
     function testCarolUnionBobUnionAliceMinusBob() {
@@ -956,9 +932,7 @@ class query_test extends Strata_Query_UnitTestCase {
             )
         );
 
-        $relations = $this->_triples->queryRelations($query);
-        $this->assertIteratorsEqual($relations, new ArrayIterator($expected));
-        $relations->closeCursor();
+        $this->assertQueryResult($query, $expected);
     }
 
     function testBobUnionAliceOptionalRating() {
@@ -996,9 +970,7 @@ class query_test extends Strata_Query_UnitTestCase {
             )
         );
 
-        $relations = $this->_triples->queryRelations($query);
-        $this->assertIteratorsEqual($relations, new ArrayIterator($expected));
-        $relations->closeCursor();
+        $this->assertQueryResult($query, $expected);
     }
 
     function testPersonOptionalKnowsAndLikes() {
@@ -1044,9 +1016,7 @@ class query_test extends Strata_Query_UnitTestCase {
             )
         );
 
-        $relations = $this->_triples->queryRelations($query);
-        $this->assertIteratorsEqual($relations, new ArrayIterator($expected));
-        $relations->closeCursor();
+        $this->assertQueryResult($query, $expected);
     }
 
     function testPersonOptionalKnowsOptionalLikes() {
@@ -1093,9 +1063,7 @@ class query_test extends Strata_Query_UnitTestCase {
             )
         );
 
-        $relations = $this->_triples->queryRelations($query);
-        $this->assertIteratorsEqual($relations, new ArrayIterator($expected));
-        $relations->closeCursor();
+        $this->assertQueryResult($query, $expected);
     }
 
     function testPersonOptionalRatingUnionLikes() {
@@ -1155,9 +1123,7 @@ class query_test extends Strata_Query_UnitTestCase {
             )
         );
 
-        $relations = $this->_triples->queryRelations($query);
-        $this->assertIteratorsEqual($relations, new ArrayIterator($expected));
-        $relations->closeCursor();
+        $this->assertQueryResult($query, $expected);
     }
 
     function testPersonOptionalRatingMinusCarol() {
@@ -1195,9 +1161,7 @@ class query_test extends Strata_Query_UnitTestCase {
             )
         );
 
-        $relations = $this->_triples->queryRelations($query);
-        $this->assertIteratorsEqual($relations, new ArrayIterator($expected));
-        $relations->closeCursor();
+        $this->assertQueryResult($query, $expected);
     }
 
     function testPersonMinusBobUnionAlice() {
@@ -1225,9 +1189,7 @@ class query_test extends Strata_Query_UnitTestCase {
             )
         );
 
-        $relations = $this->_triples->queryRelations($query);
-        $this->assertIteratorsEqual($relations, new ArrayIterator($expected));
-        $relations->closeCursor();
+        $this->assertQueryResult($query, $expected);
     }
 
     function testPersonMinusRatingMinusCarol() {
@@ -1255,9 +1217,7 @@ class query_test extends Strata_Query_UnitTestCase {
             )
         );
 
-        $relations = $this->_triples->queryRelations($query);
-        $this->assertIteratorsEqual($relations, new ArrayIterator($expected));
-        $relations->closeCursor();
+        $this->assertQueryResult($query, $expected);
     }
 
     function testPersonAndRatingMinusCarol() {
@@ -1291,9 +1251,7 @@ class query_test extends Strata_Query_UnitTestCase {
             )
         );
 
-        $relations = $this->_triples->queryRelations($query);
-        $this->assertIteratorsEqual($relations, new ArrayIterator($expected));
-        $relations->closeCursor();
+        $this->assertQueryResult($query, $expected);
     }
 
     function testPersonAndBobUnionAlice() {
@@ -1324,9 +1282,7 @@ class query_test extends Strata_Query_UnitTestCase {
             )
         );
 
-        $relations = $this->_triples->queryRelations($query);
-        $this->assertIteratorsEqual($relations, new ArrayIterator($expected));
-        $relations->closeCursor();
+        $this->assertQueryResult($query, $expected);
     }
 
     function testPersonAndKnowsOptionalLikes() {
@@ -1373,8 +1329,6 @@ class query_test extends Strata_Query_UnitTestCase {
             )
         );
 
-        $relations = $this->_triples->queryRelations($query);
-        $this->assertIteratorsEqual($relations, new ArrayIterator($expected));
-        $relations->closeCursor();
+        $this->assertQueryResult($query, $expected);
     }
 }
