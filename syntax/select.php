@@ -109,7 +109,8 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
                 if(!empty($typemap[$var])) {
                     $result['fields'][$var] = array_merge($result['fields'][$var],$typemap[$var]);
                 } else {
-                    $result['fields'][$var]['type'] = $this->types->getConf('default_type');
+                    $result['fields'][$var]['type'] = $this->types->getDefaultType();
+                    $result['fields'][$var]['hint'] = $this->types->getDefaultTypeHint();
                 }
             }
         }
