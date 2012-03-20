@@ -14,7 +14,7 @@ if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
 class plugin_strata_type_ref extends plugin_strata_type_page {
     function render($mode, &$R, &$T, $value, $hint) {
         $heading = null;
-        $titles = $T->fetchTriples($value, $T->titleKey());
+        $titles = $T->fetchTriples($value, $T->getTitleKey());
         if($titles) {
             $heading = $titles[0]['object'];
         }

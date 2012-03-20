@@ -91,11 +91,11 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         return $result;
     }
 
-    function isaKey() {
+    function getIsaKey() {
         return $this->getConf('isa_key');
     }
 
-    function titleKey() {
+    function getTitleKey() {
         return $this->getConf('title_key');
     }
 
