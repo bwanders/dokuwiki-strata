@@ -33,6 +33,23 @@ class helper_plugin_stratastorage_types extends DokuWiki_Plugin {
             'return' => array('type'=>'object')
         );
 
+        $result[] = array(
+            'name'=> 'getDefaultType',
+            'desc'=> 'Determines the default type name',
+            'params'=> array(
+            ),
+            'return' => array('type'=>'string')
+        );
+
+        $result[] = array(
+            'name'=> 'getDefaultTypeHint',
+            'desc'=> 'Determines the default type hint',
+            'params'=> array(
+            ),
+            'return' => array('type'=>'string')
+        );
+
+
         return $result;
     }
 
@@ -42,7 +59,7 @@ class helper_plugin_stratastorage_types extends DokuWiki_Plugin {
     function loadType($type) {
         // handle null type
         if($type == null) {
-            $type = $this->getConf('default_type');
+            $type = $this->getDefaultType();
         }
 
         // use cached if possible
@@ -52,5 +69,39 @@ class helper_plugin_stratastorage_types extends DokuWiki_Plugin {
         }
 
         return $this->loaded[$type];
+    }
+
+    var $defaultType = null;
+    var $defaultTypeHint = null;
+
+    function _parseDefaultType() {
+        if($this->defaultType == null) {
+            if(preg_match('/^([a-z0-9]+)(?:\(([^\)]*)\))?$/',$this->getConf('default_type'),$match)) {
+                $this->defaultType = $match[1];
+                $this->defaultTypeHint = $match[2];
+            } else {
+                msg('Strata storage: Invalid default type configuration, falling back to <code>text</code>',-1);
+                $this->defaultType = 'text';
+                $this->defaultTypeHint = '';
+            }
+        }
+    }
+
+
+    /**
+     * Returns the configured default type.
+     */
+    function getDefaultType() {
+        $this->_parseDefaultType();
+        return $this->defaultType;
+    }
+
+    /**
+     * Returns the configured default type hint to be
+     * used with the configured default type.
+     */
+    function getDefaultTypeHint() {
+        $this->_parseDefaultType();
+        return $this->defaultTypeHint;
     }
 }
