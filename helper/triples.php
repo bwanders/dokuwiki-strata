@@ -708,7 +708,7 @@ class stratastorage_sql_generator {
         }
 
         return array(
-            'sql'=>'SELECT DISTINCT '.$fields.' FROM ('.$gp['sql'].') r'.$ordering,
+            'sql'=>'SELECT DISTINCT '.$fields.' FROM (SELECT * FROM ('.$gp['sql'].') r'.$ordering.') r',
             'terms'=>$terms
         );
     }
