@@ -321,6 +321,8 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
             }
             return false;
         }
+                msg('Debug SQL: <code>'.hsc($sql).'</code>',-1);
+                msg('Debug Literals: <pre>'.hsc(print_r($literals,1)).'</pre>',-1);
 
         // wrap the results in an iterator, and return it
         return new stratastorage_relations_iterator($query);
@@ -372,19 +374,26 @@ class stratastorage_sql_generator {
      * All used literals.
      */
     private $_literalLookup = array();
+    private $_variableLookup = array();
 
     /**
-     * Name generator.
+     * Name generator. Makes the distinction between literals
+     * and variables, as they can have the same spelling (and 
+     * frequently do in simple queries).
      */
     function _name($term) {
         if($term['type'] == 'variable') {
-            // variables are just prefixed
-            return 'v_'.$term['text'];
+            // always try the cache
+            if(empty($this->_variableLookup[$term['text']])) {
+                $this->_variableLookup[$term['text']] = 'v_'.$this->_alias();
+            }
+
+            return $this->_variableLookup[$term['text']];
         } elseif($term['type'] == 'literal') {
             // always try the cache
             if(empty($this->_literalLookup[$term['text']])) {
                 // use aliases to represent literals
-                $this->_literalLookup[$term['text']] = $this->_alias();
+                $this->_literalLookup[$term['text']] = 'lit_'.$this->_alias();
             }
 
             // return literal name
