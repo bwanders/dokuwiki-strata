@@ -66,16 +66,18 @@ abstract class plugin_strata_driver {
     }
 
     /**
-     * Returns the syntax for ordering by the given value.
+     * Returns the terms on which we should order.
      *
      * Ideally, the ordering should be natural, that is '2 apples' is sorted before '10 pears'.
      * However, depending on the supported database, ordering can vary between string and natural ordering, including any compromises.
      * @param val string the thing to sort on
-     * @param asc bool whether sorting should be ascending (true) or descending (false)
+     * @return an array of terms to sort on
      */
-    public function orderBy($val, $asc=true) {
-        $order = $asc ? 'ASC' : 'DESC';
-        return "$val $order";
+    public function orderBy($val) {
+        return array(
+            $this->castToNumber($val),
+            $val
+        );
     }
 
     /**

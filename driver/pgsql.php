@@ -19,10 +19,11 @@ class plugin_strata_driver_pgsql extends plugin_strata_driver {
         return 'ILIKE';
     }
 
-    public function orderBy($val, $asc=true) {
-        $order = $asc ? 'ASC' : 'DESC';
-        // Sort first on numeric prefix and then on full string
-        return "substring($val from '^(-?[0-9]+\.?[0-9]*)')::numeric $order, $val $order";
+    public function orderBy($val) {
+        return array(
+            "SUBSTRING($val FROM E'^(-?[0-9]+\\\\.?[0-9]*)')::numeric",
+            $val
+        );
     }
 
     public function isInitialized() {
