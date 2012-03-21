@@ -6,6 +6,7 @@ class full_group_test extends Doku_GroupTest {
         $this->addTestFile($dir . 'types.test.php');
         $this->addTestFile($dir . 'storage.group.php');
         $this->addTestFile($dir . 'query.test.php');
+        $this->addTestFile($dir . 'query_operators.test.php');
     }
 }
 
