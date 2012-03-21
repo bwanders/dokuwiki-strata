@@ -48,7 +48,7 @@ class Strata_Query_UnitTestCase extends Strata_UnitTestCase {
         $this->_triples->addTriple($alice, 'has length', '5 ft 5 in');
         $this->_triples->addTriple($carol, 'has length', '4 ft 11 in');
 
-        $this->_triples->addTriple($bob, 'tax rate', '15%');
+        $this->_triples->addTriple($bob, 'tax rate', '25%');
         $this->_triples->addTriple($alice, 'tax rate', '10%');
         $this->_triples->addTriple($carol, 'tax rate', '2%');
     }

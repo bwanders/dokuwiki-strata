@@ -218,7 +218,7 @@ class query_test extends Strata_Query_UnitTestCase {
                 'img' => '50:bob.png',
                 'rating' => '8',
                 'length' => '5 ft 10 in',
-                'tax' => '15%'
+                'tax' => '25%'
             ),
             array (
                 'p' => 'person:carol',
@@ -341,7 +341,7 @@ class query_test extends Strata_Query_UnitTestCase {
                 'img' => '50:bob.png',
                 'rating' => '8',
                 'length' => '5 ft 10 in',
-                'tax' => '15%'
+                'tax' => '25%'
             ),
             array (
                 'p' => 'person:alice',
@@ -1528,7 +1528,7 @@ class query_test extends Strata_Query_UnitTestCase {
                 'given name' => 'Bob',
                 '2 knów \'`"' => 'person:alice',
                 ':l' => '5 ft 10 in',
-                '%t' => '15%',
+                '%t' => '25%',
                 '1.10' => '8',
                 '  like ' => '50:bob.png'
             ),
