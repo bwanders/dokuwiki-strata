@@ -1361,5 +1361,200 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $this->assertQueryResult($query, $expected);
     }
+
+    function testVariableNames() {
+        // Strange strings as variable names
+        $query = array (
+            'type' => 'select',
+            'group' => array (
+                'type' => 'and',
+                'lhs' => array (
+                    'type' => 'and',
+                    'lhs' => array (
+                        'type' => 'triple',
+                        'subject' => array (
+                            'type' => 'variable',
+                            'text' => '_'
+                        ),
+                        'predicate' => array (
+                            'type' => 'literal',
+                            'text' => 'class'
+                        ),
+                        'object' => array (
+                            'type' => 'variable',
+                            'text' => '?c'
+                        ),
+                    ),
+                    'rhs' => array (
+                        'type' => 'and',
+                        'lhs' => array (
+                            'type' => 'triple',
+                            'subject' => array (
+                                'type' => 'variable',
+                                'text' => '_'
+                            ),
+                            'predicate' => array (
+                                'type' => 'literal',
+                                'text' => 'name'
+                            ),
+                            'object' => array (
+                                'type' => 'variable',
+                                'text' => 'given name'
+                            ),
+                        ),
+                        'rhs' => array (
+                            'type' => 'triple',
+                            'subject' => array (
+                                'type' => 'variable',
+                                'text' => '_'
+                            ),
+                            'predicate' => array (
+                                'type' => 'literal',
+                                'text' => 'knows'
+                            ),
+                            'object' => array (
+                                'type' => 'variable',
+                                'text' => '2 knów'
+                            )
+                        )
+                    )
+                ),
+            'rhs' => array (
+                    'type' => 'and',
+                    'lhs' => array (
+                        'type' => 'and',
+                        'lhs' => array (
+                            'type' => 'triple',
+                            'subject' => array (
+                                'type' => 'variable',
+                                'text' => '_'
+                            ),
+                            'predicate' => array (
+                                'type' => 'literal',
+                                'text' => 'has length'
+                            ),
+                            'object' => array (
+                                'type' => 'variable',
+                                'text' => ':l'
+                            ),
+                        ),
+                        'rhs' => array (
+                            'type' => 'triple',
+                            'subject' => array (
+                                'type' => 'variable',
+                                'text' => '_'
+                            ),
+                            'predicate' => array (
+                                'type' => 'literal',
+                                'text' => 'tax rate'
+                            ),
+                            'object' => array (
+                                'type' => 'variable',
+                                'text' => '%t'
+                            )
+                        )
+                    ),
+                'rhs' => array (
+                        'type' => 'and',
+                        'lhs' => array (
+                            'type' => 'triple',
+                            'subject' => array (
+                                'type' => 'variable',
+                                'text' => '_'
+                            ),
+                            'predicate' => array (
+                                'type' => 'literal',
+                                'text' => 'is rated'
+                            ),
+                            'object' => array (
+                                'type' => 'variable',
+                                'text' => '1.10'
+                            ),
+                        ),
+                        'rhs' => array (
+                            'type' => 'triple',
+                            'subject' => array (
+                                'type' => 'variable',
+                                'text' => '_'
+                            ),
+                            'predicate' => array (
+                                'type' => 'literal',
+                                'text' => 'looks like'
+                            ),
+                            'object' => array (
+                                'type' => 'variable',
+                                'text' => '  like '
+                            )
+                        )
+                    )
+                )
+            ),
+            'projection' => array (
+                '_',
+                '?c',
+                'given name',
+                '2 knów',
+                ':l',
+                '%t',
+                '1.10',
+                '  like '
+            ),
+            'ordering' => array (
+                array (
+                    'variable' => '_',
+                    'direction' => 'asc'
+                ),
+                array (
+                    'variable' => '2 knów',
+                    'direction' => 'asc'
+                )
+            )
+        );
+
+        $expected = array (
+            array (
+                '_' => 'person:alice',
+                '?c' => 'person',
+                'given name' => 'Alice',
+                '2 knów' => 'person:carol',
+                ':l' => '5 ft 5 in',
+                '%t' => '10%',
+                '1.10' => '10',
+                '  like ' => '50:alice.svg'
+            ),
+            array (
+                '_' => 'person:bob',
+                '?c' => 'person',
+                'given name' => 'Bob',
+                '2 knów' => 'person:alice',
+                ':l' => '5 ft 10 in',
+                '%t' => '15%',
+                '1.10' => '8',
+                '  like ' => '50:bob.png'
+            ),
+            array (
+                '_' => 'person:carol',
+                '?c' => 'person',
+                'given name' => 'Carol',
+                '2 knów' => 'person:alice',
+                ':l' => '4 ft 11 in',
+                '%t' => '2%',
+                '1.10' => '1',
+                '  like ' => '50:carol.jpg'
+            ),
+            array (
+                '_' => 'person:carol',
+                '?c' => 'person',
+                'given name' => 'Carol',
+                '2 knów' => 'person:bob',
+                ':l' => '4 ft 11 in',
+                '%t' => '2%',
+                '1.10' => '1',
+                '  like ' => '50:carol.jpg'
+            )
+        );
+
+        $this->assertQueryResult($query, $expected);
+    }
 }
 
