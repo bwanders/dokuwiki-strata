@@ -691,7 +691,7 @@ class stratastorage_sql_generator {
         foreach($vars as $v) {
             $name = $this->_name(array('type'=>'variable','text'=>$v));
             $terms[] = $name;
-            $fields[] = $name. ' AS "' . $v . '"';
+            $fields[] = $name. ' AS "' . str_replace('"','""',$v) . '"';
         }
         $fields = implode(', ',$fields);
 
