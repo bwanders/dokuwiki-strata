@@ -698,14 +698,23 @@ class stratastorage_sql_generator {
             $terms[] = $name;
             $fields[] = $name. ' AS "' . str_replace('"','""',$v) . '"';
         }
-        $fields = implode(', ',$fields);
-
 
         // assign ordering if required
         $ordering = array();
         foreach($order as $o) {
-            $ordering[] = $this->_db->orderBy($this->_name(array('type'=>'variable','text'=>$o['variable'])), $o['direction'] == 'asc');
+            $name = $this->_name(array('type'=>'variable','text'=>$o['variable']));
+            $orderTerms = $this->_db->orderBy($name);
+            foreach($orderTerms as $term) {
+                $a = "o_".$this->_alias();
+                $fields[] = "$term AS $a";
+                $ordering[] = "$a ".($o['direction'] == 'asc'?'ASC':'DESC');
+            }
         }
+
+        // construct select list
+        $fields = implode(', ',$fields);
+
+        // construct ordering
         if(count($ordering)>0) {
             $ordering = ' ORDER BY '.implode(', ',$ordering);
         } else {
@@ -713,7 +722,7 @@ class stratastorage_sql_generator {
         }
 
         return array(
-            'sql'=>'SELECT DISTINCT '.$fields.' FROM (SELECT * FROM ('.$gp['sql'].') r'.$ordering.') r',
+            'sql'=>'SELECT DISTINCT '.$fields.' FROM ('.$gp['sql'].') r'.$ordering,
             'terms'=>$terms
         );
     }
