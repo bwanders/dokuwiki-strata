@@ -31,6 +31,7 @@ class plugin_strata_driver_mysql extends plugin_strata_driver {
 
     protected function initializeConnection() {
         $this->query('SET NAMES utf8mb4');
+        $this->query("SET sql_mode = 'PIPES_AS_CONCAT'"); // Ensure that || works as string concatenation
     }
 
     public function isInitialized() {
