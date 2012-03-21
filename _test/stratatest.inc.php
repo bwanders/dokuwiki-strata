@@ -19,7 +19,7 @@ class Strata_UnitTestCase extends Doku_UnitTestCase {
 
 		// Use PostgreSQL, which is set up with:
 		// createuser -SDR strata
-		// createdb -E UTF8 -T template0 strata_test
+		// createdb -l "en_US.UTF-8" -E UTF8 -T template0 strata_test
 		//$this->_triples->initialize('pgsql:dbname=strata_test;user=strata');
 
 	}
