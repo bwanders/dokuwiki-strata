@@ -174,10 +174,9 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                     $type->render($mode, $R, $this->triples, $triple['value'], $triple['hint']);
                 }
                 $R->tablecell_close();
-                $R->tablerow_open();
+                $R->tablerow_close();
            }
 
-            $R->tablerow_close();
             $R->table_close();
             
             return true;
