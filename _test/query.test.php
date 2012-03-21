@@ -1414,7 +1414,7 @@ class query_test extends Strata_Query_UnitTestCase {
                             ),
                             'object' => array (
                                 'type' => 'variable',
-                                'text' => '2 knów'
+                                'text' => '2 knów \'`"'
                             )
                         )
                     )
@@ -1493,7 +1493,7 @@ class query_test extends Strata_Query_UnitTestCase {
                 '_',
                 '?c',
                 'given name',
-                '2 knów',
+                '2 knów \'`"',
                 ':l',
                 '%t',
                 '1.10',
@@ -1505,7 +1505,7 @@ class query_test extends Strata_Query_UnitTestCase {
                     'direction' => 'asc'
                 ),
                 array (
-                    'variable' => '2 knów',
+                    'variable' => '2 knów \'`"',
                     'direction' => 'asc'
                 )
             )
@@ -1516,7 +1516,7 @@ class query_test extends Strata_Query_UnitTestCase {
                 '_' => 'person:alice',
                 '?c' => 'person',
                 'given name' => 'Alice',
-                '2 knów' => 'person:carol',
+                '2 knów \'`"' => 'person:carol',
                 ':l' => '5 ft 5 in',
                 '%t' => '10%',
                 '1.10' => '10',
@@ -1526,7 +1526,7 @@ class query_test extends Strata_Query_UnitTestCase {
                 '_' => 'person:bob',
                 '?c' => 'person',
                 'given name' => 'Bob',
-                '2 knów' => 'person:alice',
+                '2 knów \'`"' => 'person:alice',
                 ':l' => '5 ft 10 in',
                 '%t' => '15%',
                 '1.10' => '8',
@@ -1536,7 +1536,7 @@ class query_test extends Strata_Query_UnitTestCase {
                 '_' => 'person:carol',
                 '?c' => 'person',
                 'given name' => 'Carol',
-                '2 knów' => 'person:alice',
+                '2 knów \'`"' => 'person:alice',
                 ':l' => '4 ft 11 in',
                 '%t' => '2%',
                 '1.10' => '1',
@@ -1546,7 +1546,7 @@ class query_test extends Strata_Query_UnitTestCase {
                 '_' => 'person:carol',
                 '?c' => 'person',
                 'given name' => 'Carol',
-                '2 knów' => 'person:bob',
+                '2 knów \'`"' => 'person:bob',
                 ':l' => '4 ft 11 in',
                 '%t' => '2%',
                 '1.10' => '1',
