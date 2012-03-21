@@ -571,6 +571,11 @@ class stratastorage_sql_generator {
                 $this->literals[$id] = $f['rhs']['text'];
             }
 
+            // the escaping constants (head, tail and modifier)
+            $eh= "REPLACE(REPLACE(REPLACE(";
+            $et= ",'!','!!'),'_','!_'),'%','!%')";
+            $em= " ESCAPE '!'";
+
             // handle different operators
             switch($f['operator']) {
                 case '=':
@@ -584,16 +589,16 @@ class stratastorage_sql_generator {
                     $filters[] = '( ' . $this->_triples->_db->castToNumber($lhs) . ' ' . $f['operator'] . ' ' . $this->_triples->_db->castToNumber($rhs) . ' )';
                     break;
                 case '~':
-                    $filters[] = '( ' . $this->_ci($lhs) . ' '.$this->_db->stringCompare().' '. $this->_ci('(\'%\' || ' . $rhs . ' || \'%\')') . ')';
+                    $filters[] = '( ' . $this->_ci($lhs) . ' '.$this->_db->stringCompare().' '. $this->_ci('(\'%\' || ' .$eh.$rhs.$et. ' || \'%\')') .$em. ')';
                     break;
                 case '!~':
-                    $filters[] = '( ' . $this->_ci($lhs) . ' NOT '.$this->_db->stringCompare().' '. $this->_ci('(\'%\' || ' . $rhs. ' || \'%\')') . ')';
+                    $filters[] = '( ' . $this->_ci($lhs) . ' NOT '.$this->_db->stringCompare().' '. $this->_ci('(\'%\' || ' . $eh.$rhs.$et. ' || \'%\')') .$em. ')';
                     break;
                 case '^~':
-                    $filters[] = '( ' . $this->_ci($lhs) . ' '.$this->_db->stringCompare().' ' .$this->_ci('('. $rhs . ' || \'%\')'). ')';
+                    $filters[] = '( ' . $this->_ci($lhs) . ' '.$this->_db->stringCompare().' ' .$this->_ci('('. $eh.$rhs.$et . ' || \'%\')').$em. ')';
                     break;
                 case '$~':
-                    $filters[] = '( ' . $this->_ci($lhs) . ' '.$this->_db->stringCompare().' '.$this->_ci('(\'%\' || ' . $rhs. ')') . ')';
+                    $filters[] = '( ' . $this->_ci($lhs) . ' '.$this->_db->stringCompare().' '.$this->_ci('(\'%\' || ' . $eh.$rhs.$et. ')') .$em. ')';
                     break;
                 default:
             }
