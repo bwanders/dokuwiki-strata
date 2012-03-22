@@ -702,10 +702,15 @@ class stratastorage_sql_generator {
 
         // determine exact projection
         foreach($vars as $v) {
+            // determine projection translation
             $name = $this->_name(array('type'=>'variable','text'=>$v));
+
+            // fix projected variable into SQL
             $terms[] = $name;
-            $fields[] = $name. ' AS "' . str_replace('"','""',$v) . '"';
-            $this->projected[] = $v;
+            $fields[] = $name;
+
+            // store projection translation
+            $this->projected[$name] = $v;
         }
 
         // assign ordering if required
@@ -781,7 +786,7 @@ class stratastorage_relations_iterator implements Iterator {
         $this->id = 0;
 
         // projection data
-        $this->projection = array_fill_keys($projection,true);
+        $this->projection = $projection;
 
         // initialize the iterator
         $this->next();
@@ -800,8 +805,13 @@ class stratastorage_relations_iterator implements Iterator {
         $this->row = $this->data->fetch(PDO::FETCH_ASSOC);
 
         if($this->row) {
+            $row = array();
+
             // ...project...
-            $this->row = array_intersect_key($this->row, $this->projection);
+            foreach($this->projection as $alias=>$field) {
+                $row[$field] = $this->row[$alias];
+            }
+            $this->row = $row;
 
             // ...and increment the id.
             $this->id++;
