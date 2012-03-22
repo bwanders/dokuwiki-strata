@@ -377,8 +377,8 @@ class stratastorage_sql_generator {
      * Alias generator.
      */
     private $_aliasCounter = 0;
-    function _alias() {
-        return 'a'.($this->_aliasCounter++);
+    function _alias($prefix='a') {
+        return $prefix.($this->_aliasCounter++);
     }
 
     /**
@@ -396,7 +396,7 @@ class stratastorage_sql_generator {
         if($term['type'] == 'variable') {
             // always try the cache
             if(empty($this->_variableLookup[$term['text']])) {
-                $this->_variableLookup[$term['text']] = 'v_'.$this->_alias();
+                $this->_variableLookup[$term['text']] = $this->_alias('v');
             }
 
             return $this->_variableLookup[$term['text']];
@@ -404,7 +404,7 @@ class stratastorage_sql_generator {
             // always try the cache
             if(empty($this->_literalLookup[$term['text']])) {
                 // use aliases to represent literals
-                $this->_literalLookup[$term['text']] = 'lit_'.$this->_alias();
+                $this->_literalLookup[$term['text']] = $this->_alias('lit');
             }
 
             // return literal name
@@ -427,21 +427,21 @@ class stratastorage_sql_generator {
 
         // the subject is a variable
         if($tp['subject']['type'] != 'variable') {
-            $id = $this->_alias();
+            $id = $this->_alias('qv');
             $conditions[] = $this->_ci('subject').' = '.$this->_ci(':'.$id);
             $this->literals[$id] = $tp['subject']['text'];
         }
 
         // the predicate is a variable
         if($tp['predicate']['type'] != 'variable') {
-            $id = $this->_alias();
+            $id = $this->_alias('qv');
             $conditions[] = $this->_ci('predicate').' = '.$this->_ci(':'.$id);
             $this->literals[$id] = $tp['predicate']['text'];
         }
 
         // the object is a variable
         if($tp['object']['type'] != 'variable') {
-            $id = $this->_alias();
+            $id = $this->_alias('qv');
             $conditions[] = $this->_ci('object').' = '.$this->_ci(':'.$id);
             $this->literals[$id] = $tp['object']['text'];
         }
@@ -565,7 +565,7 @@ class stratastorage_sql_generator {
             if($f['lhs']['type'] == 'variable') {
                 $lhs = $this->_name($f['lhs']);
             } else {
-                $id = $this->_alias();
+                $id = $this->_alias('qv');
                 $lhs = ':'.$id;
                 $this->literals[$id] = $f['lhs']['text'];
             }
@@ -574,7 +574,7 @@ class stratastorage_sql_generator {
             if($f['rhs']['type'] == 'variable') {
                 $rhs = $this->_name($f['rhs']);
             } else {
-                $id = $this->_alias();
+                $id = $this->_alias('qv');
                 $rhs = ':'.$id;
                 $this->literals[$id] = $f['rhs']['text'];
             }
@@ -714,7 +714,7 @@ class stratastorage_sql_generator {
             $name = $this->_name(array('type'=>'variable','text'=>$o['variable']));
             $orderTerms = $this->_db->orderBy($name);
             foreach($orderTerms as $term) {
-                $a = "o_".$this->_alias();
+                $a = $this->_alias('o');
                 $fields[] = "$term AS $a";
                 $ordering[] = "$a ".($o['direction'] == 'asc'?'ASC':'DESC');
             }
