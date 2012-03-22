@@ -139,7 +139,6 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
      * @param tree array the parsed tree
      * @param result array the result array passed to the render method
      * @param typemap array the type map
-     * @return an array containing all unhandled lines
      */
     function handleBody(&$tree, &$result, &$typemap) {
     }

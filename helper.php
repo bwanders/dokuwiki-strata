@@ -463,7 +463,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         }
 
         if(count($stack) != 1 || $stack[0] != $root) {
-            msg('Strata basic: unmatched braces in query syntax',-1);
+            msg('Strata basic: unmatched braces in syntax',-1);
         }
 
         return $root;
