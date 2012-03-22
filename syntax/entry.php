@@ -113,10 +113,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                     // replace the [[]] quasi-magic token with the empty string
                     if($v == '[[]]') $v = '';
                     if(!isset($type) || $type == '') {
-                        $type = $this->types->getDefaultType();
-                        if(!isset($hint) || $hint == '') {
-                            $hint = $this->types->getDefaultTypeHint();
-                        }
+                        list($type, $hint) = $this->types->getDefaultType();
                     }
                     $result['data'][$property][] = array('value'=>$v,'type'=>$type,'hint'=>($hint?:null));
                 }

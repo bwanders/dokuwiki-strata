@@ -326,10 +326,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                         $object='';
                     }
                     if(!$type) {
-                        $type = $this->types->getDefaultType();
-                        if(!$hint) {
-                            $hint = $this->types->getDefaultTypeHint();
-                        }
+                        list($type, $hint) = $this->types->getDefaultType();
                     }
                     $type = $this->types->loadType($type);
                     $object = $this->literal($type->normalize($object,$hint));
@@ -351,10 +348,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                         if(!empty($typemap[$lhs['text']])) {
                             extract($typemap[$lhs['text']]);
                         } else {
-                            $type = $this->types->getDefaultType();
-                            if(!$hint) {
-                                $hint = $this->types->getDefaultTypeHint();
-                            }
+                            list($type, $hint) = $this->types->getDefaultType();
                         }
                     }
 
