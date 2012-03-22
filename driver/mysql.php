@@ -23,6 +23,14 @@ class plugin_strata_driver_mysql extends plugin_strata_driver {
         return "$val COLLATE utf8mb4_unicode_ci";
     }
 
+    protected function initializePDO($dsn) {
+        $credentials = array('','');
+        if(@file_exists(DOKU_PLUGIN.'stratastorage/local-mysql.php')) {
+            $credentials = include(DOKU_PLUGIN.'stratastorage/local-mysql.php');
+        }
+        return new PDO($dsn, $credentials[0], $credentials[1]);
+    }
+
     protected function initializeConnection() {
         $this->query('SET NAMES utf8mb4');
         $this->query("SET sql_mode = 'PIPES_AS_CONCAT'"); // Ensure that || works as string concatenation

@@ -89,7 +89,7 @@ abstract class plugin_strata_driver {
     public function connect($dsn) {
         $this->_dsn = $dsn;
         try {
-            $this->_db = new PDO($dsn);
+            $this->_db = $this->initializePDO($dsn);
         } catch(PDOException $e) {
             if ($this->_debug) {
                 msg(hsc("Strata storage: Failed to open data source '$dsn': " . $e->getMessage()), -1);
@@ -100,6 +100,16 @@ abstract class plugin_strata_driver {
         }
         $this->initializeConnection();
         return true;
+    }
+
+    /**
+     * Initialize the PDO object.
+     *
+     * @param dsn string the dsn to use for construction
+     * @return the PDO object
+     */
+    protected function initializePDO($dsn) {
+        return new PDO($dsn);
     }
 
     /**
