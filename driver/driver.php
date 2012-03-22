@@ -112,7 +112,7 @@ abstract class plugin_strata_driver {
      * @return the PDO object
      */
     protected function initializePDO($dsn) {
-        $credentials = array('','');
+        $credentials = array(null,null);
         if(@file_exists(STRATA_CREDENTIALS)) {
             $credentials = include(STRATA_CREDENTIALS);
         }
