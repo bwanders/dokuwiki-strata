@@ -19,11 +19,8 @@ class plugin_strata_driver_pgsql extends plugin_strata_driver {
         return 'ILIKE';
     }
 
-    public function orderBy($val) {
-        return array(
-            "SUBSTRING($val FROM E'^(-?[0-9]+\\\\.?[0-9]*)')::numeric",
-            $val
-        );
+    public function castToNumber($val) {
+        return"SUBSTRING($val FROM E'^(-?[0-9]+\\\\.?[0-9]*)')::numeric";
     }
 
     public function isInitialized() {
