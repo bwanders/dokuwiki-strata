@@ -198,7 +198,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
             }
 
             // batch-store triples
-            $this->triples->addTriples($triples);
+            $this->triples->addTriples($triples, $ID);
             return true;
         }
 
