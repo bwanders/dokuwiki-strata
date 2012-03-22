@@ -127,16 +127,29 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
         // - Deduplicate all values
         $buckets = $result['data'];
         $result['data'] = array();
+
+        // load predicate type
+        list($predType, $predHint) = $this->types->getPredicateType();
+        $predType = $this->types->loadType($predType);
+
         foreach($buckets as $property=>&$bucket) {
+            // array with seen values
             $seen = array();
+
             foreach($bucket as &$triple) {
+                // normalize the value
                 $type = $this->types->loadType($triple['type']);
                 $triple['value'] = $type->normalize($triple['value'], $triple['hint']);
 
+                // normalize the predicate
+                $property = $predType->normalize($property, $predHint);
+
+                // lazy create property bucket
                 if(!isset($result['data'][$property])) {
                     $result['data'][$property] = array();
                 }
 
+                // uniqueness check
                 if(!in_array($triple['value'], $seen)) {
                     $seen[] = $triple['value'];
                     $result['data'][$property][] = $triple;
@@ -229,13 +242,22 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
             $R->tableheader_close();
             $R->tablerow_close();
 
+            // load predicate type
+            list($predType, $predHint) = $this->types->getPredicateType();
+            $predType = $this->types->loadType($predType);
+
             // render a row for each key, displaying the values as comma-separated list
             foreach($data['data'] as $key=>$values) {
+                // skip isa and title keys
                 if($key == $this->triples->getTitleKey() || $key == $this->triples->getIsaKey()) continue;
+                
+                // render row header
                 $R->tablerow_open();
                 $R->tableheader_open();
-                $R->doc .= $R->_xmlEntities($key);
+                $predType->render($mode, $R, $this->triples, $key, $predHint);
                 $R->tableheader_close();
+
+                // render row content
                 $R->tablecell_open();
                 for($i=0;$i<count($values);$i++) {
                     $triple =& $values[$i];
@@ -258,7 +280,13 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
             // resolve the subject to normalize everything
             resolve_pageid(getNS($ID),$subject,$exists);
 
+            // load predicate type
+            list($predType, $predHint) = $this->types->getPredicateType();
+            $predType = $this->types->loadType($predType);
+
             foreach($data['data'] as $property=>$bucket) {
+                $predType->render($mode, $R, $this->triples, $property, $predHint);
+
                 foreach($bucket as $triple) {
                     // render values for things like backlinks
                     $type = $this->types->loadType($triple['type']);

@@ -290,6 +290,9 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         $triples = array();
         $filters = array();
 
+        list($predType, $predHint) = $this->types->getPredicateType();
+        $predType = $this->types->loadType($predType);
+
         foreach($lines as $line) {
             $line = trim($line);
 
@@ -313,7 +316,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                     $scope[] = $predicate['text'];
                     $this->updateTypemap($typemap, $predicate['text'], 'text');
                 } else {
-                    $predicate = $this->literal($predicate);
+                    $predicate = $this->literal($predType->normalize($predicate, $predHint));
                 }
 
                 if($object[0] == '?') {
