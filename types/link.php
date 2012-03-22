@@ -36,6 +36,12 @@ class plugin_strata_type_link extends plugin_strata_type {
     }
 
     function normalize($value, $hint) {
+        // strip off leading [[ and trailing ]] to offer a more
+        // user-friendly syntax.
+        if(substr($value,0,2) == '[[' && substr($value,-2) == ']]') {
+            $value = substr($value,2,-2);
+        }
+
         if(!preg_match('/^[a-zA-Z0-9\.]+>{1}.*$/u',$value)
            && !preg_match('/^\\\\\\\\[^\\\\]+?\\\\/u',$value)
            && !preg_match('#^([a-z0-9\-\.+]+?)://#i',$value)
