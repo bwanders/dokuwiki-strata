@@ -71,18 +71,21 @@ class helper_plugin_stratastorage_types extends DokuWiki_Plugin {
         return $this->loaded[$type];
     }
 
-    var $defaultType = null;
-    var $defaultTypeHint = null;
+    var $configTypes = array();
 
-    function _parseDefaultType() {
+    function _parseConfigType($key='default') {
         if($this->defaultType == null) {
-            if(preg_match('/^([a-z0-9]+)(?:\(([^\)]*)\))?$/',$this->getConf('default_type'),$match)) {
-                $this->defaultType = $match[1];
-                $this->defaultTypeHint = $match[2];
+            if(preg_match('/^([a-z0-9]+)(?:\(([^\)]*)\))?$/',$this->getConf("{$key}_type"),$match)) {
+                $this->configTypes[$key] = array(
+                    $match[1],
+                    $match[2]
+                );
             } else {
-                msg('Strata storage: Invalid default type configuration, falling back to <code>text</code>',-1);
-                $this->defaultType = 'text';
-                $this->defaultTypeHint = '';
+                msg('Strata storage: Invalid '.$key.' type configuration, falling back to <code>text</code>',-1);
+                $this->configTypes[$key] = array(
+                    'text',
+                    null
+                );
             }
         }
     }
@@ -92,8 +95,8 @@ class helper_plugin_stratastorage_types extends DokuWiki_Plugin {
      * Returns the configured default type.
      */
     function getDefaultType() {
-        $this->_parseDefaultType();
-        return $this->defaultType;
+        $this->_parseConfigType();
+        return $this->configTypes['default'][0];
     }
 
     /**
@@ -101,7 +104,7 @@ class helper_plugin_stratastorage_types extends DokuWiki_Plugin {
      * used with the configured default type.
      */
     function getDefaultTypeHint() {
-        $this->_parseDefaultType();
-        return $this->defaultTypeHint;
+        $this->_parseConfigType();
+        return $this->configTypes['default'][1];
     }
 }
