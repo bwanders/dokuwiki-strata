@@ -171,7 +171,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
      * @return a case insensitive SQL string comparison
      */
     function _cic($a, $b) {
-        return $this->_ci($a).' '.$this->_db->stringCompare().' '.$this->_ci($b);
+        return $this->_ci($a).' = '.$this->_ci($b);
     }
 
     /**
