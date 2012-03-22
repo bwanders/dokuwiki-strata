@@ -109,8 +109,13 @@ abstract class plugin_strata_driver {
      * @return the PDO object
      */
     protected function initializePDO($dsn) {
-        return new PDO($dsn);
+        $credentials = array('','');
+        if(@file_exists(DOKU_PLUGIN.'stratastorage/credentials.local.php')) {
+            $credentials = include(DOKU_PLUGIN.'stratastorage/credentials.local.php');
+        }
+        return new PDO($dsn, $credentials[0], $credentials[1]);
     }
+
 
     /**
      * Initialises a connection directly after the connection was made (e.g. by setting the character set of the connection).
