@@ -19,6 +19,10 @@ require_once(DOKU_PLUGIN.'stratastorage/driver/driver.php');
  * The triples helper is responsible for querying.
  */
 class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
+    function helper_plugin_stratastorage_triples() {
+        $this->types =& plugin_load('helper', 'stratastorage_types');
+    }
+
     function getMethods() {
         $result = array();
         $result[] = array(
@@ -92,11 +96,15 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
     }
 
     function getIsaKey() {
-        return $this->getConf('isa_key');
+        list($type, $hint) = $this->types->getPredicateType();
+        $type = $this->types->loadType($type);
+        return $type->normalize($this->getConf('isa_key'), $hint);
     }
 
     function getTitleKey() {
-        return $this->getConf('title_key');
+        list($type, $hint) = $this->types->getPredicateType();
+        $type = $this->types->loadType($type);
+        return $type->normalize($this->getConf('title_key'), $hint);
     }
 
     /**
