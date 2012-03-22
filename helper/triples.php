@@ -299,10 +299,10 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
      * @param query array an abstract query tree
      * @return an array with the resulting rows
      */
-    function queryRelations($query) {
+    function queryRelations($queryTree) {
         // create the SQL generator, and generate the SQL query
         $generator = new stratastorage_sql_generator($this);
-        list($sql, $literals) = $generator->translate($query);
+        list($sql, $literals, $projected) = $generator->translate($queryTree);
 
         // prepare the query
         $query = $this->_db->prepare($sql);
@@ -323,7 +323,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         }
 
         // wrap the results in an iterator, and return it
-        return new stratastorage_relations_iterator($query);
+        return new stratastorage_relations_iterator($query, $projected);
     }
 
     /**
@@ -348,6 +348,19 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
  * SQL generator.
  */
 class stratastorage_sql_generator {
+    /**
+     * Stores all literal values keyed to their placeholder.
+     */
+    private $literals = array();
+
+    /**
+     * Stores all projected variables.
+     */
+    private $projected = array();
+
+    /**
+     * Constructor.
+     */
     function stratastorage_sql_generator($triples) {
         $this->_triples = $triples;
         $this->_db = $this->_triples->_db;
@@ -476,11 +489,6 @@ class stratastorage_sql_generator {
 
         return implode(', ',$list);
     }
-
-    /**
-     * Stores all literal values keyed to their placeholder.
-     */
-    private $literals = array();
 
     /**
      * Translates a triple pattern into a graph pattern.
@@ -697,6 +705,7 @@ class stratastorage_sql_generator {
             $name = $this->_name(array('type'=>'variable','text'=>$v));
             $terms[] = $name;
             $fields[] = $name. ' AS "' . str_replace('"','""',$v) . '"';
+            $this->projected[] = $v;
         }
 
         // assign ordering if required
@@ -754,7 +763,7 @@ class stratastorage_sql_generator {
      */
     function translate($query) {
         $q = $this->_dispatch($query);
-        return array($q['sql'], $this->literals);
+        return array($q['sql'], $this->literals, $this->projected);
     }
 }
 
@@ -763,10 +772,18 @@ class stratastorage_sql_generator {
  * relations query result.
  */
 class stratastorage_relations_iterator implements Iterator {
-    function __construct($pdostatement) {
+    function __construct($pdostatement, $projection) {
+        // backend iterator
         $this->data = $pdostatement;
-        $this->id = 0;
+
+        // state information
         $this->closed = false;
+        $this->id = 0;
+
+        // projection data
+        $this->projection = array_fill_keys($projection,true);
+
+        // initialize the iterator
         $this->next();
     }
     
@@ -779,9 +796,21 @@ class stratastorage_relations_iterator implements Iterator {
     }
 
     function next() {
+        // fetch...
         $this->row = $this->data->fetch(PDO::FETCH_ASSOC);
-        $this->id++;
 
+        if($this->row) {
+            // ...project...
+            $this->row = array_intersect_key($this->row, $this->projection);
+
+            // ...and increment the id.
+            $this->id++;
+        }
+
+        // Close the backend if we're out of rows.
+        // (This should not be necessary if everyone closes
+        // their iterator after use -- but experience dictates that
+        // this is a good safety net)
         if(!$this->valid()) {
             $this->closeCursor();
         }
