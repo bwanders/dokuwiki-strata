@@ -59,7 +59,7 @@ class helper_plugin_stratastorage_types extends DokuWiki_Plugin {
     function loadType($type) {
         // handle null type
         if($type == null) {
-            $type = $this->getDefaultType();
+            list($type,) = $this->getDefaultType();
         }
 
         // use cached if possible
@@ -89,7 +89,7 @@ class helper_plugin_stratastorage_types extends DokuWiki_Plugin {
             }
         }
         
-        return $this->configType[$key];
+        return $this->configTypes[$key];
     }
 
 
