@@ -40,7 +40,8 @@ class plugin_strata_type_wiki extends plugin_strata_type {
             $value = substr_replace($value, $replacement, $ins[$i][2], $ins[$i+1][2] - $ins[$i][2]);
         }
 
-        return $value;
+        // strip off only the inserted newlines
+        return substr($value,1,-1);
     }
 
     /**
@@ -80,6 +81,8 @@ class plugin_strata_type_wiki extends plugin_strata_type {
      * Normalizes a media array.
      */
     function _normalize_media($instruction) {
+        global $ID;
+
         // construct media structure based on input
         if(isset($instruction['type'])) {
             $media = $instruction;
