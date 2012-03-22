@@ -3,7 +3,7 @@ require_once('stratatest.inc.php');
 class storage_test extends Strata_UnitTestCase {
 
 	function testAdd() {
-		$OK = $this->_triples->addTriple('Bob', 'knows', 'Alice');
+		$OK = $this->_triples->addTriple('Bob', 'knows', 'Alice', 'wiki');
 		$this->assertTrue($OK);
 		$data = $this->_triples->fetchTriples();
 		$expected = array(
@@ -13,7 +13,7 @@ class storage_test extends Strata_UnitTestCase {
 	}
 
 	function testAddArray() {
-		$OK = $this->_triples->addTriples(array(array('subject' => 'Bob', 'predicate' => 'knows', 'object' => 'Alice')));
+		$OK = $this->_triples->addTriples(array(array('subject' => 'Bob', 'predicate' => 'knows', 'object' => 'Alice')), 'wiki');
 		$this->assertTrue($OK);
 		$data = $this->_triples->fetchTriples();
 		$expected = array(
@@ -23,9 +23,9 @@ class storage_test extends Strata_UnitTestCase {
 	}
 
 	function testAddMulti() {
-		$OK = $this->_triples->addTriple('Bob', 'knows', 'Alice');
+		$OK = $this->_triples->addTriple('Bob', 'knows', 'Alice', 'wiki');
 		$this->assertTrue($OK);
-		$OK =$this->_triples->addTriple('Alice', 'knows', 'Carol');
+		$OK =$this->_triples->addTriple('Alice', 'knows', 'Carol', 'wiki');
 		$this->assertTrue($OK);
 		$data = $this->_triples->fetchTriples();
 		$expected = array(
@@ -36,11 +36,11 @@ class storage_test extends Strata_UnitTestCase {
 	}
 
 	function testSpecialChars() {
-		$OK = $this->_triples->addTriple('*', 'select', '%');
+		$OK = $this->_triples->addTriple('*', 'select', '%', 'wiki');
 		$this->assertTrue($OK);
-		$OK =$this->_triples->addTriple('_', '(', '`');
+		$OK =$this->_triples->addTriple('_', '(', '`', 'wiki');
 		$this->assertTrue($OK);
-		$OK =$this->_triples->addTriple(';', '\'', '"');
+		$OK =$this->_triples->addTriple(';', '\'', '"', 'wiki');
 		$this->assertTrue($OK);
 		$data = $this->_triples->fetchTriples();
 		$expected = array(

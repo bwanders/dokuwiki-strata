@@ -12,7 +12,7 @@ class storage_graphs_test extends Strata_UnitTestCase {
 		$expected2 = array('subject' => 'Alice', 'predicate' => 'knows', 'object' => 'Carol', 'graph' => 'knowledgebase of alice');
 
 		// Retrieve the wiki graph
-		$data = $this->_triples->fetchTriples();
+		$data = $this->_triples->fetchTriples(null, null, null, 'wiki');
 		$this->assertEqual($data, array());
 
 		// Retrieve Bobs graph
@@ -24,7 +24,7 @@ class storage_graphs_test extends Strata_UnitTestCase {
 		$this->assertEqual($data, array($expected2));
 
 		// Retrieve all graphs
-		$data = $this->_triples->fetchTriples(null, null, null, '%');
+		$data = $this->_triples->fetchTriples(null, null, null, null);
 		$this->assertEqual($data, array($expected1, $expected2));
 	}
 }

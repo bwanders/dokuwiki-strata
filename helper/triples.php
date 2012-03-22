@@ -175,14 +175,10 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
     }
 
     /**
-     * Removes all triples matching the given triple pattern. The parameters
-     * subject, predicate and object can be left out to indicate 'any'. If graph
-     * is left out, this indicates the use of the default graph.
+     * Removes all triples matching the given triple pattern. One or more parameters
+     * can be left out to indicate 'any'.
      */
     function removeTriples($subject=null, $predicate=null, $object=null, $graph=null) {
-        // don't nuke all graphs
-        $graph = $graph?:$this->getConf('default_graph');
-
         // construct triple filter
         $filters = array('1 = 1');
         foreach(array('subject','predicate','object','graph') as $param) {
@@ -209,14 +205,10 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
     }
 
     /**
-     * Fetches all triples matching the given triple pattern. The parameters
-     * subject, predicate and object can be left out to indicate 'any'. If graph
-     * is left out, this indicates the use of the default graph.
+     * Fetches all triples matching the given triple pattern. Onr or more of
+     * parameters can be left out to indicate 'any'.
      */
     function fetchTriples($subject=null, $predicate=null, $object=null, $graph=null) {
-        // use default graph
-        $graph = $graph?:$this->getConf('default_graph');
-
         // construct filter
         $filters = array('1 = 1');
         foreach(array('subject','predicate','object','graph') as $param) {
@@ -251,23 +243,20 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
      * @param subject string
      * @param predicate string
      * @param object string
-     * @param graph string optional graph name, will use default graph of none given.
+     * @param graph string
      * @return true of triple was added succesfully, false if not
      */
-    function addTriple($subject, $predicate, $object, $graph=null) {
+    function addTriple($subject, $predicate, $object, $graph) {
         return $this->addTriples(array(array('subject'=>$subject, 'predicate'=>$predicate, 'object'=>$object)), $graph);
     }
 
     /**
      * Adds multiple triples.
      * @param triples array contains all triples as arrays with subject, predicate and object keys
-     * @param graph string optional graph name, uses default graph if omitted
+     * @param graph string graph name
      * @return true if the triples were comitted, false otherwise
      */
-    function addTriples($triples, $graph=null) {
-        // handle null graph
-        $graph = $graph?:$this->getConf('default_graph');
-
+    function addTriples($triples, $graph) {
         // prepare insertion query
         $sql = "INSERT INTO data(subject, predicate, object, graph) VALUES(?, ?, ?, ?)";
         $query = $this->_db->prepare($sql);

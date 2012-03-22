@@ -5,11 +5,11 @@ class storage_removes_test extends Strata_UnitTestCase {
 	function setup() {
 		parent::setup();
 		// Fill database
-		$OK = $this->_triples->addTriple('Bob', 'knows', 'Alice');
+		$OK = $this->_triples->addTriple('Bob', 'knows', 'Alice', 'wiki');
 		$this->assertTrue($OK);
-		$OK =$this->_triples->addTriple('Alice', 'knows', 'Carol');
+		$OK =$this->_triples->addTriple('Alice', 'knows', 'Carol', 'wiki');
 		$this->assertTrue($OK);
-		$OK =$this->_triples->addTriple('Alice', 'dislikes', 'Carol');
+		$OK =$this->_triples->addTriple('Alice', 'dislikes', 'Carol', 'wiki');
 		$this->assertTrue($OK);
 
 		$this->expected1 = array('subject' => 'Bob', 'predicate' => 'knows', 'object' => 'Alice', 'graph' => 'wiki');

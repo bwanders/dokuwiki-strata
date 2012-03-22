@@ -63,8 +63,8 @@ class action_plugin_stratastorage extends DokuWiki_Action_Plugin {
         $triples =& plugin_load('helper', 'stratastorage_triples', false);
         $triples->initialize();
 
-        $triples->removeTriples($id);
-        $triples->removeTriples($id.'#%');
+        // remove all triples defined in this graph
+        $triples->removeTriples(null,null,null,$id);
     }
 }
 
