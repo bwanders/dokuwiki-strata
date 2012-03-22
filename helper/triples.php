@@ -97,14 +97,12 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
 
     function getIsaKey() {
         list($type, $hint) = $this->types->getPredicateType();
-        $type = $this->types->loadType($type);
-        return $type->normalize($this->getConf('isa_key'), $hint);
+        return $this->types->loadType($type)->normalize($this->getConf('isa_key'), $hint);
     }
 
     function getTitleKey() {
         list($type, $hint) = $this->types->getPredicateType();
-        $type = $this->types->loadType($type);
-        return $type->normalize($this->getConf('title_key'), $hint);
+        return $this->types->loadType($type)->normalize($this->getConf('title_key'), $hint);
     }
 
     /**
