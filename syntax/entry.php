@@ -39,9 +39,14 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
 
     function handle($match, $state, $pos, &$handler) {
         $result = array(
-            'entry'=>'',
-            'data'=>array()
+            'entry'=>''
         );
+
+        $buckets = array(
+            $this->triples->getIsaKey() => array(),
+            $this->triples->getTitleKey() => array()
+        );
+
 
         $lines = explode("\n",$match);
 
@@ -51,13 +56,13 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
         // process the classes into triples
         foreach(preg_split('/\s+/',trim($header[1])) as $class) {
             if($class == '') continue;
-            $result['data'][] = array('key'=>$this->triples->getIsaKey(),'value'=>$class,'type'=>'text', 'hint'=>null);
+            $buckets[$this->triples->getIsaKey()][] = array('value'=>$class,'type'=>'text', 'hint'=>null);
         }
 
         // process the fragment if necessary
         $result['entry'] = $header[2];
         if($result['entry'] != '') {
-            $result['data'][] = array('key'=>$this->triples->getTitleKey(),'value'=>$result['entry'], 'type'=>'text', 'hint'=>null);
+            $buckets[$this->triples->getTitleKey()][] = array('value'=>$result['entry'], 'type'=>'text', 'hint'=>null);
         }
 
         // now handle all other lines
@@ -77,6 +82,11 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                 // trim property so we don't get accidental 'name   ' keys
                 $property = trim($property);
 
+                // lazy create key bucket
+                if(!isset($buckets[$property])) {
+                    $buckets[$property] = array();
+                }
+
                 // determine values, splitting on commas if necessary
                 if($multi == '*') {
                     $values = array_map('trim',explode(',',$values));
@@ -95,17 +105,31 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                             $hint = $this->types->getDefaultTypeHint();
                         }
                     }
-                    $result['data'][] = array('key'=>$property,'value'=>$v,'type'=>$type,'hint'=>($hint?:null));
+                    $buckets[$property][] = array('value'=>$v,'type'=>$type,'hint'=>($hint?:null));
                 }
             } else {
                 msg('I don\'t understand data entry line \'<code>'.htmlentities($line).'</code>\'.', -1);
             }
         }
 
-        // normalize data
-        foreach($result['data'] as &$triple) {
-            $type = $this->types->loadType($triple['type']);
-            $triple['value'] = $type->normalize($triple['value'], $triple['hint']);
+        // normalize data:
+        // - Normalize all values
+        // - Deduplicate all values
+        foreach($buckets as $property=>&$bucket) {
+            $seen = array();
+            foreach($bucket as &$triple) {
+                $type = $this->types->loadType($triple['type']);
+                $triple['value'] = $type->normalize($triple['value'], $triple['hint']);
+
+                if(!isset($result['data'][$property])) {
+                    $result['data'][$property] = array();
+                }
+
+                if(!in_array($triple['value'], $seen)) {
+                    $seen[] = $triple['value'];
+                    $result['data'][$property][] = $triple;
+                }
+            }
         }
 
         return $result;
@@ -116,13 +140,6 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
 
 
         if($mode == 'xhtml') {
-            // group data by key (to support display of comma-separated list)
-            $keys = array();
-            foreach($data['data'] as $t) {
-                if(!isset($keys[$t['key']])) $keys[$t['key']] = array();
-                $keys[$t['key']][] = $t;
-            }
-
             // render table header
             $R->table_open();
             $R->tablerow_open();
@@ -130,9 +147,9 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
 
             // determine actual header text
             $heading = '';
-            if(isset($keys[$this->triples->getTitleKey()])) {
+            if(isset($data['data'][$this->triples->getTitleKey()])) {
                 // use title triple of possible
-                $heading = $keys[$this->triples->getTitleKey()][0]['value'];
+                $heading = $data['data'][$this->triples->getTitleKey()][0]['value'];
             } elseif (useHeading('content')) {
                 // fall back to page title, depending on wiki configuration
                 $heading = p_get_first_heading($ID);
@@ -143,10 +160,10 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
             $R->doc .= $R->_xmlEntities($heading);
 
             // display a comma-separated list of classes if the entry has classes
-            if(isset($keys[$this->triples->getIsaKey()])) {
+            if(isset($data['data'][$this->triples->getIsaKey()])) {
                 $R->emphasis_open();
                 $R->doc .= ' (';
-                $values = $keys[$this->triples->getIsaKey()];
+                $values = $data['data'][$this->triples->getIsaKey()];
                 for($i=0;$i<count($values);$i++) {
                     $triple =& $values[$i];
                     if($i!=0) $R->doc .= ', ';
@@ -160,7 +177,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
             $R->tablerow_close();
 
             // render a row for each key, displaying the values as comma-separated list
-            foreach($keys as $key=>$values) {
+            foreach($data['data'] as $key=>$values) {
                 if($key == $this->triples->getTitleKey() || $key == $this->triples->getIsaKey()) continue;
                 $R->tablerow_open();
                 $R->tableheader_open();
@@ -188,13 +205,15 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
             // resolve the subject to normalize everything
             resolve_pageid(getNS($ID),$subject,$exists);
 
-            foreach($data['data'] as $triple) {
-                // render values for things like backlinks
-                $type = $this->types->loadType($triple['type']);
-                $type->render($mode, $R, $this->triples, $triple['value'], $triple['hint']);
+            foreach($data['data'] as $property=>$bucket) {
+                foreach($bucket as $triple) {
+                    // render values for things like backlinks
+                    $type = $this->types->loadType($triple['type']);
+                    $type->render($mode, $R, $this->triples, $triple['value'], $triple['hint']);
 
-                // prepare triples for storage
-                $triples[] = array('subject'=>$subject, 'predicate'=>$triple['key'], 'object'=>$triple['value']);
+                    // prepare triples for storage
+                    $triples[] = array('subject'=>$subject, 'predicate'=>$property, 'object'=>$triple['value']);
+                }
             }
 
             // batch-store triples
