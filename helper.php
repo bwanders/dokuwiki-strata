@@ -22,6 +22,22 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
     }
 
     /**
+     * Normalizes a predicate.
+     */
+    function normalizePredicate($p) {
+        list($type, $hint) = $this->types->getPredicateType();
+        return $this->types->loadType($type)->normalize($p, $hint);
+    }
+
+    /**
+     * Renders a predicate.
+     */
+    function renderPredicate($mode, &$R, &$T, $p) {
+        list($type, $hint) = $this->types->getPredicateType();
+        return $this->types->loadType($type)->render($mode, $R, $T, $p, $hint);
+    }
+
+    /**
      * Determines whether a line can be ignored.
      */
     function ignorableLine($line) {
@@ -290,9 +306,6 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         $triples = array();
         $filters = array();
 
-        list($predType, $predHint) = $this->types->getPredicateType();
-        $predType = $this->types->loadType($predType);
-
         foreach($lines as $line) {
             $line = trim($line);
 
@@ -316,7 +329,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                     $scope[] = $predicate['text'];
                     $this->updateTypemap($typemap, $predicate['text'], 'text');
                 } else {
-                    $predicate = $this->literal($predType->normalize($predicate, $predHint));
+                    $predicate = $this->literal($this->normalizePredicate($predicate));
                 }
 
                 if($object[0] == '?') {
