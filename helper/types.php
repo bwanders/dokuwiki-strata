@@ -73,7 +73,7 @@ class helper_plugin_stratastorage_types extends DokuWiki_Plugin {
 
     var $configTypes = array();
 
-    function _parseConfigType($key='default') {
+    function _parseConfigType($key) {
         if($this->defaultType == null) {
             if(preg_match('/^([a-z0-9]+)(?:\(([^\)]*)\))?$/',$this->getConf("{$key}_type"),$match)) {
                 $this->configTypes[$key] = array(
@@ -95,16 +95,7 @@ class helper_plugin_stratastorage_types extends DokuWiki_Plugin {
      * Returns the configured default type.
      */
     function getDefaultType() {
-        $this->_parseConfigType();
-        return $this->configTypes['default'][0];
-    }
-
-    /**
-     * Returns the configured default type hint to be
-     * used with the configured default type.
-     */
-    function getDefaultTypeHint() {
-        $this->_parseConfigType();
-        return $this->configTypes['default'][1];
+        $this->_parseConfigType('default');
+        return $this->configTypes['default'];
     }
 }
