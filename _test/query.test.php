@@ -1497,7 +1497,7 @@ class query_test extends Strata_Query_UnitTestCase {
                 ':l',
                 '%t',
                 '1.10',
-                '  like '
+                '\\  like ""'
             ),
             'ordering' => array (
                 array (
