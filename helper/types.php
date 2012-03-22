@@ -75,7 +75,7 @@ class helper_plugin_stratastorage_types extends DokuWiki_Plugin {
 
     function _parseConfigType($key) {
         if($this->defaultType == null) {
-            if(preg_match('/^([a-z0-9]+)(?:\(([^\)]*)\))?$/',$this->getConf("{$key}_type"),$match)) {
+            if(preg_match('/^([a-z0-9]+)(?:\(([^\)]*)\))?$/',$this->getConf($key),$match)) {
                 $this->configTypes[$key] = array(
                     $match[1],
                     $match[2]
@@ -88,6 +88,8 @@ class helper_plugin_stratastorage_types extends DokuWiki_Plugin {
                 );
             }
         }
+        
+        return $this->configType[$key];
     }
 
 
@@ -95,7 +97,13 @@ class helper_plugin_stratastorage_types extends DokuWiki_Plugin {
      * Returns the configured default type.
      */
     function getDefaultType() {
-        $this->_parseConfigType('default');
-        return $this->configTypes['default'];
+        return $this->_parseConfigType('default_type');
+    }
+
+    /**
+     * Returns the configured predicate type.
+     */
+    function getPredicateType() {
+        return $this->_parseConfigType('predicate_type');
     }
 }
