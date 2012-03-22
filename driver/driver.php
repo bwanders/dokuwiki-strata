@@ -8,6 +8,9 @@ if(!defined('DOKU_INC')) die();
 
 if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
 
+// Define the location of the local credentials file.
+if(!defined('STRATA_CREDENTIALS')) define('STRATA_CREDENTIALS', DOKU_PLUGIN.'stratastorage/credentials.local.php');
+
 /**
  * The base class for database drivers.
  */
@@ -110,8 +113,8 @@ abstract class plugin_strata_driver {
      */
     protected function initializePDO($dsn) {
         $credentials = array('','');
-        if(@file_exists(DOKU_PLUGIN.'stratastorage/credentials.local.php')) {
-            $credentials = include(DOKU_PLUGIN.'stratastorage/credentials.local.php');
+        if(@file_exists(STRATA_CREDENTIALS)) {
+            $credentials = include(STRATA_CREDENTIALS);
         }
         return new PDO($dsn, $credentials[0], $credentials[1]);
     }
