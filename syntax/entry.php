@@ -34,7 +34,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
     }
 
     function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('<data(?: +[^#>]+?)?(?: +#[^>]*?)?>\n(?:.+?\n)*?</data>',$mode, 'plugin_stratabasic_entry');
+        $this->Lexer->addSpecialPattern('<data(?: +[^#>]+?)?(?: *#[^>]*?)?>\n(?:.+?\n)*?</data>',$mode, 'plugin_stratabasic_entry');
     }
 
     function handle($match, $state, $pos, &$handler) {
@@ -55,7 +55,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
         $header = $this->handleHeader($header, $result);
 
         // extract header, and match it to get classes and fragment
-        preg_match('/^( +[^#>]+)?(?: +#([^>]*?))?$/', $header, $header);
+        preg_match('/^( +[^#>]+)?(?: *#([^>]*?))?$/', $header, $header);
 
         // process the classes into triples
         foreach(preg_split('/\s+/',trim($header[1])) as $class) {
