@@ -291,8 +291,9 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
 
     /**
      * Executes the given abstract query tree as a query on the store.
+     *
      * @param query array an abstract query tree
-     * @return an array with the resulting rows
+     * @return an iterator over the resulting rows
      */
     function queryRelations($queryTree) {
         // create the SQL generator, and generate the SQL query
@@ -323,8 +324,10 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
 
     /**
      * Executes the abstract query tree, and returns all properties of the matching subjects.
+     * This method assumes that the root is a 'select' node.
+     * 
      * @param query array the abstract query tree
-     * @return an array of resources
+     * @return an iterator over the resources
      */
     function queryResources($query) {
         // We transform the given query into a resource-centric query as follows:
@@ -335,7 +338,41 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         // The query is ready for execution. Result set can be transformed into a
         // resource-centric view by fetching all triples related to a single subject
         // (each subject is in a single continuous block, due to the ordering)
-        return array();
+
+        // add extra tuple
+        $query['group'] = array(
+            'type'=>'and',
+            'lhs'=>$query['group'],
+            'rhs'=>array(
+                'type'=>'triple',
+                'subject'=>array('type'=>'variable','text'=>$query['projection'][0]),
+                'predicate'=>array('type'=>'variable','text'=>'__predicate'),
+                'object'=>array('type'=>'variable','text'=>'__object')
+            )
+        );
+
+        // fix projection list
+        $query['projection'] = array(
+            $query['projection'][0],
+            '__predicate',
+            '__object'
+        );
+
+        // append tuple ordering
+        $query['ordering'][] = array(
+            'variable'=>$query['projection'][0],
+            'direction'=>'asc'
+        );
+
+        // execute query
+        $result = $this->queryRelations($query);
+
+        if($result === false) {
+            return false;
+        }
+
+        // invoke iterator that's going to aggregate the resulting relations
+        return new stratastorage_resource_iterator($result,$query['projection']);
     }
 }
 
@@ -834,6 +871,83 @@ class stratastorage_relations_iterator implements Iterator {
 
     function valid() {
         return $this->row != null;
+    }
+
+    /**
+     * Closes this result set.
+     */
+    function closeCursor() {
+        if(!$this->closed) {
+            $this->data->closeCursor();
+            $this->closed = true;
+        }
+    }
+}
+
+/**
+ * This iterator is used to offer an interface over a
+ * resources query result.
+ */
+class stratastorage_resource_iterator implements Iterator {
+    function __construct($relations, $projection) {
+        // backend iterator (ordered by tuple)
+        $this->data = $relations;
+
+        // state information
+        $this->closed = false;
+        $this->valid = true;
+        $this->item = null;
+        $this->subject = null;
+
+        // projection data
+        list($this->__subject, $this->__predicate, $this->__object) = $projection;
+
+        // initialize the iterator
+        $this->next();
+    }
+    
+    function current() {
+        return $this->item;
+    }
+
+    function key() {
+        return $this->subject;
+    }
+
+    function next() {
+        if(!$this->data->valid()) {
+            $this->valid = false;
+            return;
+        }
+
+        // the current relation
+        $peekRow = $this->data->current();
+
+        // construct a new subject
+        $this->item = array();
+        $this->subject = $peekRow[$this->__subject];
+
+        // continue aggregating data as long as the subject doesn't change and
+        // there is data available
+        while($this->data->valid() && $peekRow[$this->__subject] == $this->subject) {
+            $p = $peekRow[$this->__predicate];
+            $o = $peekRow[$this->__object];
+            if(!isset($this->item[$p])) $this->item[$p] = array();
+            $this->item[$p][] = $o;
+            
+            $this->data->next();
+            $peekRow = $this->data->current();
+        }
+
+        return $this->item;
+    }
+
+    function rewind() {
+        // noop
+    }
+
+    function valid() {
+        return $this->valid;
     }
 
     /**
