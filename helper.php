@@ -353,32 +353,96 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
                 $triples[] = array('type'=>'triple','subject'=>$subject, 'predicate'=>$predicate, 'object'=>$object);
 
+            } elseif(preg_match('/^(?:\?('.STRATABASIC_VARIABLE.')(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*(!=|>=|<=|>|<|=|!~|!\^~|!\$~|\^~|\$~|~)\s*(?:\?('.STRATABASIC_VARIABLE.')(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*$/S',$line, $match)) {
+                // var op var
+                list(,$lhs, $ltype, $lhint, $operator, $rhs, $rtype, $rhint) = $match;
+
+                $lhs = $this->variable($lhs);
+                $rhs = $this->variable($rhs);
+
+                // do type information propagation
+
+                if($ltype) {
+                    // left has a defined type, so update the map
+                    $this->updateTypemap($typemap, $lhs['text'], $ltype, $lhint);
+
+                    // and propagate to right if possible
+                    if(!$rtype) {
+                        $this->updateTypemap($typemap, $rhs['text'], $ltype, $lhint);
+                    }
+                }
+                if($rtype) {
+                    // right has a defined type, so update the map
+                    $this->updateTypemap($typemap, $rhs['text'], $rtype, $rhint);
+
+                    // and propagate to left if possible
+                    if(!$ltype) {
+                        $this->updateTypemap($typemap, $lhs['text'], $rtype, $rhint);
+                    }
+                }
+
+                $filters[] = array('type'=>'filter', 'lhs'=>$lhs, 'operator'=>$operator, 'rhs'=>$rhs);
+
             } elseif(preg_match('/^(?:\?('.STRATABASIC_VARIABLE.')(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*(!=|>=|<=|>|<|=|!~|!\^~|!\$~|\^~|\$~|~)\s*(.+?)\s*$/S',$line, $match)) {
+                // var op lit
+
                 // filter pattern
-                list($_, $lhs,$type,$hint,$operator,$rhs) = $match;
+                list(, $lhs,$type,$hint,$operator,$rhs) = $match;
 
                 $lhs = $this->variable($lhs);
 
-                if($rhs[0] == '?') {
-                    $rhs = $this->variable($rhs);
-                    $this->updateTypemap($typemap, $rhs['text'], $type, $hint);
-                } else {
-                    if(!$type) {
-                        if(!empty($typemap[$lhs['text']])) {
-                            extract($typemap[$lhs['text']]);
-                        } else {
-                            list($type, $hint) = $this->types->getDefaultType();
-                        }
-                    }
-
-                    // check for empty string token
-                    if($rhs == '[[]]') {
-                        $rhs = '';
-                    }
-
-                    $type = $this->types->loadType($type);
-                    $rhs = $this->literal($type->normalize($rhs,$hint));
+                // update typemap if a type was defined
+                if($type) {
+                    $this->updateTypemap($typemap, $lhs['text'],$type,$hint);
                 }
+
+                // use the already declared type if no type was defined
+                if(!$type) {
+                    if(!empty($typemap[$lhs['text']])) {
+                        extract($typemap[$lhs['text']]);
+                    } else {
+                        list($type, $hint) = $this->types->getDefaultType();
+                    }
+                }
+
+                // check for empty string token
+                if($rhs == '[[]]') {
+                    $rhs = '';
+                }
+
+                $type = $this->types->loadType($type);
+                $rhs = $this->literal($type->normalize($rhs,$hint));
+
+                $filters[] = array('type'=>'filter','lhs'=>$lhs, 'operator'=>$operator, 'rhs'=>$rhs);
+            } elseif(preg_match('/^(.+?)\s*(!=|>=|<=|>|<|=|!~|!\^~|!\$~|\^~|\$~|~)\s*(?:\?('.STRATABASIC_VARIABLE.')(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*$/S',$line, $match)) {
+                // lit op var
+
+                // filter pattern
+                list(, $lhs,$operator,$rhs,$type,$hint) = $match;
+
+                $rhs = $this->variable($rhs);
+
+                // update typemap if a type was defined
+                if($type) {
+                    $this->updateTypemap($typemap, $rhs['text'],$type,$hint);
+                }
+
+                // use the already declared type if no type was defined
+                if(!$type) {
+                    if(!empty($typemap[$rhs['text']])) {
+                        extract($typemap[$rhs['text']]);
+                    } else {
+                        list($type, $hint) = $this->types->getDefaultType();
+                    }
+                }
+
+                // check for empty string token
+                if($lhs == '[[]]') {
+                    $lhs = '';
+                }
+
+                $type = $this->types->loadType($type);
+                $lhs = $this->literal($type->normalize($lhs,$hint));
 
                 $filters[] = array('type'=>'filter','lhs'=>$lhs, 'operator'=>$operator, 'rhs'=>$rhs);
             } else {
