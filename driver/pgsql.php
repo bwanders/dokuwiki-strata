@@ -20,7 +20,15 @@ class plugin_strata_driver_pgsql extends plugin_strata_driver {
     }
 
     public function castToNumber($val) {
-        return"SUBSTRING($val FROM E'^(-?[0-9]+\\\\.?[0-9]*)')::numeric";
+        return "SUBSTRING($val FROM E'^(-?[0-9]+\\\\.?[0-9]*)')::numeric";
+    }
+
+    public function orderBy($val) {
+        return array(
+            "$val IS NOT NULL",
+            $this->castToNumber($val),
+            $val
+        );
     }
 
     public function isInitialized() {
