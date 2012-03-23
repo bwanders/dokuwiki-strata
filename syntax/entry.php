@@ -34,7 +34,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
     }
 
     function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('<data(?: +[_a-zA-Z0-9 ]+?)?(?: +#[^>]*?)?>\n(?:.+?\n)*?</data>',$mode, 'plugin_stratabasic_entry');
+        $this->Lexer->addSpecialPattern('<data(?: +[^#>]+?)?(?: +#[^>]*?)?>\n(?:.+?\n)*?</data>',$mode, 'plugin_stratabasic_entry');
     }
 
     function handle($match, $state, $pos, &$handler) {
@@ -55,7 +55,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
         $header = $this->handleHeader($header, $result);
 
         // extract header, and match it to get classes and fragment
-        preg_match('/^( +[_a-zA-Z0-9 ]+)?(?: +#([^>]*?))?$/', $header, $header);
+        preg_match('/^( +[^#>]+)?(?: +#([^>]*?))?$/', $header, $header);
 
         // process the classes into triples
         foreach(preg_split('/\s+/',trim($header[1])) as $class) {
@@ -80,7 +80,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
 
         // sanity check
         if(count($tree['cs'])) {
-            msg('Strata basic: I don\'t know what to do with the '.($tree['cs'][0]['tag']?'\'<code>'.hsc($tree['cs'][0]['tag']).'</code>\'':'unnamed').' group in the '.($result['entry']?'\''.hsc($result['entry']).'\' ':'').'data block.',-1);
+            msg('Strata basic: I don\'t know what to do with the '.($tree['cs'][0]['tag']?'\'<code>'.utf8_tohtml(hsc($tree['cs'][0]['tag'])).'</code>\'':'unnamed').' group in the '.($result['entry']?'\''.utf8_tohtml(hsc($result['entry'])).'\' ':'').'data block.',-1);
             return array();
         }
 
@@ -88,12 +88,12 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
         foreach($lines as $line) {
             // match a "property_type(hint)*: value" pattern
             // (the * is only used to indicate that the value is actually a comma-seperated list)
-            if(preg_match('/^([-a-zA-Z0-9 ]+?)(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?(\*)?\s*:(.*)$/',$line,$parts)) {
+            if(preg_match('/^([^_:]+?)(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?(\*)?\s*:(.*)$/',$line,$parts)) {
                 // assign useful names
                 list($match, $property, $type, $hint, $multi, $values) = $parts;
 
                 // trim property so we don't get accidental 'name   ' keys
-                $property = trim($property);
+                $property = utf8_trim($property);
 
                 // lazy create key bucket
                 if(!isset($result['data'][$property])) {
@@ -102,13 +102,14 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
 
                 // determine values, splitting on commas if necessary
                 if($multi == '*') {
-                    $values = array_map('trim',explode(',',$values));
+                    $values = explode(',',$values);
                 } else {
-                    $values = array(trim($values));
+                    $values = array($values);
                 }
 
                 // generate triples from the values
                 foreach($values as $v) {
+                    $v = utf8_trim($v);
                     if($v == '') continue;
                     // replace the [[]] quasi-magic token with the empty string
                     if($v == '[[]]') $v = '';
@@ -118,7 +119,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                     $result['data'][$property][] = array('value'=>$v,'type'=>$type,'hint'=>($hint?:null));
                 }
             } else {
-                msg('Strata basic: I don\'t understand data entry line \'<code>'.htmlentities($line).'</code>\'.', -1);
+                msg('Strata basic: I don\'t understand data entry line \'<code>'.utf8_tohtml(hsc($line)).'</code>\'.', -1);
             }
         }
 
