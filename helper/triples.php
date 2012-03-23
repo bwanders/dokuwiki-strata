@@ -600,9 +600,16 @@ class stratastorage_sql_generator {
                 case '^~':
                     $filters[] = '( ' . $this->_ci($lhs) . ' '.$this->_db->stringCompare().' ' .$this->_ci('('. $eh.$rhs.$et . ' || \'%\')').$em. ')';
                     break;
+                case '!^~':
+                    $filters[] = '( ' . $this->_ci($lhs) . ' NOT '.$this->_db->stringCompare().' ' .$this->_ci('('. $eh.$rhs.$et . ' || \'%\')').$em. ')';
+                    break;
                 case '$~':
                     $filters[] = '( ' . $this->_ci($lhs) . ' '.$this->_db->stringCompare().' '.$this->_ci('(\'%\' || ' . $eh.$rhs.$et. ')') .$em. ')';
                     break;
+                case '!$~':
+                    $filters[] = '( ' . $this->_ci($lhs) . ' NOT '.$this->_db->stringCompare().' '.$this->_ci('(\'%\' || ' . $eh.$rhs.$et. ')') .$em. ')';
+                    break;
+
                 default:
             }
         }
