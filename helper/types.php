@@ -81,7 +81,7 @@ class helper_plugin_stratastorage_types extends DokuWiki_Plugin {
                     $match[2]
                 );
             } else {
-                msg('Strata storage: Invalid '.$key.' type configuration, falling back to <code>text</code>',-1);
+                msg(sprintf($this->getLang('error_types_config'), $key), -1);
                 $this->configTypes[$key] = array(
                     'text',
                     null

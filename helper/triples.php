@@ -137,7 +137,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         list($driver,$connection) = explode(':',$dsn,2);
         $driverFile = DOKU_PLUGIN."stratastorage/driver/$driver.php";
         if(!@file_exists($driverFile)) {
-            msg('Strata storage: no complementary driver for PDO driver '.$driver.'.',-1);
+            msg(sprintf($this->getLang('error_triples_nodriver'), $driver), -1);
             return false;
         }
         require_once($driverFile);
@@ -204,7 +204,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         $res = $query->execute($values);
         if($res === false) {
             $error = $query->errorInfo();
-            msg(hsc('Strata storage: Failed to remove triples: '.$error[2]),-1);
+            msg(sprintf($this->getLang('error_tiples_remove'),hsc($error[2])),-1);
         }
 
         $query->closeCursor();
@@ -234,7 +234,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         $res = $query->execute($values);
         if($res === false) {
             $error = $query->errorInfo();
-            msg(hsc('Strata storage: Failed to fetch triples: '.$error[2]),-1);
+            msg(sprintf($this->getLang('error_triples_fetch'),hsc($error[2])),-1);
         }
 
         // fetch results and return them
@@ -278,7 +278,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
             // handle errors
             if($res === false) {
                 $error = $query->errorInfo();
-                msg(hsc('Strata storage: Failed to add triples: '.$error[2]),-1);
+                msg(sprintf($this->getLang('error_triples_add'),hsc($error[2])),-1);
                 $this->_db->rollBack();
                 return false;
             }
@@ -310,10 +310,10 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         $res = $query->execute($literals);
         if($res === false) {
             $error = $query->errorInfo();
-            msg(hsc('Strata storage: Failed to execute query: '.$error[2]),-1);
+            msg(sprintf($this->getLang('error_triples_query'),hsc($error[2])),-1);
             if($this->getConf('debug')) {
-                msg('Debug SQL: <code>'.hsc($sql).'</code>',-1);
-                msg('Debug Literals: <pre>'.hsc(print_r($literals,1)).'</pre>',-1);
+                msg(sprintf($this->getLang('debug_sql'),hsc($sql)),-1);
+                msg(sprintf($this->getLang('debug_literals'), hsc(print_r($literals,1))),-1);
             }
             return false;
         }
@@ -797,7 +797,7 @@ class stratastorage_sql_generator {
             case 'and':
                 return $this->_trans_and($query);
             default:
-                msg('Strata storage: unkown abstract query tree node \''.hsc($query['type']).'\'.',-1);
+                msg(sprintf($this->getLang('error_triples_node'),hsc($query['type'])),-1);
                 return array('sql'=>'<<INVALID QUERY NODE>>', array());
         }
     }
