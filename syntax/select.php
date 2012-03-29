@@ -56,7 +56,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
             $result['fields'] = $this->helper->parseFieldsShort($header, $typemap);
         }
 
-        $tree = $this->helper->constructTree($lines);
+        $tree = $this->helper->constructTree($lines,'query');
 
         // allow subclass body handling
         $this->handleBody($tree, $result, $typemap);

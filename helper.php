@@ -507,7 +507,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
      *
      * @return a tagged tree
      */
-    function constructTree($lines) {
+    function constructTree($lines, $what) {
         $root = array(
             'tag'=>'',
             'cs'=>array()
@@ -541,7 +541,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         }
 
         if(count($stack) != 1 || $stack[0] != $root) {
-            msg($this->getLang('error_syntax_braces'),-1);
+            msg(sprintf($this->getLang('error_syntax_braces'),$what),-1);
         }
 
         return $root;

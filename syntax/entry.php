@@ -70,7 +70,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
         }
 
         // parse tree
-        $tree = $this->helper->constructTree($lines);
+        $tree = $this->helper->constructTree($lines,'data entry');
 
         // allow subclasses first pick in the tree
         $this->handleBody($tree, $result);
