@@ -6,8 +6,8 @@ $lang['error_triples_nodriver'] = 'Strata storage: no complementary driver for P
 $lang['error_triples_remove'] = 'Strata storage: Failed to remove triples: %s';
 $lang['error_triples_fetch'] = 'Strata storage: Failed to fetch triples: %s';
 $lang['error_triples_add'] = 'Strata storage: Failed to add triples: %s';
-$lang['error_triples_query'] = 'Strata storage: failed to execute query: %s';
-$lang['error_triples_node'] = 'Strata storage: unknown abstract query tree node type \'%s\'';
+$lang['error_triples_query'] = 'Strata storage: Failed to execute query: %s';
+$lang['error_triples_node'] = 'Strata storage: Unknown abstract query tree node type \'%s\'';
 
 $lang['debug_sql'] = 'Debug SQL: <code>%s</code>';
 $lang['debug_literals'] = 'Debug Literals: <pre>%s</pre>';
