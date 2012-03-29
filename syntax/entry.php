@@ -80,7 +80,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
 
         // sanity check
         if(count($tree['cs'])) {
-            msg('Strata basic: I don\'t know what to do with the '.($tree['cs'][0]['tag']?'\'<code>'.utf8_tohtml(hsc($tree['cs'][0]['tag'])).'</code>\'':'unnamed').' group in the '.($result['entry']?'\''.utf8_tohtml(hsc($result['entry'])).'\' ':'').'data block.',-1);
+            msg(sprintf($this->getLang('error_entry_block'), ($tree['cs'][0]['tag']?sprintf($this->getLang('named_group'),utf8_tohtml(hsc($tree['cs'][0]['tag']))):$this->getLang('unnamed_group')), utf8_tohtml(hsc($result['entry']))),-1);
             return array();
         }
 
@@ -119,7 +119,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                     $result['data'][$property][] = array('value'=>$v,'type'=>$type,'hint'=>($hint?:null));
                 }
             } else {
-                msg('Strata basic: I don\'t understand data entry line \'<code>'.utf8_tohtml(hsc($line)).'</code>\'.', -1);
+                msg(sprintf($this->getLang('error_entry_line'), utf8_tohtml(hsc($line))),-1);
             }
         }
 

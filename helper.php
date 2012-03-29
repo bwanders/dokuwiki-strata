@@ -113,10 +113,10 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
             } elseif(count($where)==1) {
                 $tree =& $where[0];
                 if(count($root['cs'])) {
-                    $this->_fail('Strata basic: I don\'t know what to do with things outside of the <code>where</code> group.');
+                    $this->_fail($this->getLang('error_query_outofwhere'));
                 }
             } else {
-                $this->_fail('Strata basic: A query should contain at most a single <code>where</code> group.');
+                $this->_fail($this->getLang('error_query_singlewhere'));
             }
 
             list($group, $scope) = $this->transformGroup($tree, $typemap);
@@ -126,30 +126,30 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
             // handle sort groups
             if(count($ordering)) {
                 if(count($ordering) > 1) {
-                    $this->_fail('Strata basic: I don\'t know what to do with multiple <code>sort</code> groups.',-1);
+                    $this->_fail($this->getLang('error_query_multisort'));
                 }
    
                 // handle each line in the group 
                 foreach($ordering[0]['cs'] as $line) {
                     if(is_array($line)) {
-                        $this->_fail('Strata basic: I can\'t handle groups in a <code>sort</code> group.',-1);
+                        $this->_fail($this->getLang('error_query_sortblock'));
                     }
     
                     if(preg_match('/^\?('.STRATABASIC_VARIABLE.')\s*(?:\((asc|desc)(?:ending)?\))?$/S',utf8_trim($line),$match)) {
                         if(!in_array($match[1], $scope)) {
-                            $this->_fail('Strata basic: <code>sort</code> group uses out-of-scope variable \'<code>'.utf8_tohtml(hsc($match[1])).'</code>\'.',-1);
+                            $this->_fail(sprintf($this->getLang('error_query_sortvar'),utf8_tohtml(hsc($match[1]))));
                         }
     
                         $result['ordering'][] = array('variable'=>$match[1], 'direction'=>($match[2]?:'asc'));
                     } else {
-                        $this->_fail('Strata basic: I can\'t handle line \'<code>'.utf8_tohtml(hsc($line)).'</code>\' in the <code>sort</code> group.',-1);
+                        $this->_fail(sprintf($this->getLang('error_query_sortline'), utf8_tohtml(hsc($line))));
                     }
                 }
             }
     
             foreach($projection as $var) {
                 if(!in_array($var, $scope)) {
-                    $this->_fail('Strata basic: selected variable \'<code>'.utf8_tohtml(hsc($var)).'</code>\' is out-of-scope.',-1);
+                    $this->_fail(sprintf($this->getLang('error_query_selectvar'), utf8_tohtml(hsc($var))));
                 }
             }
     
@@ -183,7 +183,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
         // check for leftovers
         if(count($root['cs'])) {
-            $this->_fail('Strata basic: Invalid '.( isset($root['cs'][0]['tag']) ? 'group \'<code>'.utf8_tohtml(hsc($root['cs'][0]['tag'])).'</code>\'' : 'unnamed group').' in query.',-1);
+            $this->_fail(sprintf($this->getLang('error_query_group'),( isset($root['cs'][0]['tag']) ? sprintf($this->getLang('named_group'), utf8_tohtml(hsc($root['cs'][0]['tag']))) : $this->getLang('unnamed_group'))));
         }
 
         // split patterns into triples and filters
@@ -268,11 +268,11 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
         // do sanity checks
         if(count($root['cs'])) {
-            $this->_fail('Strata basic: Lines or named groups inside a <code>union</code> group; I can only handle unnamed groups inside a <code>union</code> group.',-1);
+            $this->_fail($this->getLang('error_query_unionblocks'));
         }
 
         if(count($subs) < 2) {
-            $this->_fail('Strata basic: I need at least 2 unnamed groups inside a <code>union</code> group.',-1);
+            $this->_fail($this->getLang('error_query_unionreq'));
         }
 
         // transform the first group
@@ -447,7 +447,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                 $filters[] = array('type'=>'filter','lhs'=>$lhs, 'operator'=>$operator, 'rhs'=>$rhs);
             } else {
                 // unknown lines are fail
-                $this->_fail('Strata basic: Unknown triple pattern or filter \'<code>'.utf8_tohtml(hsc($line)).'</code>\'.',-1);
+                $this->_fail(sprintf($this->getLang('error_query_pattern'),utf8_tohtml(hsc($line))));
             }
         }
 
@@ -468,7 +468,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                 $this->updateTypemap($typemap, $variable, $type, $hint);
                 $result[$variable] = array('caption'=>$caption);
             } else {
-                msg('Strata basic: Weird line \'<code>'.utf8_tohtml(hsc($line)).'</code>\' in \'<code>fields</code>\' group.', -1);
+                msg(sprintf($this->getLang('error_query_fieldsline'),utf8_tohtml(hsc($line))),-1);
                 return false;
             }
         }
@@ -541,7 +541,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         }
 
         if(count($stack) != 1 || $stack[0] != $root) {
-            msg('Strata basic: unmatched braces in syntax',-1);
+            msg($this->getLang('error_syntax_braces'),-1);
         }
 
         return $root;
