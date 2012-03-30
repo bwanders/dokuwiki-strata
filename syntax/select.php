@@ -70,17 +70,17 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         // parse 'long syntax' if we don't have projection information yet
         if(count($fieldsGroups)) {
             if(count($result['fields'])) {
-                msg($this->getLang('error_query_bothfields'),-1);
+                msg($this->helper->getLang('error_query_bothfields'),-1);
                 return array();
             } else {
                 if(count($fieldsGroups) > 1) {
-                    msg($this->getLang('error_query_fieldsgroups'),-1);
+                    msg($this->helper->getLang('error_query_fieldsgroups'),-1);
                     return array();
                 }
 
                 $fieldsLines = $this->helper->extractText($fieldsGroups[0]);
                 if(count($fieldsGroups[0]['cs'])) {
-                    msg(sprintf($this->getLang('error_query_fieldsblock'),( isset($fieldsGroups[0]['cs'][0]['tag']) ? sprintf($this->getLang('named_group'),hsc($fieldsGroups[0]['cs'][0]['tag'])) : $this->getLang('unnamed_group'))),-1);
+                    msg(sprintf($this->helper->getLang('error_query_fieldsblock'),( isset($fieldsGroups[0]['cs'][0]['tag']) ? sprintf($this->helper->getLang('named_group'),hsc($fieldsGroups[0]['cs'][0]['tag'])) : $this->helper->getLang('unnamed_group'))),-1);
                     return array();
                 }
                 $result['fields'] = $this->helper->parseFieldsLong($fieldsLines, $typemap);
@@ -89,7 +89,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         }
 
         if(empty($result['fields']) || count($result['fields']) == 0) {
-            msg($this->getLang('error_query_noselect'),-1);
+            msg($this->helper->getLang('error_query_noselect'),-1);
             return array();
         }
 
@@ -104,7 +104,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         // check projected variables and load types
         foreach($result['fields'] as $var=>$f) {
             if(!in_array($var, $variables)) {
-                msg(sprintf($this->getLang('error_query_unknownselect'),utf8_tohtml(hsc($var))),-1);
+                msg(sprintf($this->helper->getLang('error_query_unknownselect'),utf8_tohtml(hsc($var))),-1);
                 return array();
             }
 
