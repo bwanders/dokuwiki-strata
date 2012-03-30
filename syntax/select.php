@@ -38,6 +38,9 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
     }
 
     function handle($match, $state, $pos, &$handler) {
+        // allow subclass handling of the whole match
+        $match = $this->preprocess($match);
+
         // split into lines and remove header and footer
         $lines = explode("\n",$match);
         $header = array_shift($lines);
@@ -118,6 +121,18 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
 
         return $result;
     }
+
+    /**
+     * Handles the whole match. This method is called before any processing
+     * is done by the actual class.
+     * 
+     * @param match string the complete match
+     * @return a preprocessed string
+     */
+    function preprocess($match) {
+        return $match;
+    }
+
 
     /**
      * Handles the header of the syntax. This method is called before
