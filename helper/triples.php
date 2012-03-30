@@ -399,6 +399,13 @@ class stratastorage_sql_generator {
     }
 
     /**
+     * Passes through localisation calls.
+     */
+    function getLang($key) {
+        return $this->_triples->getLang($key);
+    }
+
+    /**
      * Wrap SQL expression in case insensitivisation.
      */
     function _ci($a) {
@@ -798,7 +805,7 @@ class stratastorage_sql_generator {
                 return $this->_trans_and($query);
             default:
                 msg(sprintf($this->getLang('error_triples_node'),hsc($query['type'])),-1);
-                return array('sql'=>'<<INVALID QUERY NODE>>', array());
+                return array('sql'=>'<<INVALID QUERY NODE>>', 'terms'=>array());
         }
     }
 
