@@ -38,18 +38,16 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
     }
 
     function handle($match, $state, $pos, &$handler) {
+        $result = array();
+        $typemap = array();
+
         // allow subclass handling of the whole match
-        $match = $this->preprocess($match);
+        $match = $this->preprocess($match, $result, $typemap);
 
         // split into lines and remove header and footer
         $lines = explode("\n",$match);
         $header = array_shift($lines);
         $footer = array_pop($lines);
-
-        $result = array();
-
-        $typemap = array();
-
 
         // allow subclass header handling
         $header = $this->handleHeader($header, $result, $typemap);
@@ -127,9 +125,11 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
      * is done by the actual class.
      * 
      * @param match string the complete match
+     * @param result array the result array passed to the render method
+     * @param typemap array the type map
      * @return a preprocessed string
      */
-    function preprocess($match) {
+    function preprocess($match, &$result, &$typemap) {
         return $match;
     }
 
