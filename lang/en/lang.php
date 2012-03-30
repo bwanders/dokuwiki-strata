@@ -23,7 +23,7 @@ $lang['error_query_selectvar'] = 'selected variable\'<code>%s</code>\' is out-of
 $lang['error_query_group'] = 'Invalid %s in query.';
 $lang['error_query_unionblocks'] = 'Lines or named groups inside a <code>union</code> group. I can only handle unnamed groups inside a <code>union</code> group.';
 $lang['error_query_unionreq'] = 'I need at least 2 unnamed groups inside a <code>union</code> group.';
-$lang['error_query_pattern'] = 'Unknwon triple pattern or filter pattern \'<code>%s</code>\'.';
+$lang['error_query_pattern'] = 'Unknown triple pattern or filter pattern \'<code>%s</code>\'.';
 $lang['error_query_fieldsline'] = 'Weird line \'<code>%s</code>\' in <code>fields</code> group.';
 $lang['error_syntax_braces'] = 'Unmatched braces in %s';
 
