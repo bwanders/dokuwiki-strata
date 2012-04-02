@@ -38,10 +38,6 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
     }
 
     function handle($match, $state, $pos, &$handler) {
-        $lines = explode("\n",$match);
-        $header = array_shift($lines);
-        $footer = array_pop($lines);
-
         $result = array(
             'entry'=>'',
             'data'=> array(
@@ -49,6 +45,13 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                 $this->triples->getTitleKey() => array()
             )
         );
+
+        // allow for preprocessing by a subclass
+        $match = $this->preprocess($match, $result);
+
+        $lines = explode("\n",$match);
+        $header = array_shift($lines);
+        $footer = array_pop($lines);
 
 
         // allow subclasses to mangle header
@@ -157,6 +160,18 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
         $footer = $this->handleFooter($footer, $result);
 
         return $result;
+    }
+
+    /**
+     * Handles the whole match. This method is called before any processing
+     * is done by the actual class.
+     * 
+     * @param match string the complete match
+     * @param result array the result array passed to the render method
+     * @return a preprocessed string
+     */
+    function preprocess($match, &$result) {
+        return $match;
     }
 
     /**
