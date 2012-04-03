@@ -19,7 +19,7 @@ class plugin_strata_type_wiki extends plugin_strata_type {
 
         $value = "\n".str_replace("\r\n","\n",$value)."\n";
 
-        for($i=0;$i<count($ins);$i++) {
+        for($i=count($ins)-1;$i>=0;$i--) {
             switch($ins[$i][0]) {
                 case 'internallink':
                     $replacement = $this->_normalize_internallink($ins[$i][1]);
