@@ -204,7 +204,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         $res = $query->execute($values);
         if($res === false) {
             $error = $query->errorInfo();
-            msg(sprintf($this->getLang('error_tiples_remove'),hsc($error[2])),-1);
+            msg(sprintf($this->getLang('error_triples_remove'),hsc($error[2])),-1);
         }
 
         $query->closeCursor();
