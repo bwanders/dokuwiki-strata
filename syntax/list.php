@@ -57,16 +57,24 @@ class syntax_plugin_stratabasic_list extends syntax_plugin_stratabasic_select {
             foreach($result as $row) {
                 $R->listitem_open(1);
                 $R->listcontent_open();
-                foreach($fields as $f) {
-                    $first = true;
-                    foreach($row[$f['name']] as $value) {
-                        if(!$first) $R->doc .= ', ';
-                        $f['type']->render($mode, $R, $this->triples, $value, $f['hint']);
-                        $first = false;
-                    }
 
-                    if(count($row[$f['name']])) $R->doc .= ' ';
+                $fieldCount = 0;
+
+                foreach($fields as $f) {
+                    if(!count($row[$f['name']])) continue;
+                    if($fieldCount>1) $R->doc .= '; ';
+                    if($fieldCount==1) $R->doc .= ' (';
+                    $firstValue = true;
+                    foreach($row[$f['name']] as $value) {
+                        if(!$firstValue) $R->doc .= ', ';
+                        $f['type']->render($mode, $R, $this->triples, $value, $f['hint']);
+                        $firstValue = false;
+                    }
+                    $fieldCount++;
                 }
+
+                if($fieldCount>1) $R->doc .= ')';
+
                 $R->listcontent_close();
                 $R->listitem_close();
             }
