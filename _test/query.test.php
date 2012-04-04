@@ -1483,7 +1483,7 @@ class query_test extends Strata_Query_UnitTestCase {
                             ),
                             'object' => array (
                                 'type' => 'variable',
-                                'text' => '\\  like ""'
+                                'text' => '  \\  like ""! '
                             )
                         )
                     )
@@ -1497,7 +1497,7 @@ class query_test extends Strata_Query_UnitTestCase {
                 ':l',
                 '%t',
                 '1.10',
-                '\\  like ""'
+                '  \\  like ""! '
             ),
             'ordering' => array (
                 array (
@@ -1520,7 +1520,7 @@ class query_test extends Strata_Query_UnitTestCase {
                 ':l' => '5 ft 5 in',
                 '%t' => '10%',
                 '1.10' => '10',
-                '\\  like ""' => '50:alice.svg'
+                '  \\  like ""! ' => '50:alice.svg'
             ),
             array (
                 '_' => 'person:bob',
@@ -1530,7 +1530,7 @@ class query_test extends Strata_Query_UnitTestCase {
                 ':l' => '5 ft 10 in',
                 '%t' => '25%',
                 '1.10' => '8',
-                '\\  like ""' => '50:bob.png'
+                '  \\  like ""! ' => '50:bob.png'
             ),
             array (
                 '_' => 'person:carol',
@@ -1540,7 +1540,7 @@ class query_test extends Strata_Query_UnitTestCase {
                 ':l' => '4 ft 11 in',
                 '%t' => '2%',
                 '1.10' => '1',
-                '\\  like ""' => '50:carol.jpg'
+                '  \\  like ""! ' => '50:carol.jpg'
             ),
             array (
                 '_' => 'person:carol',
@@ -1550,7 +1550,7 @@ class query_test extends Strata_Query_UnitTestCase {
                 ':l' => '4 ft 11 in',
                 '%t' => '2%',
                 '1.10' => '1',
-                '\\  like ""' => '50:carol.jpg'
+                '  \\  like ""! ' => '50:carol.jpg'
             )
         );
 
