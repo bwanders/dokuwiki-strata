@@ -79,7 +79,7 @@ abstract class plugin_strata_driver {
     public function orderBy($val) {
         return array(
             $this->castToNumber($val),
-            $val
+            $this->ci($val)
         );
     }
 
