@@ -314,7 +314,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
             if(preg_match('/^((?:\?'.STRATABASIC_VARIABLE.')|(?:\[\[[^]]*\]\]))\s+(?:((?:'.STRATABASIC_PREDICATE.')|(?:\?'.STRATABASIC_VARIABLE.'))(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*:\s*(.+?)\s*$/S',$line,$match)) {
                 // triple pattern
-                list($_, $subject, $predicate, $type, $hint, $object) = $match;
+                list(, $subject, $predicate, $type, $hint, $object) = $match;
 
                 if($subject[0] == '?') {
                     $subject = $this->variable($subject);
@@ -336,8 +336,16 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                 }
 
                 if($object[0] == '?') {
-                    $object = $this->variable($object);
+                    // match a proper type variable
+                    preg_match('/(?:\?('.STRATABASIC_VARIABLE.'))(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?/',$object,$captures);
+                    list(, $var, $vtype, $vhint) = $captures;
+
+                    // create the object node
+                    $object = $this->variable($var);
                     $scope[] = $object['text'];
+
+                    // try direct type first, implied type second
+                    $this->updateTypemap($typemap, $object['text'], $vtype, $vhint);
                     $this->updateTypemap($typemap, $object['text'], $type, $hint);
                 } else {
                     // check for empty string token
