@@ -505,9 +505,11 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
     /**
      * Returns the regex pattern used by the 'short syntax' for projection. This methods can
      * be used to get a dokuwiki-lexer-safe regex to embed into your own syntax pattern.
+     *
+     * @param captions boolean Whether the pattern should include caption matching (defaults to true)
      */
-    function fieldsShortPattern() {
-        return '(?:\s*\?'.STRATABASIC_VARIABLE.'(?:_[a-z0-9]*(?:\([^\)]*\))?)?\s*(?:"[^"]*")?)';
+    function fieldsShortPattern($captions = true) {
+        return '(?:\s*\?'.STRATABASIC_VARIABLE.'(?:_[a-z0-9]*(?:\([^\)]*\))?)?'.($captions?'\s*(?:"[^"]*")?':'').')';
     }
 
     /**
