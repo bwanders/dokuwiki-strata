@@ -10,6 +10,7 @@ class query_operators_numeric_optional_test extends Strata_Query_UnitTestCase {
     function testGtLtePartiallyNumeric() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'filter',
                 'lhs' => array (
@@ -67,21 +68,22 @@ class query_operators_numeric_optional_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:alice',
-                'tax' => '10%'
+                'p' => array('person:alice'),
+                'tax' => array('10%')
             ),
             array (
-                'p' => 'person:bob',
-                'tax' => '25%'
+                'p' => array('person:bob'),
+                'tax' => array('25%')
             )
         );
 
-        $this->assertQueryResult($query, $expected);
+        $this->assertQueryResult($query, $expected, 'Partial numeric comparison (first numbers, then text) unsupported');
     }
 
     function testGteLtPartiallyNumeric() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'filter',
                 'lhs' => array (
@@ -139,21 +141,22 @@ class query_operators_numeric_optional_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:alice',
-                'tax' => '10%'
+                'p' => array('person:alice'),
+                'tax' => array('10%')
             ),
             array (
-                'p' => 'person:carol',
-                'tax' => '2%'
+                'p' => array('person:carol'),
+                'tax' => array('2%')
             )
         );
 
-        $this->assertQueryResult($query, $expected);
+        $this->assertQueryResult($query, $expected, 'Partial numeric comparison (first numbers, then text) unsupported');
     }
 
     function testGtLteNatural() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'filter',
                 'lhs' => array (
@@ -211,21 +214,22 @@ class query_operators_numeric_optional_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:alice',
-                'length' => '5 ft 5 in'
+                'p' => array('person:alice'),
+                'length' => array('5 ft 5 in')
             ),
             array (
-                'p' => 'person:carol',
-                'length' => '4 ft 11 in'
+                'p' => array('person:carol'),
+                'length' => array('4 ft 11 in')
             )
         );
 
-        $this->assertQueryResult($query, $expected);
+        $this->assertQueryResult($query, $expected, 'Natural comparison unsupported');
     }
 
     function testGteLtNatural() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'filter',
                 'lhs' => array (
@@ -283,16 +287,16 @@ class query_operators_numeric_optional_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:alice',
-                'length' => '5 ft 5 in'
+                'p' => array('person:alice'),
+                'length' => array('5 ft 5 in')
             ),
             array (
-                'p' => 'person:carol',
-                'length' => '4 ft 11 in'
+                'p' => array('person:carol'),
+                'length' => array('4 ft 11 in')
             )
         );
 
-        $this->assertQueryResult($query, $expected);
+        $this->assertQueryResult($query, $expected, 'Natural comparison unsupported');
     }
 
 }

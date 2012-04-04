@@ -10,6 +10,7 @@ class query_operators_numeric_test extends Strata_Query_UnitTestCase {
     function testGtLte() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'filter',
                 'lhs' => array (
@@ -67,12 +68,12 @@ class query_operators_numeric_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:alice',
-                'rating' => '10'
+                'p' => array('person:alice'),
+                'rating' => array('10')
             ),
             array (
-                'p' => 'person:bob',
-                'rating' => '8'
+                'p' => array('person:bob'),
+                'rating' => array('8')
             )
         );
 
@@ -82,6 +83,7 @@ class query_operators_numeric_test extends Strata_Query_UnitTestCase {
     function testGteLt() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'filter',
                 'lhs' => array (
@@ -139,12 +141,12 @@ class query_operators_numeric_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:bob',
-                'rating' => '8'
+                'p' => array('person:bob'),
+                'rating' => array('8')
             ),
             array (
-                'p' => 'person:carol',
-                'rating' => '1'
+                'p' => array('person:carol'),
+                'rating' => array('1')
             )
         );
 
@@ -154,6 +156,7 @@ class query_operators_numeric_test extends Strata_Query_UnitTestCase {
     function testPartiallyNumeric() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'filter',
                 'lhs' => array (
@@ -216,6 +219,7 @@ class query_operators_numeric_test extends Strata_Query_UnitTestCase {
     function testNonNumeric() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'filter',
                 'lhs' => array (

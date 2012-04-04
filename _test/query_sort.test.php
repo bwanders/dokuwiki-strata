@@ -10,6 +10,7 @@ class query_sort_test extends Strata_Query_UnitTestCase {
     function testNumericSort() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'triple',
                 'subject' => array (
@@ -39,16 +40,16 @@ class query_sort_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:carol',
-                'rating' => '1'
+                'p' => array('person:carol'),
+                'rating' => array('1')
             ),
             array (
-                'p' => 'person:bob',
-                'rating' => '8'
+                'p' => array('person:bob'),
+                'rating' => array('8')
             ),
             array (
-                'p' => 'person:alice',
-                'rating' => '10'
+                'p' => array('person:alice'),
+                'rating' => array('10')
             )
         );
 
@@ -58,6 +59,7 @@ class query_sort_test extends Strata_Query_UnitTestCase {
     function testPartiallyNumericSort() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'triple',
                 'subject' => array (

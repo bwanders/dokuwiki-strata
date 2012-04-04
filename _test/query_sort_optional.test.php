@@ -10,6 +10,7 @@ class query_sort_optional_test extends Strata_Query_UnitTestCase {
     function testPartiallyNumericSort() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'triple',
                 'subject' => array (
@@ -39,25 +40,26 @@ class query_sort_optional_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:carol',
-                'tax' => '2%'
+                'p' => array('person:carol'),
+                'tax' => array('2%')
             ),
             array (
-                'p' => 'person:alice',
-                'tax' => '10%'
+                'p' => array('person:alice'),
+                'tax' => array('10%')
             ),
             array (
-                'p' => 'person:bob',
-                'tax' => '25%'
+                'p' => array('person:bob'),
+                'tax' => array('25%')
             )
         );
 
-        $this->assertQueryResult($query, $expected);
+        $this->assertQueryResult($query, $expected, 'Partial numeric sort (numbers first, text second) unsupported');
     }
 
     function testNaturalSort() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'triple',
                 'subject' => array (
@@ -87,25 +89,26 @@ class query_sort_optional_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:carol',
-                'length' => '4 ft 11 in'
+                'p' => array('person:carol'),
+                'length' => array('4 ft 11 in')
             ),
             array (
-                'p' => 'person:alice',
-                'length' => '5 ft 5 in'
+                'p' => array('person:alice'),
+                'length' => array('5 ft 5 in')
             ),
             array (
-                'p' => 'person:bob',
-                'length' => '5 ft 10 in'
+                'p' => array('person:bob'),
+                'length' => array('5 ft 10 in')
             )
         );
 
-        $this->assertQueryResult($query, $expected);
+        $this->assertQueryResult($query, $expected, 'Full natural sort unsupported');
     }
 
     function testUnicodeSort() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'triple',
                 'subject' => array (
@@ -135,20 +138,20 @@ class query_sort_optional_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:alice',
-                'id' => 'α'
+                'p' => array('person:alice'),
+                'id' => array('α')
             ),
             array (
-                'p' => 'person:bob',
-                'id' => 'Β'
+                'p' => array('person:bob'),
+                'id' => array('Β')
             ),
             array (
-                'p' => 'person:carol',
-                'id' => 'γ'
+                'p' => array('person:carol'),
+                'id' => array('γ')
             )
         );
 
-        $this->assertQueryResult($query, $expected);
+        $this->assertQueryResult($query, $expected, 'Case insensitive unicode sort unsupported');
     }
 
 }

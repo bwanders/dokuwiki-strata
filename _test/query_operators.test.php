@@ -10,6 +10,7 @@ class query_operators_test extends Strata_Query_UnitTestCase {
     function testEquals() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'filter',
                 'lhs' => array (
@@ -53,7 +54,7 @@ class query_operators_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:carol'
+                'p' => array('person:carol')
             )
         );
 
@@ -63,6 +64,7 @@ class query_operators_test extends Strata_Query_UnitTestCase {
     function testNotEquals() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'filter',
                 'lhs' => array (
@@ -106,10 +108,10 @@ class query_operators_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:alice'
+                'p' => array('person:alice')
             ),
             array (
-                'p' => 'person:bob'
+                'p' => array('person:bob')
             )
         );
 
@@ -119,6 +121,7 @@ class query_operators_test extends Strata_Query_UnitTestCase {
     function testLike() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'filter',
                 'lhs' => array (
@@ -162,7 +165,7 @@ class query_operators_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:carol'
+                'p' => array('person:carol')
             )
         );
 
@@ -172,6 +175,7 @@ class query_operators_test extends Strata_Query_UnitTestCase {
     function testNotLike() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'filter',
                 'lhs' => array (
@@ -215,10 +219,10 @@ class query_operators_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:alice'
+                'p' => array('person:alice')
             ),
             array (
-                'p' => 'person:bob'
+                'p' => array('person:bob')
             )
         );
 
@@ -228,6 +232,7 @@ class query_operators_test extends Strata_Query_UnitTestCase {
     function testBeginsWith() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'filter',
                 'lhs' => array (
@@ -271,7 +276,7 @@ class query_operators_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:carol'
+                'p' => array('person:carol')
             )
         );
 
@@ -281,6 +286,7 @@ class query_operators_test extends Strata_Query_UnitTestCase {
     function testEndsWith() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'filter',
                 'lhs' => array (
@@ -324,7 +330,7 @@ class query_operators_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:carol'
+                'p' => array('person:carol')
             )
         );
 

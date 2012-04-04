@@ -131,6 +131,7 @@ class query_test extends Strata_Query_UnitTestCase {
     function testAllPersonsOnce() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'and',
                 'lhs' => array (
@@ -207,25 +208,25 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:alice',
-                'img' => '50:alice.svg',
-                'rating' => '10',
-                'length' => '5 ft 5 in',
-                'tax' => '10%'
+                'p' => array('person:alice'),
+                'img' => array('50:alice.svg'),
+                'rating' => array('10'),
+                'length' => array('5 ft 5 in'),
+                'tax' => array('10%')
             ),
             array (
-                'p' => 'person:bob',
-                'img' => '50:bob.png',
-                'rating' => '8',
-                'length' => '5 ft 10 in',
-                'tax' => '25%'
+                'p' => array('person:bob'),
+                'img' => array('50:bob.png'),
+                'rating' => array('8'),
+                'length' => array('5 ft 10 in'),
+                'tax' => array('25%')
             ),
             array (
-                'p' => 'person:carol',
-                'img' => '50:carol.jpg',
-                'rating' => '1',
-                'length' => '4 ft 11 in',
-                'tax' => '2%'
+                'p' => array('person:carol'),
+                'img' => array('50:carol.jpg'),
+                'rating' => array('1'),
+                'length' => array('4 ft 11 in'),
+                'tax' => array('2%')
             )
         );
 
@@ -235,6 +236,7 @@ class query_test extends Strata_Query_UnitTestCase {
     function testAllPersons() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'and',
                 'lhs' => array (
@@ -320,36 +322,36 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:carol',
-                'knows' => 'person:alice',
-                'img' => '50:carol.jpg',
-                'rating' => '1',
-                'length' => '4 ft 11 in',
-                'tax' => '2%'
+                'p' => array('person:carol'),
+                'knows' => array('person:alice'),
+                'img' => array('50:carol.jpg'),
+                'rating' => array('1'),
+                'length' => array('4 ft 11 in'),
+                'tax' => array('2%')
             ),
             array (
-                'p' => 'person:carol',
-                'knows' => 'person:bob',
-                'img' => '50:carol.jpg',
-                'rating' => '1',
-                'length' => '4 ft 11 in',
-                'tax' => '2%'
+                'p' => array('person:carol'),
+                'knows' => array('person:bob'),
+                'img' => array('50:carol.jpg'),
+                'rating' => array('1'),
+                'length' => array('4 ft 11 in'),
+                'tax' => array('2%')
             ),
             array (
-                'p' => 'person:bob',
-                'knows' => 'person:alice',
-                'img' => '50:bob.png',
-                'rating' => '8',
-                'length' => '5 ft 10 in',
-                'tax' => '25%'
+                'p' => array('person:bob'),
+                'knows' => array('person:alice'),
+                'img' => array('50:bob.png'),
+                'rating' => array('8'),
+                'length' => array('5 ft 10 in'),
+                'tax' => array('25%')
             ),
             array (
-                'p' => 'person:alice',
-                'knows' => 'person:carol',
-                'img' => '50:alice.svg',
-                'rating' => '10',
-                'length' => '5 ft 5 in',
-                'tax' => '10%'
+                'p' => array('person:alice'),
+                'knows' => array('person:carol'),
+                'img' => array('50:alice.svg'),
+                'rating' => array('10'),
+                'length' => array('5 ft 5 in'),
+                'tax' => array('10%')
             )
         );
 
@@ -360,6 +362,7 @@ class query_test extends Strata_Query_UnitTestCase {
         // All persons except Bob
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'minus',
                 'lhs' => $this->_isPerson,
@@ -378,10 +381,10 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:alice'
+                'p' => array('person:alice')
             ),
             array (
-                'p' => 'person:carol'
+                'p' => array('person:carol')
             )
         );
 
@@ -392,6 +395,7 @@ class query_test extends Strata_Query_UnitTestCase {
         // All persons that know Alice
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'and',
                 'lhs' => array (
@@ -442,10 +446,10 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:bob'
+                'p' => array('person:bob')
             ),
             array (
-                'p' => 'person:carol'
+                'p' => array('person:carol')
             )
         );
 
@@ -456,6 +460,7 @@ class query_test extends Strata_Query_UnitTestCase {
         // All persons having some relation with Alice
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'and',
                 'lhs' => array (
@@ -507,16 +512,16 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:bob',
-                'relationWith' => 'knows'
+                'p' => array('person:bob'),
+                'relationWith' => array('knows')
             ),
             array (
-                'p' => 'person:bob',
-                'relationWith' => 'likes'
+                'p' => array('person:bob'),
+                'relationWith' => array('likes')
             ),
             array (
-                'p' => 'person:carol',
-                'relationWith' => 'knows'
+                'p' => array('person:carol'),
+                'relationWith' => array('knows')
             )
         );
 
@@ -527,6 +532,7 @@ class query_test extends Strata_Query_UnitTestCase {
         // All persons, including their relation with Alice
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'optional',
                 'lhs' => $this->_isPerson,
@@ -578,20 +584,20 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:alice',
-                'relationWith' => null
+                'p' => array('person:alice'),
+                'relationWith' => array()
             ),
             array (
-                'p' => 'person:bob',
-                'relationWith' => 'knows'
+                'p' => array('person:bob'),
+                'relationWith' => array('knows')
             ),
             array (
-                'p' => 'person:bob',
-                'relationWith' => 'likes'
+                'p' => array('person:bob'),
+                'relationWith' => array('likes')
             ),
             array (
-                'p' => 'person:carol',
-                'relationWith' => 'knows'
+                'p' => array('person:carol'),
+                'relationWith' => array('knows')
             )
         );
 
@@ -602,6 +608,7 @@ class query_test extends Strata_Query_UnitTestCase {
         // All persons, including their relation with Alice (unless this relation is 'knows')
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'optional',
                 'lhs' => $this->_isPerson,
@@ -670,16 +677,16 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:alice',
-                'relationWith' => null
+                'p' => array('person:alice'),
+                'relationWith' => array()
             ),
             array (
-                'p' => 'person:bob',
-                'relationWith' => 'likes'
+                'p' => array('person:bob'),
+                'relationWith' => array('likes')
             ),
             array (
-                'p' => 'person:carol',
-                'relationWith' => null
+                'p' => array('person:carol'),
+                'relationWith' => array()
             )
         );
 
@@ -690,6 +697,7 @@ class query_test extends Strata_Query_UnitTestCase {
         // All persons having a relation with Alice that is not 'knows'
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'filter',
                 'lhs' => array (
@@ -758,8 +766,8 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:bob',
-                'relationWith' => 'likes'
+                'p' => array('person:bob'),
+                'relationWith' => array('likes')
             )
         );
 
@@ -769,6 +777,7 @@ class query_test extends Strata_Query_UnitTestCase {
     function testBobUnionAlice() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => $this->_bobUnionAlice,
             'projection' => array (
                 'p'
@@ -783,10 +792,10 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:alice'
+                'p' => array('person:alice')
             ),
             array (
-                'p' => 'person:bob'
+                'p' => array('person:bob')
             )
         );
 
@@ -796,6 +805,7 @@ class query_test extends Strata_Query_UnitTestCase {
     function testBobUnionAliceWithRating() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'union',
                 'lhs' => array (
@@ -823,12 +833,12 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:alice',
-                'rating' => '10'
+                'p' => array('person:alice'),
+                'rating' => array('10')
             ),
             array (
-                'p' => 'person:bob',
-                'rating' => '8'
+                'p' => array('person:bob'),
+                'rating' => array('8')
             )
         );
 
@@ -838,6 +848,7 @@ class query_test extends Strata_Query_UnitTestCase {
     function testCarolUnionBobUnionAlice() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'union',
                 'lhs' => $this->_personCarol,
@@ -856,13 +867,13 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:alice'
+                'p' => array('person:alice')
             ),
             array (
-                'p' => 'person:bob'
+                'p' => array('person:bob')
             ),
             array (
-                'p' => 'person:carol'
+                'p' => array('person:carol')
             )
         );
 
@@ -872,6 +883,7 @@ class query_test extends Strata_Query_UnitTestCase {
     function testBobUnionBobUnionAlice() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'union',
                 'lhs' => $this->_personBob,
@@ -890,10 +902,10 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:alice'
+                'p' => array('person:alice')
             ),
             array (
-                'p' => 'person:bob'
+                'p' => array('person:bob')
             )
         );
 
@@ -903,6 +915,7 @@ class query_test extends Strata_Query_UnitTestCase {
     function testCarolUnionBobUnionAliceMinusBob() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'union',
                 'lhs' => $this->_personCarol,
@@ -925,10 +938,10 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:alice'
+                'p' => array('person:alice')
             ),
             array (
-                'p' => 'person:carol'
+                'p' => array('person:carol')
             )
         );
 
@@ -938,6 +951,7 @@ class query_test extends Strata_Query_UnitTestCase {
     function testBobUnionAliceOptionalRating() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'union',
                 'lhs' => $this->_personBob,
@@ -961,12 +975,12 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-              'p' => 'person:alice',
-              'rating' => '10'
+              'p' => array('person:alice'),
+              'rating' => array('10')
             ),
             array (
-              'p' => 'person:bob',
-              'rating' => null
+              'p' => array('person:bob'),
+              'rating' => array()
             )
         );
 
@@ -976,6 +990,7 @@ class query_test extends Strata_Query_UnitTestCase {
     function testPersonOptionalKnowsAndLikes() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'optional',
                 'lhs' => $this->_isPerson,
@@ -1000,19 +1015,19 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:alice',
-                'knows' => null,
-                'likes' => null
+                'p' => array('person:alice'),
+                'knows' => array(),
+                'likes' => array()
             ),
             array (
-                'p' => 'person:bob',
-                'knows' => 'person:alice',
-                'likes' => 'person:alice'
+                'p' => array('person:bob'),
+                'knows' => array('person:alice'),
+                'likes' => array('person:alice')
             ),
             array (
-                'p' => 'person:carol',
-                'knows' => null,
-                'likes' => null
+                'p' => array('person:carol'),
+                'knows' => array(),
+                'likes' => array()
             )
         );
 
@@ -1022,6 +1037,7 @@ class query_test extends Strata_Query_UnitTestCase {
     function testPersonOptionalKnowsOptionalLikes() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'optional',
                 'lhs' => $this->_isPerson,
@@ -1046,24 +1062,24 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:alice',
-                'knows' => 'person:carol',
-                'likes' => null
+                'p' => array('person:alice'),
+                'knows' => array('person:carol'),
+                'likes' => array()
             ),
             array (
-                'p' => 'person:bob',
-                'knows' => 'person:alice',
-                'likes' => 'person:alice'
+                'p' => array('person:bob'),
+                'knows' => array('person:alice'),
+                'likes' => array('person:alice')
             ),
             array (
-                'p' => 'person:carol',
-                'knows' => 'person:alice',
-                'likes' => null
+                'p' => array('person:carol'),
+                'knows' => array('person:alice'),
+                'likes' => array()
             ),
             array (
-                'p' => 'person:carol',
-                'knows' => 'person:bob',
-                'likes' => null
+                'p' => array('person:carol'),
+                'knows' => array('person:bob'),
+                'likes' => array()
             )
         );
 
@@ -1073,6 +1089,7 @@ class query_test extends Strata_Query_UnitTestCase {
     function testPersonOptionalRatingUnionLikes() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'optional',
                 'lhs' => $this->_isPerson,
@@ -1132,20 +1149,20 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:alice',
-                'rating' => '10'
+                'p' => array('person:alice'),
+                'rating' => array('10')
             ),
             array (
-                'p' => 'person:bob',
-                'rating' => 'person:alice'
+                'p' => array('person:bob'),
+                'rating' => array('person:alice')
             ),
             array (
-                'p' => 'person:bob',
-                'rating' => '8'
+                'p' => array('person:bob'),
+                'rating' => array('8')
             ),
             array (
-                'p' => 'person:carol',
-                'rating' => '1'
+                'p' => array('person:carol'),
+                'rating' => array('1')
             )
         );
 
@@ -1155,6 +1172,7 @@ class query_test extends Strata_Query_UnitTestCase {
     function testPersonOptionalRatingMinusCarol() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'optional',
                 'lhs' => $this->_isPerson,
@@ -1174,16 +1192,16 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:alice',
-                'rating' => '10'
+                'p' => array('person:alice'),
+                'rating' => array('10')
             ),
             array (
-                'p' => 'person:bob',
-                'rating' => '8'
+                'p' => array('person:bob'),
+                'rating' => array('8')
             ),
             array (
-                'p' => 'person:carol',
-                'rating' => null
+                'p' => array('person:carol'),
+                'rating' => array()
             )
         );
 
@@ -1193,6 +1211,7 @@ class query_test extends Strata_Query_UnitTestCase {
     function testPersonMinusBobUnionAlice() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'minus',
                 'lhs' => $this->_isPerson,
@@ -1211,7 +1230,7 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:carol'
+                'p' => array('person:carol')
             )
         );
 
@@ -1221,6 +1240,7 @@ class query_test extends Strata_Query_UnitTestCase {
     function testPersonMinusRatingMinusCarol() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'minus',
                 'lhs' => $this->_isPerson,
@@ -1239,7 +1259,7 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:carol'
+                'p' => array('person:carol')
             )
         );
 
@@ -1249,6 +1269,7 @@ class query_test extends Strata_Query_UnitTestCase {
     function testPersonAndRatingMinusCarol() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'and',
                 'lhs' => $this->_isPerson,
@@ -1268,12 +1289,12 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:alice',
-                'rating' => '10'
+                'p' => array('person:alice'),
+                'rating' => array('10')
             ),
             array (
-                'p' => 'person:bob',
-                'rating' => '8'
+                'p' => array('person:bob'),
+                'rating' => array('8')
             )
         );
 
@@ -1283,6 +1304,7 @@ class query_test extends Strata_Query_UnitTestCase {
     function testPersonAndBobUnionAlice() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'and',
                 'lhs' => $this->_isPerson,
@@ -1301,10 +1323,10 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:alice'
+                'p' => array('person:alice')
             ),
             array (
-                'p' => 'person:bob'
+                'p' => array('person:bob')
             )
         );
 
@@ -1314,6 +1336,7 @@ class query_test extends Strata_Query_UnitTestCase {
     function testPersonAndKnowsOptionalLikes() {
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'and',
                 'lhs' => $this->_isPerson,
@@ -1338,24 +1361,24 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                'p' => 'person:alice',
-                'knows' => 'person:carol',
-                'likes' => null
+                'p' => array('person:alice'),
+                'knows' => array('person:carol'),
+                'likes' => array()
             ),
             array (
-                'p' => 'person:bob',
-                'knows' => 'person:alice',
-                'likes' => 'person:alice'
+                'p' => array('person:bob'),
+                'knows' => array('person:alice'),
+                'likes' => array('person:alice')
             ),
             array (
-                'p' => 'person:carol',
-                'knows' => 'person:alice',
-                'likes' => null
+                'p' => array('person:carol'),
+                'knows' => array('person:alice'),
+                'likes' => array()
             ),
             array (
-                'p' => 'person:carol',
-                'knows' => 'person:bob',
-                'likes' => null
+                'p' => array('person:carol'),
+                'knows' => array('person:bob'),
+                'likes' => array()
             )
         );
 
@@ -1366,6 +1389,7 @@ class query_test extends Strata_Query_UnitTestCase {
         // Strange strings as variable names
         $query = array (
             'type' => 'select',
+            'grouping'=>array(),
             'group' => array (
                 'type' => 'and',
                 'lhs' => array (
@@ -1513,44 +1537,44 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $expected = array (
             array (
-                '_' => 'person:alice',
-                '?c' => 'person',
-                'given name' => 'Alice',
-                '2 knów \'`"' => 'person:carol',
-                ':l' => '5 ft 5 in',
-                '%t' => '10%',
-                '1.10' => '10',
-                '  \\  like ""! ' => '50:alice.svg'
+                '_' => array('person:alice'),
+                '?c' => array('person'),
+                'given name' => array('Alice'),
+                '2 knów \'`"' => array('person:carol'),
+                ':l' => array('5 ft 5 in'),
+                '%t' => array('10%'),
+                '1.10' => array('10'),
+                '  \\  like ""! ' => array('50:alice.svg')
             ),
             array (
-                '_' => 'person:bob',
-                '?c' => 'person',
-                'given name' => 'Bob',
-                '2 knów \'`"' => 'person:alice',
-                ':l' => '5 ft 10 in',
-                '%t' => '25%',
-                '1.10' => '8',
-                '  \\  like ""! ' => '50:bob.png'
+                '_' => array('person:bob'),
+                '?c' => array('person'),
+                'given name' => array('Bob'),
+                '2 knów \'`"' => array('person:alice'),
+                ':l' => array('5 ft 10 in'),
+                '%t' => array('25%'),
+                '1.10' => array('8'),
+                '  \\  like ""! ' => array('50:bob.png')
             ),
             array (
-                '_' => 'person:carol',
-                '?c' => 'person',
-                'given name' => 'Carol',
-                '2 knów \'`"' => 'person:alice',
-                ':l' => '4 ft 11 in',
-                '%t' => '2%',
-                '1.10' => '1',
-                '  \\  like ""! ' => '50:carol.jpg'
+                '_' => array('person:carol'),
+                '?c' => array('person'),
+                'given name' => array('Carol'),
+                '2 knów \'`"' => array('person:alice'),
+                ':l' => array('4 ft 11 in'),
+                '%t' => array('2%'),
+                '1.10' => array('1'),
+                '  \\  like ""! ' => array('50:carol.jpg')
             ),
             array (
-                '_' => 'person:carol',
-                '?c' => 'person',
-                'given name' => 'Carol',
-                '2 knów \'`"' => 'person:bob',
-                ':l' => '4 ft 11 in',
-                '%t' => '2%',
-                '1.10' => '1',
-                '  \\  like ""! ' => '50:carol.jpg'
+                '_' => array('person:carol'),
+                '?c' => array('person'),
+                'given name' => array('Carol'),
+                '2 knów \'`"' => array('person:bob'),
+                ':l' => array('4 ft 11 in'),
+                '%t' => array('2%'),
+                '1.10' => array('1'),
+                '  \\  like ""! ' => array('50:carol.jpg')
             )
         );
 

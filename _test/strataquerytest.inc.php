@@ -57,20 +57,21 @@ class Strata_Query_UnitTestCase extends Strata_UnitTestCase {
         $this->_triples->addTriple($carol, 'tax rate', '2%', 'wiki');
     }
 
-    function assertQueryResult($query, $expectedResult) {
+    function assertQueryResult($query, $expectedResult, $message='') {
         $relations = $this->_triples->queryRelations($query);
         if ($relations === false) {
-            $this->fail('Query failed');
+            $this->fail($message.' Query failed.');
         } else {
-            $this->assertIteratorsEqual($relations, new ArrayIterator($expectedResult));
+            $this->assertIteratorsEqual($relations, new ArrayIterator($expectedResult), $message);
             $relations->closeCursor();
         }
     }
 
-    function assertIteratorsEqual($x, $y) {
+    function assertIteratorsEqual($x, $y, $message='') {
+        $message = $message?$message.': ':'';
         do {
-            $this->assertEqual($x->valid(), $y->valid(), 'Number of result and expected rows differ: %s');
-            $this->assertEqual($x->current(), $y->current(), 'Result row differs from expected one: %s');
+            $this->assertEqual($x->valid(), $y->valid(), $message.'Number of result and expected rows differ: %s');
+            $this->assertEqual($x->current(), $y->current(), $message.'Result row differs from expected one: %s');
             $x->next();
             $y->next();
         } while ($x->valid() || $y->valid());
