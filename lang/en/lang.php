@@ -27,3 +27,8 @@ $lang['error_query_pattern'] = 'Unknown triple pattern or filter pattern \'<code
 $lang['error_query_fieldsline'] = 'Weird line \'<code>%s</code>\' in <code>fields</code> group.';
 $lang['error_syntax_braces'] = 'Unmatched braces in %s';
 
+$lang['error_query_multigrouping'] = 'I don\'t know what to do with multiple <code>group</code> groups.';
+$lang['error_query_groupblock'] = 'I can\'t handle groups in a <code>group</code> group.';
+$lang['error_query_groupvar'] = '<code>group</code> group uses out-of-scope variable \'<code>%s</code>\'.';
+$lang['error_query_groupline'] = 'I can\'t handle line\'<code>%s</code>\' in the <code>group</code> group.';
+

@@ -99,11 +99,14 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                 'type'=>'select',
                 'group'=>array(),
                 'projection'=>$projection,
-                'ordering'=>array()
+                'ordering'=>array(),
+                'grouping'=>array()
             );
     
             // extract sort groups
             $ordering = $this->extractGroups($root, 'sort');
+
+            $grouping = $this->extractGroups($root, 'group');
     
             // transform actual group
             $where = $this->extractGroups($root, 'where');
@@ -143,6 +146,29 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                         $result['ordering'][] = array('variable'=>$match[1], 'direction'=>($match[2]?:'asc'));
                     } else {
                         $this->_fail(sprintf($this->getLang('error_query_sortline'), utf8_tohtml(hsc($line))));
+                    }
+                }
+            }
+
+            //handle grouping
+            if(count($grouping)) {
+                if(count($grouping) > 1) {
+                    $this->_fail($this->getLang('error_query_multigrouping'));
+                }
+
+                foreach($grouping[0]['cs'] as $line) {
+                    if(is_array($line)) {
+                        $this->_fail($this->getLang('error_query_groupblock'));
+                    }
+
+                    if(preg_match('/^\?('.STRATABASIC_VARIABLE.')$/',utf8_trim($line),$match)) {
+                        if(!in_array($match[1], $scope)) {
+                            $this->_fail(sprintf($this->getLang('error_query_groupvar'),utf8_tohtml(hsc($match[1]))));
+                        }
+
+                        $result['grouping'][] = $match[1];
+                    } else {
+                        $this->_fail(sprintf($this->getLang('error_query_groupline'), utf8_tohtml(hsc($line))));
                     }
                 }
             }
