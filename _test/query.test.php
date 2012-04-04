@@ -1580,5 +1580,104 @@ class query_test extends Strata_Query_UnitTestCase {
 
         $this->assertQueryResult($query, $expected);
     }
+
+    function testGrouping() {
+        $query = array (
+            'type' => 'select',
+            'grouping' => array (
+                'knows',
+                'rating'
+            ),
+            'group' => array (
+                'type' => 'and',
+                'lhs' => array (
+                    'type' => 'and',
+                    'lhs' => array (
+                        'type' => 'and',
+                        'lhs' => array (
+                            'type' => 'and',
+                            'lhs' => $this->_isPerson,
+                            'rhs' => $this->_personKnows
+                        ),
+                        'rhs' => array (
+                            'type' => 'triple',
+                            'subject' => array (
+                                'type' => 'variable',
+                                'text' => 'knows'
+                            ),
+                            'predicate' => array (
+                                'type' => 'literal',
+                                'text' => 'knows'
+                            ),
+                            'object' => array (
+                                'type' => 'variable',
+                                'text' => 'who knows'
+                            )
+                        )
+                    ),
+                    'rhs' => $this->_personRating
+                ),
+                'rhs' => array (
+                    'type' => 'triple',
+                    'subject' => array (
+                        'type' => 'variable',
+                        'text' => 'knows'
+                    ),
+                    'predicate' => array (
+                        'type' => 'literal',
+                        'text' => 'identifier'
+                    ),
+                    'object' => array (
+                        'type' => 'variable',
+                        'text' => 'knows id'
+                    )
+                )
+            ),
+            'projection' => array (
+                'p',
+                'knows id',
+                'who knows',
+            ),
+            'ordering' => array (
+                array (
+                    'variable' => 'rating',
+                    'direction' => 'desc'
+                ),
+                array (
+                    'variable' => 'knows',
+                    'direction' => 'asc'
+                ),
+                array (
+                    'variable' => 'who knows',
+                    'direction' => 'asc'
+                )
+            )
+        );
+
+        $expected = array (
+            array (
+                'p' => array('person:alice', 'person:alice'),
+                'knows id' => array('γ', 'γ'),
+                'who knows' => array('person:alice', 'person:bob'),
+            ),
+            array (
+                'p' => array('person:bob'),
+                'knows id' => array('α'),
+                'who knows' => array('person:carol'),
+            ),
+            array (
+                'p' => array('person:carol'),
+                'knows id' => array('α'),
+                'who knows' => array('person:carol'),
+            ),
+            array (
+                'p' => array('person:carol'),
+                'knows id' => array('Β'),
+                'who knows' => array('person:alice'),
+            )
+        );
+
+        $this->assertQueryResult($query, $expected);
+    }
 }
 
