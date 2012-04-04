@@ -298,7 +298,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
     function queryRelations($queryTree) {
         // create the SQL generator, and generate the SQL query
         $generator = new stratastorage_sql_generator($this);
-        list($sql, $literals, $projected) = $generator->translate($queryTree);
+        list($sql, $literals, $projected, $grouped) = $generator->translate($queryTree);
 
         // prepare the query
         $query = $this->_db->prepare($sql);
@@ -319,7 +319,11 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         }
 
         // wrap the results in an iterator, and return it
-        return new stratastorage_relations_iterator($query, $projected);
+        if(count($grouped) == 0) {
+            return new stratastorage_relations_iterator($query, $projected);
+        } else {
+            return new stratastorage_aggregating_iterator($query, $projected, $grouped);
+        }
     }
 
     /**
@@ -389,6 +393,11 @@ class stratastorage_sql_generator {
      * Stores all projected variables.
      */
     private $projected = array();
+
+    /**
+     * Stores all grouped variables.
+     */
+    private $grouped = array();
 
     /**
      * Constructor.
@@ -743,8 +752,51 @@ class stratastorage_sql_generator {
         $gp = $this->_dispatch($query['group']);
         $vars = $query['projection'];
         $order = $query['ordering'];
+        $group = $query['grouping'];
         $terms = array();
         $fields = array();
+
+        // massage ordering to comply with grouping
+        // we do this by combining ordering and sorting information as follows:
+        // The new ordering is {i, Gc, Oc} where
+        //  i = (order intersect group)
+        //  Gc = (group diff order)
+        //  Oc = (order diff group)
+        $order_vars = array();
+        $order_lookup = array();
+        foreach($order as $o) {
+            $order_vars[] = $o['variable'];
+            $order_lookup[$o['variable']] = $o;
+        }
+
+        // determine the three components
+        $order_i = array_intersect($order_vars, $group);
+        $group_c = array_diff($group, $order_vars);
+        $order_c = array_diff($order_vars, $group);
+        $order_n = array_merge($order_i, $group_c, $order_c);
+
+        // construct new ordering array
+        $neworder = array();
+        foreach($order_n as $ovar) {
+            if(!empty($order_lookup[$ovar])) {
+                $neworder[] = $order_lookup[$ovar];
+            } else {
+                $neworder[] = array('variable'=>$ovar, 'direction'=>'asc');
+            }
+        }
+
+        // project extra fields that are required for the grouping
+        foreach($group as $v) {
+            // only project them if they're not projected somewhere else
+            if(!in_array($v, $vars)) {
+                $name = $this->_name(array('type'=>'variable', 'text'=>$v));
+                $fields[] = $name;
+
+                // store grouping translation
+                $this->grouped[$name] = $v;
+            }
+        }
+        
 
         // determine exact projection
         foreach($vars as $v) {
@@ -757,11 +809,16 @@ class stratastorage_sql_generator {
 
             // store projection translation
             $this->projected[$name] = $v;
+
+            // store grouping translation
+            if(in_array($v, $group)) {
+                $this->grouped[$name] = $v;
+            }
         }
 
         // assign ordering if required
         $ordering = array();
-        foreach($order as $o) {
+        foreach($neworder as $o) {
             $name = $this->_name(array('type'=>'variable','text'=>$o['variable']));
             $orderTerms = $this->_db->orderBy($name);
             foreach($orderTerms as $term) {
@@ -814,7 +871,7 @@ class stratastorage_sql_generator {
      */
     function translate($query) {
         $q = $this->_dispatch($query);
-        return array($q['sql'], $this->literals, $this->projected);
+        return array($q['sql'], $this->literals, $this->projected, $this->grouped);
     }
 }
 
@@ -944,6 +1001,111 @@ class stratastorage_resource_iterator implements Iterator {
             
             $this->data->next();
             $peekRow = $this->data->current();
+        }
+
+        return $this->item;
+    }
+
+    function rewind() {
+        // noop
+    }
+
+    function valid() {
+        return $this->valid;
+    }
+
+    /**
+     * Closes this result set.
+     */
+    function closeCursor() {
+        if(!$this->closed) {
+            $this->data->closeCursor();
+            $this->closed = true;
+        }
+    }
+}
+
+/**
+ * This iterator aggregates the results of the underlying
+ * iterator for the given grouping key.
+ */
+class stratastorage_aggregating_iterator implements Iterator {
+    function __construct($pdostatement, $projection, $grouped) {
+        // backend iterator (ordered by tuple)
+        $this->data = $pdostatement;
+
+        // state information
+        $this->closed = false;
+        $this->valid = true;
+        $this->item = null;
+        $this->subject = 0;
+
+        $this->groupKey = $grouped;
+        $this->projection = $projection;
+
+        // initialize the iterator
+        $this->peekRow = $this->data->fetch(PDO::FETCH_ASSOC);
+        $this->next();
+    }
+    
+    function current() {
+        return $this->item;
+    }
+
+    function key() {
+        return $this->subject;
+    }
+
+    private function extractKey($row) {
+        $result = array();
+        foreach($this->groupKey as $alias=>$field) {
+            $result[$field] = $row[$alias];
+        }
+        return $result;
+    }
+
+    private function keyCheck($a, $b) {
+        return $a === $b;
+    }
+
+    function next() {
+        if($this->peekRow == null) {
+            $this->valid = false;
+            return;
+        }
+
+        // the current relation
+        $key = $this->extractKey($this->peekRow);
+
+        // construct a new subject
+        $this->subject++;
+        $this->item = array();
+
+        // continue aggregating data as long as the subject doesn't change and
+        // there is data available
+        while($this->peekRow != null && $this->keyCheck($key,$this->extractKey($this->peekRow))) {
+            foreach($this->projection as $alias=>$field) {
+                if(in_array($field, $this->groupKey)) {
+                    // it is a key field, grab it directly from the key
+                    $this->item[$field] = $key[$field]!=null ? array($key[$field]) : array();
+                } else {
+                    // lazy create the field's bucket
+                    if(empty($this->item[$field])) {
+                        $this->item[$field] = array();
+                    }
+
+                    // push the item into the bucket if we have an item
+                    if($this->peekRow[$alias] != null) {
+                        $this->item[$field][] = $this->peekRow[$alias];
+                    }
+                }
+            }
+            
+            $this->peekRow = $this->data->fetch(PDO::FETCH_ASSOC);
+        }
+
+        if($this->peekRow == null) {
+            $this->closeCursor();
         }
 
         return $this->item;
