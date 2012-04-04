@@ -855,7 +855,7 @@ class stratastorage_relations_iterator implements Iterator {
 
             // ...project...
             foreach($this->projection as $alias=>$field) {
-                $row[$field] = $this->row[$alias];
+                $row[$field] = $this->row[$alias] != null ? array($this->row[$alias]) : array();
             }
             $this->row = $row;
 
