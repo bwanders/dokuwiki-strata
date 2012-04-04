@@ -13,8 +13,8 @@ if (!defined('DOKU_LF')) define('DOKU_LF', "\n");
 if (!defined('DOKU_TAB')) define('DOKU_TAB', "\t");
 if (!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
 
-if (!defined('STRATABASIC_PREDICATE')) define('STRATABASIC_PREDICATE','[^_:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\=]+');
-if (!defined('STRATABASIC_VARIABLE')) define('STRATABASIC_VARIABLE','[^ _:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\=]+');
+if (!defined('STRATABASIC_PREDICATE')) define('STRATABASIC_PREDICATE','[^_:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+');
+if (!defined('STRATABASIC_VARIABLE')) define('STRATABASIC_VARIABLE','[^ _:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+');
 
 /**
  * Helper plugin for common syntax parsing.
@@ -490,10 +490,10 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
     function parseFieldsShort($line, &$typemap) {
         $result = array();
 
-        if(preg_match_all('/\s*\?('.STRATABASIC_VARIABLE.')(?:\s*(\()([^_)]*)(?:_([a-z0-9]*)(?:\(([^)]*)\))?)?\))?/',$line,$match, PREG_SET_ORDER)) {
+        if(preg_match_all('/(?:\s*\?('.STRATABASIC_VARIABLE.')(?:_([a-z0-9]*)(?:\(([^\)]*)\))?)?\s*(?:(")([^"]*)")?)/',$line,$match, PREG_SET_ORDER)) {
             foreach($match as $m) {
-                list($_, $variable, $parenthesis, $caption, $type, $hint) = $m;
-                if(!$parenthesis || (!$parenthesis && !$caption && !$type)) $caption = ucfirst($variable);
+                list(, $variable, $type, $hint, $caption_indicator, $caption) = $m;
+                if(!$caption_indicator) $caption = ucfirst($variable);
                 $this->updateTypemap($typemap, $variable, $type, $hint);
                 $result[$variable] = array('caption'=>$caption);
             }
@@ -507,7 +507,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
      * be used to get a dokuwiki-lexer-safe regex to embed into your own syntax pattern.
      */
     function fieldsShortPattern() {
-        return '(?:\s+\?'.STRATABASIC_VARIABLE.'(?:\s*\([^_\)]*(?:_[a-z0-9]*(?:\([^\)]*\))?)?\))?)';
+        return '(?:\s*\?'.STRATABASIC_VARIABLE.'(?:_[a-z0-9]*(?:\([^\)]*\))?)?\s*(?:"[^"]*")?)';
     }
 
     /**
