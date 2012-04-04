@@ -29,6 +29,10 @@ class Strata_Query_UnitTestCase extends Strata_UnitTestCase {
         $this->_triples->addTriple($alice, 'name', 'Alice', 'wiki');
         $this->_triples->addTriple($carol, 'name', 'Carol', 'wiki');
 
+        $this->_triples->addTriple($bob, 'identifier', 'Β', 'wiki');
+        $this->_triples->addTriple($alice, 'identifier', 'α', 'wiki');
+        $this->_triples->addTriple($carol, 'identifier', 'γ', 'wiki');
+
         $this->_triples->addTriple($bob, 'knows', $alice, 'wiki');
         $this->_triples->addTriple($alice, 'knows', $carol, 'wiki');
         $this->_triples->addTriple($carol, 'knows', $bob, 'wiki');
