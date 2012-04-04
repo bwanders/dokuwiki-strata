@@ -58,10 +58,14 @@ class syntax_plugin_stratabasic_list extends syntax_plugin_stratabasic_select {
                 $R->listitem_open(1);
                 $R->listcontent_open();
                 foreach($fields as $f) {
-                    if($row[$f['name']] != null) {
-                        $f['type']->render($mode, $R, $this->triples, $row[$f['name']], $f['hint']);
-                        $R->doc .= ' ';
+                    $first = true;
+                    foreach($row[$f['name']] as $value) {
+                        if(!$first) $R->doc .= ', ';
+                        $f['type']->render($mode, $R, $this->triples, $value, $f['hint']);
+                        $first = false;
                     }
+
+                    if(count($row[$f['name']])) $R->doc .= ' ';
                 }
                 $R->listcontent_close();
                 $R->listitem_close();
@@ -75,8 +79,8 @@ class syntax_plugin_stratabasic_list extends syntax_plugin_stratabasic_select {
             // render all rows in metadata mode to enable things like backlinks
             foreach($result as $row) {
                 foreach($fields as $f) {
-                    if($row[$f['name']] != null) {
-                        $f['type']->render($mode, $R, $this->triples, $row[$f['name']], $f['hint']);
+                    foreach($row[$f['name']] as $value) {
+                        $f['type']->render($mode, $R, $this->triples, $value, $f['hint']);
                     }
                 }
             }

@@ -214,8 +214,11 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
                 $R->tablerow_open();
                     foreach($fields as $f) {
                         $R->tablecell_open();
-                        if($row[$f['name']] != null) {
-                            $f['type']->render($mode, $R, $this->triples, $row[$f['name']], $f['hint']);
+                        $first = true;
+                        foreach($row[$f['name']] as $value) {
+                            if(!$first) $R->doc .= ', ';
+                            $f['type']->render($mode, $R, $this->triples, $value, $f['hint']);
+                            $first = false;
                         }
                         $R->tablecell_close();
                     }
@@ -230,8 +233,8 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
             // render all rows in metadata mode to enable things like backlinks
             foreach($result as $row) {
                 foreach($fields as $f) {
-                    if($row[$f['name']] != null) {
-                        $f['type']->render($mode, $R, $this->triples, $row[$f['name']], $f['hint']);
+                    foreach($row[$f['name']] as $value) {
+                        $f['type']->render($mode, $R, $this->triples, $value, $f['hint']);
                     }
                 }
             }
