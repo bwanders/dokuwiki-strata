@@ -180,7 +180,7 @@ abstract class plugin_strata_driver {
         }
         $this->commit();
 
-        msg('Strata storage: Database set up successful!', 1);
+        if($this->_debug) msg('Strata storage: Database set up successful!', 1);
 
         return true;
     }
