@@ -50,8 +50,10 @@ class plugin_strata_type {
     /**
      * Returns meta-data on the type. This method returns an array with
      * the following keys:
-     *   - desc: A human-readable description of the type.
-     *   - synthetic: an optional boolean indicating that the type is synthethic.
+     *   - desc: A human-readable description of the type
+     *   - synthetic: an optional boolean indicating that the type is synthethic
+     *   - hint: an optional string indicating what the type hint's function is
+     *   - tags: an array op applicable tags
      *
      * @return an array containing
      */
