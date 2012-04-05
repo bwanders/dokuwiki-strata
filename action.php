@@ -77,7 +77,7 @@ class action_plugin_stratastorage extends DokuWiki_Action_Plugin {
  */
 function plugin_stratastorage_autoload($fullname) {
     // only load matching components
-    if(!preg_match('/^plugin_strata_(type)_(.*)$/',$fullname, $matches)) {
+    if(!preg_match('/^plugin_strata_(type|aggregate)_(.*)$/',$fullname, $matches)) {
         return false;
     }
 
