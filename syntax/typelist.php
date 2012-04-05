@@ -22,7 +22,7 @@ require_once DOKU_PLUGIN.'syntax.php';
  */
 class syntax_plugin_stratastorage_typelist extends DokuWiki_Syntax_Plugin {
     public function syntax_plugin_stratastorage_typelist() {
-        $this->_types =& plugin_load('helper', 'stratastorage_types');
+        $this->types =& plugin_load('helper', 'stratastorage_types');
     }
 
     public function getType() {
@@ -41,16 +41,22 @@ class syntax_plugin_stratastorage_typelist extends DokuWiki_Syntax_Plugin {
 
     public function connectTo($mode) {
         $this->Lexer->addSpecialPattern('~~INFO:stratatypes~~',$mode,'plugin_stratastorage_typelist');
+        $this->Lexer->addSpecialPattern('~~INFO:strataaggregates~~',$mode,'plugin_stratastorage_typelist');
     }
 
     public function handle($match, $state, $pos, &$handler){
         $data = array();
+        preg_match('/~~INFO:strata(type|aggregate)s~~/',$match, $captures);
+        list(,$kind) = $captures;
 
         // get a list of all types...
-        foreach(glob(DOKU_PLUGIN."*/types/*.php") as $type) {
-            if(preg_match('@/([^/]+)/types/([^/]+)\.php@',$type,$matches)) {
+        foreach(glob(DOKU_PLUGIN."*/${kind}s/*.php") as $type) {
+            if(preg_match("@/([^/]+)/${kind}s/([^/]+)\.php@",$type,$matches)) {
                 // ...load each type...
-                $meta = $this->_types->loadType($matches[2])->getInfo();
+                switch($kind) {
+                    case 'type': $meta = $this->types->loadType($matches[2])->getInfo(); break;
+                    case 'aggregate': $meta = $this->types->loadAggregate($matches[2])->getInfo(); break;
+                }
 
                 // ...and check if it's synthetic (i.e., not user-usable)
                 if(!isset($meta['synthetic']) || !$meta['synthetic']) {
@@ -65,7 +71,7 @@ class syntax_plugin_stratastorage_typelist extends DokuWiki_Syntax_Plugin {
 
         usort($data, array($this,'_compareNames'));
 
-        return $data;
+        return array($kind,$data);
     }
 
     function _compareNames($a, $b) {
@@ -74,8 +80,8 @@ class syntax_plugin_stratastorage_typelist extends DokuWiki_Syntax_Plugin {
 
     public function render($mode, &$R, $data) {
         if($mode == 'xhtml') {
-            // render a list of types. Each type lists it's name, source plugin
-            // and a short description of the type.
+            list($kind, $data) = $data;
+
             $R->listu_open();
             foreach($data as $data){
                 $R->listitem_open(1);
@@ -86,7 +92,7 @@ class syntax_plugin_stratastorage_typelist extends DokuWiki_Syntax_Plugin {
                 $R->strong_close();
 
                 if($data['meta']['hint']) {
-                    $R->doc .= ' (type hint: '.$R->_xmlEntities($data['meta']['hint']).')';
+                    $R->doc .= ' ('.$kind.' hint: '.$R->_xmlEntities($data['meta']['hint']).')';
                 }
 
                 $R->linebreak();
