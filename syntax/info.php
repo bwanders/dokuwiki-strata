@@ -80,10 +80,10 @@ class syntax_plugin_stratastorage_info extends DokuWiki_Syntax_Plugin {
 
     public function render($mode, &$R, $data) {
         if($mode == 'xhtml') {
-            list($kind, $data) = $data;
+            list($kind, $items) = $data;
 
             $R->listu_open();
-            foreach($data as $data){
+            foreach($items as $data){
                 $R->listitem_open(1);
                 $R->listcontent_open();
 
