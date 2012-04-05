@@ -496,9 +496,19 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
         foreach($lines as $line) {
             $line = trim($line);
-            if(preg_match('/^(?:([^_]*)(?:_([a-z0-9]*)(?:\(([^)]+)\))?)?(:))?\s*\?('.STRATABASIC_VARIABLE.')(?:@([a-z0-9]*)(?:\(([^)]+)\))?)?$/S',$line, $match)) {
-                list($_, $caption, $type, $hint, $nocaphint, $variable, $agg, $agghint) = $match;
+            if(preg_match('/^(?:([^_]*)(?:_([a-z0-9]*)(?:\(([^)]+)\))?)?(:))?\s*\?('.STRATABASIC_VARIABLE.')(?:@([a-z0-9]*)(?:\(([^)]+)\))?)?(?:_([a-z0-9]*)(?:\(([^)]+)\))?)?$/S',$line, $match)) {
+                list($_, $caption, $type, $hint, $nocaphint, $variable, $agg, $agghint, $rtype, $rhint) = $match;
                 if(!$nocaphint || (!$nocaphint && !$caption && !$type)) $caption = ucfirst($variable);
+
+                // use right-hand type if no left-hand type available
+                if(!$type) {
+                    $type = $rtype;
+                    $hint = $rhint;
+                }
+
+                if($type && $rtype && ($type!=$rtype || $hint!=$rhint)) {
+                    msg(sprintf($this->getLang('error_query_fieldsdoubletyped'), utf8_tohtml(hsc($variable))),-1);
+                }
                 $this->updateTypemap($typemap, $variable, $type, $hint);
                 $result[$variable] = array('caption'=>$caption, 'aggregate'=>($agg?:null), 'aggregateHint'=>($agg?$agghint:null));
             } else {
