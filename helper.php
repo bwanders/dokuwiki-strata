@@ -496,11 +496,11 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
         foreach($lines as $line) {
             $line = trim($line);
-            if(preg_match('/^(?:([^_]*)(?:_([a-z0-9]*)(?:\(([^)]+)\))?)?(:))?\s*\?('.STRATABASIC_VARIABLE.')$/S',$line, $match)) {
-                list($_, $caption, $type, $hint, $nocaphint, $variable) = $match;
+            if(preg_match('/^(?:([^_]*)(?:_([a-z0-9]*)(?:\(([^)]+)\))?)?(:))?\s*\?('.STRATABASIC_VARIABLE.')(?:@([a-z0-9]*)(?:\(([^)]+)\))?)?$/S',$line, $match)) {
+                list($_, $caption, $type, $hint, $nocaphint, $variable, $agg, $agghint) = $match;
                 if(!$nocaphint || (!$nocaphint && !$caption && !$type)) $caption = ucfirst($variable);
                 $this->updateTypemap($typemap, $variable, $type, $hint);
-                $result[$variable] = array('caption'=>$caption);
+                $result[$variable] = array('caption'=>$caption, 'aggregate'=>($agg?:null), 'aggregateHint'=>($agg?$agghint:null));
             } else {
                 msg(sprintf($this->getLang('error_query_fieldsline'),utf8_tohtml(hsc($line))),-1);
                 return false;
@@ -516,12 +516,12 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
     function parseFieldsShort($line, &$typemap) {
         $result = array();
 
-        if(preg_match_all('/(?:\s*\?('.STRATABASIC_VARIABLE.')(?:_([a-z0-9]*)(?:\(([^\)]*)\))?)?\s*(?:(")([^"]*)")?)/',$line,$match, PREG_SET_ORDER)) {
+        if(preg_match_all('/(?:\s*\?('.STRATABASIC_VARIABLE.')(?:@([a-z0-9]*)(?:\(([^\)]*)\))?)?(?:_([a-z0-9]*)(?:\(([^\)]*)\))?)?\s*(?:(")([^"]*)")?)/',$line,$match, PREG_SET_ORDER)) {
             foreach($match as $m) {
-                list(, $variable, $type, $hint, $caption_indicator, $caption) = $m;
+                list(, $variable, $agg, $agghint, $type, $hint, $caption_indicator, $caption) = $m;
                 if(!$caption_indicator) $caption = ucfirst($variable);
                 $this->updateTypemap($typemap, $variable, $type, $hint);
-                $result[$variable] = array('caption'=>$caption);
+                $result[$variable] = array('caption'=>$caption, 'aggregate'=>($agg?:null), 'aggregateHint'=>($agg?$agghint:null));
             }
         }
 
@@ -535,7 +535,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
      * @param captions boolean Whether the pattern should include caption matching (defaults to true)
      */
     function fieldsShortPattern($captions = true) {
-        return '(?:\s*\?'.STRATABASIC_VARIABLE.'(?:_[a-z0-9]*(?:\([^\)]*\))?)?'.($captions?'\s*(?:"[^"]*")?':'').')';
+        return '(?:\s*\?'.STRATABASIC_VARIABLE.'(?:@[a-z0-9]*(?:\([^\)]*\))?)?(?:_[a-z0-9]*(?:\([^\)]*\))?)?'.($captions?'\s*(?:"[^"]*")?':'').')';
     }
 
     /**
