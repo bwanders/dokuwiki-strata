@@ -20,8 +20,8 @@ require_once DOKU_PLUGIN.'syntax.php';
  * the same syntax as the info plugin, but only accepts a specific
  * info category.
  */
-class syntax_plugin_stratastorage_typelist extends DokuWiki_Syntax_Plugin {
-    public function syntax_plugin_stratastorage_typelist() {
+class syntax_plugin_stratastorage_info extends DokuWiki_Syntax_Plugin {
+    public function __construct() {
         $this->types =& plugin_load('helper', 'stratastorage_types');
     }
 
@@ -40,8 +40,8 @@ class syntax_plugin_stratastorage_typelist extends DokuWiki_Syntax_Plugin {
 
 
     public function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('~~INFO:stratatypes~~',$mode,'plugin_stratastorage_typelist');
-        $this->Lexer->addSpecialPattern('~~INFO:strataaggregates~~',$mode,'plugin_stratastorage_typelist');
+        $this->Lexer->addSpecialPattern('~~INFO:stratatypes~~',$mode,'plugin_stratastorage_info');
+        $this->Lexer->addSpecialPattern('~~INFO:strataaggregates~~',$mode,'plugin_stratastorage_info');
     }
 
     public function handle($match, $state, $pos, &$handler){
