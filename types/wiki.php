@@ -182,6 +182,13 @@ class plugin_strata_type_wiki extends plugin_strata_type {
         if($mode == 'xhtml') {
             $instructions = $this->_instructions($value);
             $instructions = array_slice($instructions, 2, -2);
+
+            // last-minute fix of newline in front of content
+            if(!empty($instructions[0][0]) && $instructions[0][0]=='cdata') {
+                $instructions[0][1][0] = ltrim($instructions[0][1][0]);
+            }
+
+            // actual render of content
             $R->nest($instructions);
         }
     }
