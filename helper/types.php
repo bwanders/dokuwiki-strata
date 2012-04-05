@@ -14,13 +14,18 @@ if (!defined('DOKU_TAB')) define('DOKU_TAB', "\t");
 if (!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
 
 /**
- * The types helper is used to cached types.
+ * The types helper is used to cached types and aggregates.
  */
 class helper_plugin_stratastorage_types extends DokuWiki_Plugin {
     /**
      * The currently loaded types.
      */
     var $loaded = array();
+
+    function __construct() {
+        $this->loaded['type'] = array();
+        $this->loaded['aggregate'] = array();
+    }
 
     function getMethods() {
         $result = array();
@@ -34,53 +39,103 @@ class helper_plugin_stratastorage_types extends DokuWiki_Plugin {
         );
 
         $result[] = array(
-            'name'=> 'getDefaultType',
-            'desc'=> 'Determines the default type name',
+            'name'=> 'loadAggregate',
+            'desc'=> 'Loads an aggregate and returns it.',
             'params'=> array(
+                'type'=>'string'
             ),
-            'return' => array('type'=>'string')
+            'return' => array('type'=>'object')
         );
 
         $result[] = array(
-            'name'=> 'getDefaultTypeHint',
-            'desc'=> 'Determines the default type hint',
+            'name'=> 'parseType',
+            'desc'=> "Parses a 'name(hint)' pattern",
             'params'=> array(
+                'text'=>'string'
             ),
-            'return' => array('type'=>'string')
+            'return'=>array('parsed'=>'array')
         );
 
+        $result[] = array(
+            'name'=> 'getDefaultType',
+            'desc'=> 'Determines the default type name and hint',
+            'params'=> array(
+            ),
+            'return' => array('type'=>'array')
+        );
+
+        $result[] = array(
+            'name'=> 'getDefaultPredicateType',
+            'desc'=> 'Determines the default predicate type name and hint',
+            'params'=> array(
+            ),
+            'return' => array('type'=>'array')
+        );
 
         return $result;
+    }
+
+    /**
+     * Loads something.
+     */
+    function _load($kind, $name, $default) {
+        // handle null value
+        if($name == null) {
+            $name = $default;
+        }
+
+        // use cache if possible
+        if(!isset($this->loaded[$kind][$name])) {
+            $class = "plugin_strata_${kind}_${name}";
+            $this->loaded[$kind][$name] = new $class();
+        }
+
+        return $this->loaded[$kind][$name];
+
     }
 
     /**
      * Loads a type.
      */
     function loadType($type) {
-        // handle null type
-        if($type == null) {
-            list($type,) = $this->getDefaultType();
-        }
+        list($default,) = $this->getDefaultType();
+        return $this->_load('type', $type, $default);
+    }
 
-        // use cached if possible
-        if(!isset($this->loaded[$type])) {
-            $class = "plugin_strata_type_".$type;
-            $this->loaded[$type] = new $class();
-        }
-
-        return $this->loaded[$type];
+    /**
+     * Loads an aggregate.
+     */
+    function loadAggregate($aggregate) {
+        return $this->_load('aggregate', $aggregate, 'all');
     }
 
     var $configTypes = array();
 
+    /**
+     * Parses a 'name(hint)' pattern.
+     *
+     * @param string string the text to parse
+     * @return an array with a name and hint, or false
+     */
+    function parseType($string) {
+        if(preg_match('/^([a-z0-9]+)(?:\(([^\)]*)\))?$/',$string,$match)) {
+            return array(
+                $match[1],
+                $match[2]
+            );
+        } else {
+            return false;
+        }
+    }
+
     function _parseConfigType($key) {
+        // laze load
         if($this->defaultType == null) {
-            if(preg_match('/^([a-z0-9]+)(?:\(([^\)]*)\))?$/',$this->getConf($key),$match)) {
-                $this->configTypes[$key] = array(
-                    $match[1],
-                    $match[2]
-                );
-            } else {
+            // parse
+            $this->configTypes[$key] = $this->parseType($this->getConf($key));
+
+            // handle failed parse
+            if($this->configTypes[$key] === false) {
                 msg(sprintf($this->getLang('error_types_config'), $key), -1);
                 $this->configTypes[$key] = array(
                     'text',
