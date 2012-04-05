@@ -18,7 +18,7 @@ class plugin_strata_aggregate_sum extends plugin_strata_aggregate {
 
     function getInfo() {
         return array(
-            'desc'=>'Sums up all items.',
+            'desc'=>'Sums up all items. Any item that does not have a clear numeric value (i.e. starts with a number) is counted as 0.',
             'tags'=>array()
         );
     }
