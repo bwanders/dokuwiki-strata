@@ -21,9 +21,10 @@ class plugin_strata_aggregate {
      * Aggregates the values and converts them to a new set of values.
      *
      * @param values array the set to aggregate
+     * @param hint string the aggregation hint
      * @return an array containing the new values
      */
-    function aggregate($values) {
+    function aggregate($values, $hint) {
         return $values;
     }
 
