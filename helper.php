@@ -510,7 +510,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                     msg(sprintf($this->getLang('error_query_fieldsdoubletyped'), utf8_tohtml(hsc($variable))),-1);
                 }
                 $this->updateTypemap($typemap, $variable, $type, $hint);
-                $result[$variable] = array('caption'=>$caption, 'aggregate'=>($agg?:null), 'aggregateHint'=>($agg?$agghint:null));
+                $result[] = array('variable'=>$variable,'caption'=>$caption, 'aggregate'=>($agg?:null), 'aggregateHint'=>($agg?$agghint:null), 'type'=>$type, 'hint'=>$hint);
             } else {
                 msg(sprintf($this->getLang('error_query_fieldsline'),utf8_tohtml(hsc($line))),-1);
                 return false;
@@ -531,7 +531,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                 list(, $variable, $agg, $agghint, $type, $hint, $caption_indicator, $caption) = $m;
                 if(!$caption_indicator) $caption = ucfirst($variable);
                 $this->updateTypemap($typemap, $variable, $type, $hint);
-                $result[$variable] = array('caption'=>$caption, 'aggregate'=>($agg?:null), 'aggregateHint'=>($agg?$agghint:null));
+                $result[] = array('variable'=>$variable,'caption'=>$caption, 'aggregate'=>($agg?:null), 'aggregateHint'=>($agg?$agghint:null), 'type'=>$type, 'hint'=>$hint);
             }
         }
 

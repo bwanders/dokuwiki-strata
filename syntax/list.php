@@ -40,9 +40,9 @@ class syntax_plugin_stratabasic_list extends syntax_plugin_stratabasic_select {
     
         // prepare all 'columns'
         $fields = array();
-        foreach($data['fields'] as $field=>$meta) {
+        foreach($data['fields'] as $meta) {
             $fields[] = array(
-                'name'=>$field,
+                'name'=>$meta['variable'],
                 'type'=>$this->types->loadType($meta['type']),
                 'hint'=>$meta['hint'],
                 'aggregate'=>$this->types->loadAggregate($meta['aggregate']),

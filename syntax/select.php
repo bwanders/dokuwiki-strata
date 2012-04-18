@@ -91,8 +91,13 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
             return array();
         }
 
+        // determine the variables to project
+        $projection = array();
+        foreach($result['fields'] as $f) $projection[] = $f['variable'];
+        $projection = array_unique($projection);
+
         // parse the query itself
-        list($result['query'], $variables) = $this->helper->constructQuery($tree, $typemap, array_keys($result['fields']));
+        list($result['query'], $variables) = $this->helper->constructQuery($tree, $typemap, $projection);
         if(!$result['query']) return array();
 
 
@@ -100,7 +105,8 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         $footer = $this->handleFooter($footer, &$result, &$typemap, &$variable);
 
         // check projected variables and load types
-        foreach($result['fields'] as $var=>$f) {
+        foreach($result['fields'] as $i=>$f) {
+            $var = $f['variable'];
             if(!in_array($var, $variables)) {
                 msg(sprintf($this->helper->getLang('error_query_unknownselect'),utf8_tohtml(hsc($var))),-1);
                 return array();
@@ -108,11 +114,11 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
 
             if(empty($f['type'])) {
                 if(!empty($typemap[$var])) {
-                    $result['fields'][$var] = array_merge($result['fields'][$var],$typemap[$var]);
+                    $result['fields'][$i] = array_merge($result['fields'][$i],$typemap[$var]);
                 } else {
                     list($type, $hint) = $this->types->getDefaultType();
-                    $result['fields'][$var]['type'] = $type;
-                    $result['fields'][$var]['hint'] = $hint;
+                    $result['fields'][$i]['type'] = $type;
+                    $result['fields'][$i]['hint'] = $hint;
                 }
             }
         }
@@ -187,9 +193,9 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         }
 
         // prepare all columns
-        foreach($data['fields'] as $field=>$meta) {
+        foreach($data['fields'] as $meta) {
             $fields[] = array(
-                'name'=>$field,
+                'name'=>$meta['variable'],
                 'caption'=>$meta['caption'],
                 'type'=>$this->types->loadType($meta['type']),
                 'hint'=>$meta['hint'],
