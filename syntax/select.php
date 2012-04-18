@@ -195,7 +195,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         // prepare all columns
         foreach($data['fields'] as $meta) {
             $fields[] = array(
-                'name'=>$meta['variable'],
+                'variable'=>$meta['variable'],
                 'caption'=>$meta['caption'],
                 'type'=>$this->types->loadType($meta['type']),
                 'hint'=>$meta['hint'],
@@ -223,7 +223,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
                     foreach($fields as $f) {
                         $R->tablecell_open();
                         $first = true;
-                        foreach($f['aggregate']->aggregate($row[$f['name']],$f['aggregateHint']) as $value) {
+                        foreach($f['aggregate']->aggregate($row[$f['variable']],$f['aggregateHint']) as $value) {
                             if(!$first) $R->doc .= ', ';
                             $f['type']->render($mode, $R, $this->triples, $value, $f['hint']);
                             $first = false;
@@ -241,7 +241,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
             // render all rows in metadata mode to enable things like backlinks
             foreach($result as $row) {
                 foreach($fields as $f) {
-                    foreach($f['aggregate']->aggregate($row[$f['name']],$f['aggregateHint']) as $value) {
+                    foreach($f['aggregate']->aggregate($row[$f['variable']],$f['aggregateHint']) as $value) {
                         $f['type']->render($mode, $R, $this->triples, $value, $f['hint']);
                     }
                 }

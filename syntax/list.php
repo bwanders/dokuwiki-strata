@@ -42,7 +42,7 @@ class syntax_plugin_stratabasic_list extends syntax_plugin_stratabasic_select {
         $fields = array();
         foreach($data['fields'] as $meta) {
             $fields[] = array(
-                'name'=>$meta['variable'],
+                'variable'=>$meta['variable'],
                 'type'=>$this->types->loadType($meta['type']),
                 'hint'=>$meta['hint'],
                 'aggregate'=>$this->types->loadAggregate($meta['aggregate']),
@@ -63,7 +63,7 @@ class syntax_plugin_stratabasic_list extends syntax_plugin_stratabasic_select {
                 $fieldCount = 0;
 
                 foreach($fields as $f) {
-                    $values = $f['aggregate']->aggregate($row[$f['name']], $f['aggregateHint']);
+                    $values = $f['aggregate']->aggregate($row[$f['variable']], $f['aggregateHint']);
                     if(!count($values)) continue;
                     if($fieldCount>1) $R->doc .= '; ';
                     if($fieldCount==1) $R->doc .= ' (';
@@ -90,7 +90,7 @@ class syntax_plugin_stratabasic_list extends syntax_plugin_stratabasic_select {
             // render all rows in metadata mode to enable things like backlinks
             foreach($result as $row) {
                 foreach($fields as $f) {
-                    foreach($f['aggregate']->aggregate($row[$f['name']],$f['aggregateHint']) as $value) {
+                    foreach($f['aggregate']->aggregate($row[$f['variable']],$f['aggregateHint']) as $value) {
                         $f['type']->render($mode, $R, $this->triples, $value, $f['hint']);
                     }
                 }
