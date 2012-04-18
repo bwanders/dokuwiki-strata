@@ -301,8 +301,12 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                 }
             }
 
-            // batch-store triples
-            $this->triples->addTriples($triples, $ID);
+            // we're done if nodata is flagged.
+            if(!isset($R->info['data']) || $R->info['data']==true) {
+                // batch-store triples if we're allowed to store
+                $this->triples->addTriples($triples, $ID);
+            }
+
             return true;
         }
 
