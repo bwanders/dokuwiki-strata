@@ -9,17 +9,22 @@ if(!defined('DOKU_INC')) die();
 if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
 
 /**
- * The summation aggregator.
+ * The first aggregator.
  */
-class plugin_strata_aggregate_sum extends plugin_strata_aggregate {
+class plugin_strata_aggregate_first extends plugin_strata_aggregate {
     function aggregate($values, $hint = null) {
-        return array(array_sum($values));
+        $val = reset($values);
+        if($val === false ) {
+            return array();
+        }
+
+        return array($val);
     }
 
     function getInfo() {
         return array(
-            'desc'=>'Sums up all items. Any item that does not have a clear numeric value (i.e. starts with a number) is counted as 0.',
-            'tags'=>array('numeric')
+            'desc'=>'Selects only the first element.',
+            'tags'=>array()
         );
     }
 }

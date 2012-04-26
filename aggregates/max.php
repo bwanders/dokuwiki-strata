@@ -9,16 +9,17 @@ if(!defined('DOKU_INC')) die();
 if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
 
 /**
- * The summation aggregator.
+ * The maximum aggregator.
  */
-class plugin_strata_aggregate_sum extends plugin_strata_aggregate {
+class plugin_strata_aggregate_max extends plugin_strata_aggregate {
     function aggregate($values, $hint = null) {
-        return array(array_sum($values));
+        if(empty($values)) return array();
+        return array(max($values));
     }
 
     function getInfo() {
         return array(
-            'desc'=>'Sums up all items. Any item that does not have a clear numeric value (i.e. starts with a number) is counted as 0.',
+            'desc'=>'Returns the maximum value. Any item that does not have a clear numeric value (i.e. starts with a number) is counted as 0.',
             'tags'=>array('numeric')
         );
     }
