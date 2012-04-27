@@ -42,7 +42,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         $typemap = array();
 
         // allow subclass handling of the whole match
-        $match = $this->preprocess($match, $result, $typemap);
+        $match = $this->preprocess($match, $handler, $result, $typemap);
 
         // split into lines and remove header and footer
         $lines = explode("\n",$match);
@@ -131,11 +131,12 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
      * is done by the actual class.
      * 
      * @param match string the complete match
+     * @param handler object the parser handler
      * @param result array the result array passed to the render method
      * @param typemap array the type map
      * @return a preprocessed string
      */
-    function preprocess($match, &$result, &$typemap) {
+    function preprocess($match, &$handler, &$result, &$typemap) {
         return $match;
     }
 
@@ -206,7 +207,9 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
 
         if($mode == 'xhtml') {
             // render header
+            $R->doc .= '<div class="stratabasic-table">'.DOKU_LF;
             $R->table_open();
+            $R->doc .= '<thead>'.DOKU_LF;
             $R->tablerow_open();
 
             // render all columns
@@ -216,7 +219,9 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
                 $R->tableheader_close();
             }
             $R->tablerow_close();
+            $R->doc .= '</thead>'.DOKU_LF;
 
+            $R->doc .= '<tbody>'.DOKU_LF;
             // render each row
             foreach($result as $row) {
                 $R->tablerow_open();
@@ -233,8 +238,10 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
                 $R->tablerow_close();
             }
             $result->closeCursor();
+            $R->doc .= '</tbody>'.DOKU_LF;
 
             $R->table_close();
+            $R->doc .= '</div>'.DOKU_LF;
 
             return true;
         } elseif($mode == 'metadata') {

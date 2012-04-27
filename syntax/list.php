@@ -49,6 +49,7 @@ class syntax_plugin_stratabasic_list extends syntax_plugin_stratabasic_select {
 
         if($mode == 'xhtml') {
             // render header
+            $R->doc .= '<div class="stratabasic-list">'.DOKU_LF;
             $R->listu_open();
 
             // render each row
@@ -80,6 +81,7 @@ class syntax_plugin_stratabasic_list extends syntax_plugin_stratabasic_select {
             $result->closeCursor();
 
             $R->listu_close();
+            $R->doc .= '</div>'.DOKU_LF;
 
             return true;
         } elseif($mode == 'metadata') {
