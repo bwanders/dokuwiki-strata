@@ -14,7 +14,7 @@ require_once(DOKU_PLUGIN.'syntax.php');
  * Select syntax for basic query handling.
  */
 class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
-    function syntax_plugin_stratabasic_select() {
+    function __construct() {
         $this->helper =& plugin_load('helper', 'stratabasic');
         $this->types =& plugin_load('helper', 'stratastorage_types');
         $this->triples =& plugin_load('helper', 'stratastorage_triples', false);

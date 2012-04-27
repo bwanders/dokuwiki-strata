@@ -14,10 +14,6 @@ require_once(DOKU_PLUGIN.'syntax.php');
  * List syntax for basic query handling.
  */
 class syntax_plugin_stratabasic_list extends syntax_plugin_stratabasic_select {
-    function syntax_plugin_stratabasic_select() {
-        parent::__construct();
-   }
-
     function connectTo($mode) {
         $this->Lexer->addSpecialPattern('<list'.$this->helper->fieldsShortPattern().'* *>\n.+?\n</list>',$mode, 'plugin_stratabasic_list');
     }
