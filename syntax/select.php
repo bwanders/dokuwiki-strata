@@ -189,6 +189,10 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
      * @return the query tree to use
      */
     function prepareQuery($query) {
+        // fire event
+        trigger_event('STRATABASIC_PREPARE_QUERY', $query);
+
+        // return the (possibly modified) query
         return $query;
     }
 
