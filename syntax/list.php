@@ -27,8 +27,10 @@ class syntax_plugin_stratabasic_list extends syntax_plugin_stratabasic_select {
             return;
         }
 
+        $query = $this->prepareQuery($data['query']);
+
         // execute the query
-        $result = $this->triples->queryRelations($data['query']);
+        $result = $this->triples->queryRelations($query);
 
         if($result == false) {
             return;

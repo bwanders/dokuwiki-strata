@@ -181,13 +181,26 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         return '';
     }
 
+    /**
+     * This method performs just-in-time modification to prepare
+     * the query for use.
+     *
+     * @param query array the query tree
+     * @return the query tree to use
+     */
+    function prepareQuery($query) {
+        return $query;
+    }
+
     function render($mode, &$R, $data) {
         if($data == array()) {
             return;
         }
 
+        $query = $this->prepareQuery($data['query']);
+
         // execute the query
-        $result = $this->triples->queryRelations($data['query']);
+        $result = $this->triples->queryRelations($query);
 
         if($result == false) {
             return;
