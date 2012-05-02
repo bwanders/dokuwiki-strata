@@ -14,6 +14,7 @@ if (!defined('DOKU_TAB')) define('DOKU_TAB', "\t");
 if (!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
 
 require_once(DOKU_PLUGIN.'stratastorage/driver/driver.php');
+require_once(DOKU_PLUGIN.'stratastorage/strata_querytree_visitor.php');
 
 /**
  * The triples helper is responsible for querying.
