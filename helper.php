@@ -6,12 +6,7 @@
  * @author  Brend Wanders <b.wanders@utwente.nl>
  */
 
-// must be run within Dokuwiki
-if (!defined('DOKU_INC')) die();
-
-if (!defined('DOKU_LF')) define('DOKU_LF', "\n");
-if (!defined('DOKU_TAB')) define('DOKU_TAB', "\t");
-if (!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
+if (!defined('DOKU_INC')) die('meh.');
 
 if (!defined('STRATABASIC_PREDICATE')) define('STRATABASIC_PREDICATE','[^_:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+');
 if (!defined('STRATABASIC_VARIABLE')) define('STRATABASIC_VARIABLE','[^ _:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+');
