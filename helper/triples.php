@@ -7,13 +7,10 @@
  */
 
 // must be run within Dokuwiki
-if (!defined('DOKU_INC')) die();
+if (!defined('DOKU_INC')) die('Meh.');
 
-if (!defined('DOKU_LF')) define('DOKU_LF', "\n");
-if (!defined('DOKU_TAB')) define('DOKU_TAB', "\t");
-if (!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
-
-require_once(DOKU_PLUGIN.'stratastorage/driver/driver.php');
+// FIXME: This include should be where the visitor is actually needed!
+// FIXME: It should really be handled by the auto-loader of stratastorage!
 require_once(DOKU_PLUGIN.'stratastorage/strata_querytree_visitor.php');
 
 /**

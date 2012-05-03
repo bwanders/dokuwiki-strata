@@ -4,9 +4,7 @@
  * @author     Steven te Brinke <s.tebrinke@utwente.nl>
  */
 // must be run within Dokuwiki
-if(!defined('DOKU_INC')) die();
-
-if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
+if(!defined('DOKU_INC')) die('Meh.');
 
 require_once(DOKU_PLUGIN.'stratastorage/driver/driver.php');
 

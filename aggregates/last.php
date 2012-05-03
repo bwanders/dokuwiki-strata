@@ -4,9 +4,7 @@
  * @author     Brend Wanders <b.wanders@utwente.nl>
  */
 // must be run within Dokuwiki
-if(!defined('DOKU_INC')) die();
-
-if(!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
+if(!defined('DOKU_INC')) die('Meh.');
 
 /**
  * The last aggregator.

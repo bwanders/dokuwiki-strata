@@ -7,7 +7,7 @@
  */
 
 // must be run within Dokuwiki
-if (!defined('DOKU_INC')) die();
+if (!defined('DOKU_INC')) die('Meh.');
 
 class strata_querytree_visitor {
     /**

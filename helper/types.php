@@ -7,11 +7,7 @@
  */
 
 // must be run within Dokuwiki
-if (!defined('DOKU_INC')) die();
-
-if (!defined('DOKU_LF')) define('DOKU_LF', "\n");
-if (!defined('DOKU_TAB')) define('DOKU_TAB', "\t");
-if (!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN',DOKU_INC.'lib/plugins/');
+if (!defined('DOKU_INC')) die('Meh.');
 
 /**
  * The types helper is used to cached types and aggregates.
