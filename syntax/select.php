@@ -62,31 +62,22 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         // allow subclass body handling
         $this->handleBody($tree, $result, $typemap);
 
-        // extract the projection information in 'long syntax' if available
-        $fieldsGroups = $this->helper->extractGroups($tree, 'fields');
+        // parse long fields, if available
+        $longFields = $this->helper->getFields($tree, $typemap);
 
-        // parse 'long syntax' if we don't have projection information yet
-        if(count($fieldsGroups)) {
-            if(count($result['fields'])) {
-                msg($this->helper->getLang('error_query_bothfields'),-1);
-                return array();
-            } else {
-                if(count($fieldsGroups) > 1) {
-                    msg($this->helper->getLang('error_query_fieldsgroups'),-1);
-                    return array();
-                }
-
-                $fieldsLines = $this->helper->extractText($fieldsGroups[0]);
-                if(count($fieldsGroups[0]['cs'])) {
-                    msg(sprintf($this->helper->getLang('error_query_fieldsblock'),( isset($fieldsGroups[0]['cs'][0]['tag']) ? sprintf($this->helper->getLang('named_group'),hsc($fieldsGroups[0]['cs'][0]['tag'])) : $this->helper->getLang('unnamed_group'))),-1);
-                    return array();
-                }
-                $result['fields'] = $this->helper->parseFieldsLong($fieldsLines, $typemap);
-                if(!$result['fields']) return array();
-            }
+        // check double data
+        if(count($result['fields']) && count($longFields)) {
+            msg($this->getLang('error_query_bothfields'),-1);
+            return array();
         }
 
-        if(empty($result['fields']) || count($result['fields']) == 0) {
+        // assign longfields if necessary
+        if(count($result['fields']) == 0) {
+            $result['fields'] = $longFields;
+        }
+
+        // check no data
+        if(count($result['fields']) == 0) {
             msg($this->helper->getLang('error_query_noselect'),-1);
             return array();
         }

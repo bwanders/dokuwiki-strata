@@ -488,6 +488,31 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         return array($triples, $filters, $scope);
     }
 
+    function getFields(&$tree, &$typemap) {
+        $fields = array();
+
+        // extract the projection information in 'long syntax' if available
+        $fieldsGroups = $this->extractGroups($tree, 'fields');
+
+        // parse 'long syntax' if we don't have projection information yet
+        if(count($fieldsGroups)) {
+            if(count($fieldsGroups) > 1) {
+                msg($this->getLang('error_query_fieldsgroups'),-1);
+                return array();
+            }
+
+            $fieldsLines = $this->extractText($fieldsGroups[0]);
+            if(count($fieldsGroups[0]['cs'])) {
+                msg(sprintf($this->getLang('error_query_fieldsblock'),( isset($fieldsGroups[0]['cs'][0]['tag']) ? sprintf($this->getLang('named_group'),hsc($fieldsGroups[0]['cs'][0]['tag'])) : $this->getLang('unnamed_group'))),-1);
+                return array();
+            }
+            $fields = $this->parseFieldsLong($fieldsLines, $typemap);
+            if(!$fields) return array();
+        }
+    
+        return $fields;
+    }
+
     /**
      * Parses a projection group in 'long syntax'.
      */
