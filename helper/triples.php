@@ -987,13 +987,13 @@ class stratastorage_resource_iterator implements Iterator {
 
         // construct a new subject
         $this->item = array();
-        $this->subject = $peekRow[$this->__subject];
+        $this->subject = $peekRow[$this->__subject][0];
 
         // continue aggregating data as long as the subject doesn't change and
         // there is data available
-        while($this->data->valid() && $peekRow[$this->__subject] == $this->subject) {
-            $p = $peekRow[$this->__predicate];
-            $o = $peekRow[$this->__object];
+        while($this->data->valid() && $peekRow[$this->__subject][0] == $this->subject) {
+            $p = $peekRow[$this->__predicate][0];
+            $o = $peekRow[$this->__object][0];
             if(!isset($this->item[$p])) $this->item[$p] = array();
             $this->item[$p][] = $o;
             
