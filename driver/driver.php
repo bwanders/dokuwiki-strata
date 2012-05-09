@@ -36,6 +36,7 @@ abstract class plugin_strata_driver {
      */
     function __construct($debug=false) {
         $this->_debug = $debug;
+        $this->helper =& plugin_load('helper', 'stratastorage_types');
     }
 
     /**
@@ -93,9 +94,9 @@ abstract class plugin_strata_driver {
             $this->_db = $this->initializePDO($dsn);
         } catch(PDOException $e) {
             if ($this->_debug) {
-                msg(hsc("Strata storage: Failed to open data source '$dsn': " . $e->getMessage()), -1);
+                msg(sprintf($this->helper->getLang('driver_failed_detail'), hsc($dsn), hsc($e->getMessage())), -1);
             } else {
-                msg('Strata storage: Failed to open data source.', -1);
+                msg($this->helper->getLang('driver_failed'), -1);
             }
             return false;
         }
@@ -143,7 +144,7 @@ abstract class plugin_strata_driver {
 
         // determine driver
         list($driver, $connection) = explode(':', $this->_dsn, 2);
-        if ($this->_debug) msg('Strata storage: Setting up ' . $driver . ' database.');
+        if ($this->_debug) msg(sprintf($this->helper->getLang('driver_setup_start'), hsc($driver)));
 
         // load SQL script
         $sqlfile = DOKU_PLUGIN . "stratastorage/sql/setup-$driver.sql";
@@ -170,15 +171,15 @@ abstract class plugin_strata_driver {
             // skip empty lines (usually the last line is empty, due to the final semicolon)
             if(trim($s) == '') continue;
 
-            if ($this->_debug) msg(hsc('Strata storage: Executing \'' . $s . '\'.'));
-            if(!$this->query($s, 'Failed to set up database')) {
+            if ($this->_debug) msg(sprintf($this->helper->getLang('driver_setup_statement'),hsc($s)));
+            if(!$this->query($s, $this->helper->getLang('driver_setup_failed'))) {
                 $this->rollBack();
                 return false;
             }
         }
         $this->commit();
 
-        if($this->_debug) msg('Strata storage: Database set up successful!', 1);
+        if($this->_debug) msg($this->helper->getLang('driver_setup_succes'), 1);
 
         return true;
     }
@@ -189,7 +190,7 @@ abstract class plugin_strata_driver {
      * @return whether the database was removed successfully
      */
     public function removeDatabase() {
-        return $this->query('DROP TABLE data', 'Failed to remove database');
+        return $this->query('DROP TABLE data', $this->helper->getLang('driver_remove_failed'));
     }
 
     /**
@@ -204,7 +205,7 @@ abstract class plugin_strata_driver {
         $result = $this->_db->prepare($query);
         if ($result === false) {
             $error = $this->_db->errorInfo();
-            msg(hsc('Strata storage: Failed to prepare query \''.$query.'\': '.$error[2]),-1);
+            msg(sprintf($this->helper->getLang('driver_prepare_failed'),hsc($query), hsc($error[2])),-1);
             return false;
         }
 
@@ -218,13 +219,17 @@ abstract class plugin_strata_driver {
       * @param message string message to report when executing the query fails
       * @return whether querying succeeded
       */
-    public function query($query, $message="Query failed") {
+    public function query($query, $message=false) {
         if($this->_db == false) return false;
+
+        if($message === false) {
+            $message = $this->helper->getLang('driver_query_failed_default');
+        }
 
         $res = $this->_db->query($query);
         if ($res === false) {
             $error = $this->_db->errorInfo();
-            msg(hsc('Strata storage: '.$message.' (with \''.$query.'\'): '.$error[2]),-1);
+            msg(sprintf($this->helper->getLang('driver_query_failed'), $message, hsc($query), hsc($error[2])),-1);
             return false;
         }
         return true;
