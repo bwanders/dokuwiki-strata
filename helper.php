@@ -337,6 +337,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                 // triple pattern
                 list(, $subject, $predicate, $type, $hint, $object) = $match;
 
+                $subject = utf8_trim($subject);
                 if($subject[0] == '?') {
                     $subject = $this->variable($subject);
                     $scope[] = $subject['text'];
@@ -348,6 +349,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                     $subject = $this->literal($subject);
                 }
 
+                $predicate = utf8_trim($predicate);
                 if($predicate[0] == '?') {
                     $predicate = $this->variable($predicate);
                     $scope[] = $predicate['text'];
@@ -356,6 +358,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                     $predicate = $this->literal($this->normalizePredicate($predicate));
                 }
 
+                $object = utf8_trim($object);
                 if($object[0] == '?') {
                     // match a proper type variable
                     preg_match('/(?:\?('.STRATABASIC_VARIABLE.'))(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?/',$object,$captures);
