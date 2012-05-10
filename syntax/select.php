@@ -57,9 +57,6 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
 
         $tree = $this->helper->constructTree($lines,'query');
 
-        // allow subclass body handling
-        $this->handleBody($tree, $result, $typemap);
-
         // parse long fields, if available
         $longFields = $this->helper->getFields($tree, $typemap);
 
@@ -84,6 +81,9 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         $projection = array();
         foreach($result['fields'] as $f) $projection[] = $f['variable'];
         $projection = array_unique($projection);
+
+        // allow subclass body handling
+        $this->handleBody($tree, $result, $typemap);
 
         // parse the query itself
         list($result['query'], $variables) = $this->helper->constructQuery($tree, $typemap, $projection);
@@ -146,7 +146,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
 
     /**
      * Handles the body of the syntax. This method is called before any
-     * of the body is handled.
+     * of the body is handled, but after the 'fields' groups have been processed.
      *
      * @param tree array the parsed tree
      * @param result array the result array passed to the render method
