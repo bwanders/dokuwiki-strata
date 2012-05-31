@@ -33,7 +33,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
 
     function connectTo($mode) {
         if($this->getConf('enable_entry')) {
-            $this->Lexer->addSpecialPattern('<data(?: +[^#>]+?)?(?: *#[^>]*?)?>\n(?:.+?\n)*?</data>',$mode, 'plugin_stratabasic_entry');
+            $this->Lexer->addSpecialPattern('<data(?: +[^#>]+?)?(?: *#[^>]*?)?>\n(?:.*?\n)*?</data>',$mode, 'plugin_stratabasic_entry');
         }
     }
 
