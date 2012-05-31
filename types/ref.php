@@ -12,9 +12,13 @@ if(!defined('DOKU_INC')) die('Meh.');
 class plugin_strata_type_ref extends plugin_strata_type_page {
     function render($mode, &$R, &$T, $value, $hint) {
         $heading = null;
-        $titles = $T->fetchTriples($value, $T->getTitleKey());
-        if($titles) {
-            $heading = $titles[0]['object'];
+
+        // only use heading if allowed by configuration
+        if(useHeading('content')) {
+            $titles = $T->fetchTriples($value, $T->getTitleKey());
+            if($titles) {
+                $heading = $titles[0]['object'];
+            }
         }
 
         // render internal link
