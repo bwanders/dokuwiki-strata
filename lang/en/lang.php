@@ -32,4 +32,5 @@ $lang['error_query_multigrouping'] = 'I don\'t know what to do with multiple <co
 $lang['error_query_groupblock'] = 'I can\'t handle groups in a <code>group</code> group.';
 $lang['error_query_groupvar'] = '<code>group</code> group uses out-of-scope variable \'<code>%s</code>\'.';
 $lang['error_query_groupline'] = 'I can\'t handle line\'<code>%s</code>\' in the <code>group</code> group.';
+$lang['error_query_grouppattern'] = 'I can\'t handle a group without at least one triple pattern or union group.';
 

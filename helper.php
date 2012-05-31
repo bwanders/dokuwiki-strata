@@ -217,6 +217,10 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
             $patterns[] = $u;
         }
 
+        if(count($patterns) == 0) {
+            $this->_fail(sprintf($this->getLang('error_query_grouppattern')));
+        }
+
         // chain all patterns with ANDs 
         $result = array_shift($patterns);
         foreach($patterns as $pattern) {
