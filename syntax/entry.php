@@ -329,8 +329,6 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                 }
             }
 
-            msg('<pre>'.hsc(print_r($data['data'],1)),'</pre>',2);
-
             foreach($data['data'] as $property=>$bucket) {
                 $this->helper->renderPredicate($mode, $R, $this->triples, $property);
 

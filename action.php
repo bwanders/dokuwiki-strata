@@ -31,8 +31,6 @@ class action_plugin_stratabasic extends DokuWiki_Action_Plugin {
 
         $current =& $event->data['current'];
 
-        msg('<pre>'.print_r($current,1).'</pre>',1);
-
         if(isset($current['stratabasic']['fixTitle']) && $current['stratabasic']['fixTitle']) {
             // get triples helper
             $triples =& plugin_load('helper', 'stratastorage_triples', false);
