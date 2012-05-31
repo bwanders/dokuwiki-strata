@@ -34,3 +34,5 @@ $lang['error_query_groupvar'] = '<code>group</code> group uses out-of-scope vari
 $lang['error_query_groupline'] = 'I can\'t handle line\'<code>%s</code>\' in the <code>group</code> group.';
 $lang['error_query_grouppattern'] = 'I can\'t handle a group without at least one triple pattern or union group.';
 
+$lang['content_error_explanation'] = '%s: An error ocurred! Use the preview to see the error message again.';
+

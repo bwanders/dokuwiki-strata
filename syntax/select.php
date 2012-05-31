@@ -187,6 +187,17 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
 
     function render($mode, &$R, $data) {
         if($data == array()) {
+            if($mode == 'xhtml') {
+                $R->table_open();
+                $R->tablerow_open();
+                $R->tablecell_open();
+                $R->emphasis_open();
+                $R->doc .= $R->_xmlEntities(sprintf($this->helper->getLang('content_error_explanation'),'Strata table'));
+                $R->emphasis_close();
+                $R->tablecell_close();
+                $R->tablerow_close();
+                $R->table_close();
+            }
             return;
         }
 
@@ -196,6 +207,17 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         $result = $this->triples->queryRelations($query);
 
         if($result == false) {
+            if($mode == 'xhtml') {
+                $R->table_open();
+                $R->tablerow_open();
+                $R->tablecell_open();
+                $R->emphasis_open();
+                $R->doc .= $R->_xmlEntities(sprintf($this->helper->getLang('content_error_explanation'),'Strata table'));
+                $R->emphasis_close();
+                $R->tablecell_close();
+                $R->tablerow_close();
+                $R->table_close();
+            }
             return;
         }
 

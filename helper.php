@@ -77,7 +77,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
     function _fail($message) {
         msg($message,-1);
-        throw new Exception();
+        throw new Exception($message);
     }
 
     /**
