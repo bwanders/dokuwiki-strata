@@ -69,7 +69,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
         // process the fragment if necessary
         $result['entry'] = $header[2];
         if($result['entry'] != '') {
-            $result['data'][$this->triples->getTitleKey()][] = array('value'=>$result['entry'], 'type'=>'text', 'hint'=>null);
+            $result['title candidate'] = array('value'=>$result['entry'], 'type'=>'text', 'hint'=>null);
         }
 
         // parse tree
@@ -109,6 +109,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                 } else {
                     $values = array($values);
                 }
+                
 
                 // generate triples from the values
                 foreach($values as $v) {
@@ -155,6 +156,13 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                     $result['data'][$property][] = $triple;
                 }
             }
+        }
+
+        
+        // normalize title candidate
+        if(!empty($result['title candidate'])) {
+            $type = $this->types->loadType($result['title candidate']['type']);
+            $result['title candidate']['value'] = $type->normalize($result['title candidate']['value'], $result['title candidate']['hint']);
         }
 
         $footer = $this->handleFooter($footer, $result);
@@ -226,14 +234,21 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
             // determine actual header text
             $heading = '';
             if(isset($data['data'][$this->triples->getTitleKey()])) {
-                // use title triple of possible
+                // use title triple if possible
                 $heading = $data['data'][$this->triples->getTitleKey()][0]['value'];
-            } elseif (useHeading('content')) {
-                // fall back to page title, depending on wiki configuration
-                $heading = p_get_first_heading($ID);
+            } elseif (!empty($data['title candidate'])) {
+                // use title candidate if possible
+                $heading = $data['title candidate']['value'];
             } else {
-                // use page id if all else fails
-                $heading = noNS($ID);
+                if(useHeading('content')) {
+                    // fall back to page title, depending on wiki configuration
+                    $heading = p_get_first_heading($ID);
+                }
+
+                if(!$heading) {
+                    // use page id if all else fails
+                    $heading = noNS($ID);
+                }
             }
             $R->doc .= $R->_xmlEntities($heading);
 
@@ -288,6 +303,34 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
             // resolve the subject to normalize everything
             resolve_pageid(getNS($ID),$subject,$exists);
 
+            $titleKey = $this->helper->normalizePredicate($this->triples->getTitleKey());
+
+            $fixTitle = false;
+
+            // we only use the title determination if no explicit title was given
+            if(empty($data['data'][$titleKey])) {
+                if(!empty($data['title candidate'])) {
+                    // we have a candidate from somewhere
+                    $data['data'][$titleKey][] = $data['title candidate'];
+                } else {
+                    if(!empty($R->meta['title'])) {
+                        // we do not have a candidate, so we use the page title
+                        // (this is possible because fragments set the candidate)
+                        $data['data'][$titleKey][] = array(
+                            'value'=>$R->meta['title'],
+                            'type'=>'text',
+                            'hint'=>null
+                        );
+                    } else {
+                        // we were added before the page title is known
+                        // however, we do require a page title (iff we actually store data)
+                        $fixTitle = true;
+                    }
+                }
+            }
+
+            msg('<pre>'.hsc(print_r($data['data'],1)),'</pre>',2);
+
             foreach($data['data'] as $property=>$bucket) {
                 $this->helper->renderPredicate($mode, $R, $this->triples, $property);
 
@@ -305,6 +348,11 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
             if(!isset($R->info['data']) || $R->info['data']==true) {
                 // batch-store triples if we're allowed to store
                 $this->triples->addTriples($triples, $ID);
+                
+                // set flag for title addendum
+                if($fixTitle) {
+                    $R->meta['stratabasic']['fixTitle'] = true;
+                }
             }
 
             return true;
