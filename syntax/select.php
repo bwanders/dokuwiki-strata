@@ -32,7 +32,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
     }
 
     function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('<table'.$this->helper->fieldsShortPattern().'* *>\n.+?\n</table>',$mode, 'plugin_stratabasic_select');
+        $this->Lexer->addSpecialPattern('<table'.$this->helper->fieldsShortPattern().'* *>\s*?\n.+?\n\s*?</table>',$mode, 'plugin_stratabasic_select');
     }
 
     function handle($match, $state, $pos, &$handler) {
@@ -44,8 +44,8 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
 
         // split into lines and remove header and footer
         $lines = explode("\n",$match);
-        $header = array_shift($lines);
-        $footer = array_pop($lines);
+        $header = trim(array_shift($lines));
+        $footer = trim(array_pop($lines));
 
         // allow subclass header handling
         $header = $this->handleHeader($header, $result, $typemap);

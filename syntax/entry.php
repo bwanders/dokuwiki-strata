@@ -33,7 +33,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
 
     function connectTo($mode) {
         if($this->getConf('enable_entry')) {
-            $this->Lexer->addSpecialPattern('<data(?: +[^#>]+?)?(?: *#[^>]*?)?>\n(?:.*?\n)*?</data>',$mode, 'plugin_stratabasic_entry');
+            $this->Lexer->addSpecialPattern('<data(?: +[^#>]+?)?(?: *#[^>]*?)?>\s*?\n(?:.*?\n)*?\s*?</data>',$mode, 'plugin_stratabasic_entry');
         }
     }
 
@@ -50,8 +50,8 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
         $match = $this->preprocess($match, $result);
 
         $lines = explode("\n",$match);
-        $header = array_shift($lines);
-        $footer = array_pop($lines);
+        $header = trim(array_shift($lines));
+        $footer = trim(array_pop($lines));
 
 
         // allow subclasses to mangle header

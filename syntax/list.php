@@ -13,7 +13,7 @@ if (!defined('DOKU_INC')) die('Meh.');
  */
 class syntax_plugin_stratabasic_list extends syntax_plugin_stratabasic_select {
     function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('<list'.$this->helper->fieldsShortPattern().'* *>\n.+?\n</list>',$mode, 'plugin_stratabasic_list');
+        $this->Lexer->addSpecialPattern('<list'.$this->helper->fieldsShortPattern().'* *>\s*?\n.+?\n\s*?</list>',$mode, 'plugin_stratabasic_list');
     }
 
     function handleHeader($header, &$result, &$typemap) {
