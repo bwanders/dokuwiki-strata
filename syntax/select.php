@@ -206,21 +206,6 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         // execute the query
         $result = $this->triples->queryRelations($query);
 
-        if($result == false) {
-            if($mode == 'xhtml') {
-                $R->table_open();
-                $R->tablerow_open();
-                $R->tablecell_open();
-                $R->emphasis_open();
-                $R->doc .= $R->_xmlEntities(sprintf($this->helper->getLang('content_error_explanation'),'Strata table'));
-                $R->emphasis_close();
-                $R->tablecell_close();
-                $R->tablerow_close();
-                $R->table_close();
-            }
-            return;
-        }
-
         // prepare all columns
         foreach($data['fields'] as $meta) {
             $fields[] = array(
@@ -250,22 +235,30 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
             $R->doc .= '</thead>'.DOKU_LF;
 
             $R->doc .= '<tbody>'.DOKU_LF;
-            // render each row
-            foreach($result as $row) {
-                $R->tablerow_open();
-                    foreach($fields as $f) {
-                        $R->tablecell_open();
-                        $first = true;
-                        foreach($f['aggregate']->aggregate($row[$f['variable']],$f['aggregateHint']) as $value) {
-                            if(!$first) $R->doc .= ', ';
-                            $f['type']->render($mode, $R, $this->triples, $value, $f['hint']);
-                            $first = false;
-                        }
-                        $R->tablecell_close();
-                    }
-                $R->tablerow_close();
+            if($result != false) {
+              // render each row
+              foreach($result as $row) {
+                  $R->tablerow_open();
+                      foreach($fields as $f) {
+                          $R->tablecell_open();
+                          $first = true;
+                          foreach($f['aggregate']->aggregate($row[$f['variable']],$f['aggregateHint']) as $value) {
+                              if(!$first) $R->doc .= ', ';
+                              $f['type']->render($mode, $R, $this->triples, $value, $f['hint']);
+                              $first = false;
+                          }
+                          $R->tablecell_close();
+                      }
+                  $R->tablerow_close();
+              }
+              $result->closeCursor();
+            } else {
+              $R->tablecell_open(count($fields));
+              $R->emphasis_open();
+              $R->doc .= $R->_xmlEntities(sprintf($this->helper->getLang('content_error_explanation'),'Strata table'));
+              $R->emphasis_close();
+              $R->tablecell_close();
             }
-            $result->closeCursor();
             $R->doc .= '</tbody>'.DOKU_LF;
 
             $R->table_close();
@@ -273,6 +266,8 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
 
             return true;
         } elseif($mode == 'metadata') {
+            if($result == false) return;
+
             // render all rows in metadata mode to enable things like backlinks
             foreach($result as $row) {
                 foreach($fields as $f) {
