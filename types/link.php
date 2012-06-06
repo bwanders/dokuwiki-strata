@@ -14,20 +14,19 @@ class plugin_strata_type_link extends plugin_strata_type {
         if(preg_match('/^[a-zA-Z0-9\.]+>{1}.*$/u',$value)) {
             // Interwiki
             $interwiki = explode('>',$value,2);
-            $renderer->interwikilink($value,null, strtolower($interwiki[0]), $interwiki[1]);
+            $renderer->interwikilink($value,$hint, strtolower($interwiki[0]), $interwiki[1]);
 
         } elseif(preg_match('/^\\\\\\\\[^\\\\]+?\\\\/u',$value)) {
-            $renderer->windowssharelink($value,null);
+            $renderer->windowssharelink($value,$hint);
 
         } elseif(preg_match('#^([a-z0-9\-\.+]+?)://#i',$value)) {
-            $renderer->externallink($value,null);
+            $renderer->externallink($value,$hint);
 
         } elseif(preg_match('<'.PREG_PATTERN_VALID_EMAIL.'>',$value)) {
-            $renderer->emaillink($value,null);
+            $renderer->emaillink($value,$hint);
 
         } else {
-            $page = new plugin_strata_type_page();
-            $page->render($mode, $renderer, $triples, $value, null);
+            $renderer->internallink(':'.$value, $hint);
         }
 
         return true;
@@ -53,7 +52,8 @@ class plugin_strata_type_link extends plugin_strata_type {
         
     function getInfo() {
         return array(
-            'desc'=>'Creates a link. This type is multi-purpose: it handles external links, interwiki links, email addresses, windows shares and normal wiki links (basically any link DokuWiki knows of). The hint is ignored.'
+            'desc'=>'Creates a link. This type is multi-purpose: it handles external links, interwiki links, email addresses, windows shares and normal wiki links (basically any link DokuWiki knows of). The optional hint will be used as link title.',
+            'hint'=>'The link title'
         );
     }
 }
