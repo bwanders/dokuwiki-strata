@@ -50,6 +50,8 @@ class plugin_strata_type_wiki extends plugin_strata_type {
         $parts = explode('?', $instruction[0] ,2);
 
         $id = $parts[0];
+
+		list($id,$hash) = explode('#', $id, 2);
         
         // normalize selflink
         if($id === '') {
@@ -60,7 +62,7 @@ class plugin_strata_type_wiki extends plugin_strata_type {
         resolve_pageid(getNS($ID), $id, $exists);
 
         // render the link
-        return $this->_linkSyntax($instruction, $id);
+        return $this->_linkSyntax($instruction, $id.'#'.$hash);
     }
 
     /**
