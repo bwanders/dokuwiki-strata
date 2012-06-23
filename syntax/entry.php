@@ -129,14 +129,10 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
 
         // normalize data:
         // - Normalize all values
-        // - Deduplicate all values
         $buckets = $result['data'];
         $result['data'] = array();
 
         foreach($buckets as $property=>&$bucket) {
-            // array with seen values
-            $seen = array();
-
             foreach($bucket as &$triple) {
                 // normalize the value
                 $type = $this->types->loadType($triple['type']);
@@ -150,11 +146,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                     $result['data'][$property] = array();
                 }
 
-                // uniqueness check
-                if(!in_array($triple['value'], $seen)) {
-                    $seen[] = $triple['value'];
-                    $result['data'][$property][] = $triple;
-                }
+                $result['data'][$property][] = $triple;
             }
         }
 
