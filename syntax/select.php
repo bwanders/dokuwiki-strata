@@ -288,7 +288,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
     protected function displayError(&$R, $data) {
         $R->doc .= '<div class="strata__debug_message">';
         $R->doc .= $R->_xmlEntities($this->helper->getLang('content_error_explanation'));
-        $R->doc .= $data['error']['message'];
+        $R->doc .= ': '.$data['error']['message'];
         $R->doc .= '</div>';
         if(isset($data['error']['regions'])) $R->doc .= $this->helper->debugTree($data['error']['lines'], $data['error']['regions']);
     }
