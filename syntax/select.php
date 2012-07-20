@@ -88,8 +88,6 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
     
             // parse the query itself
             list($result['query'], $variables) = $this->helper->constructQuery($tree, $typemap, $projection);
-            if(!$result['query']) return array();
-    
     
             // allow subclass footer handling
             $footer = $this->handleFooter($footer, &$result, &$typemap, &$variable);
@@ -98,7 +96,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
             foreach($result['fields'] as $i=>$f) {
                 $var = $f['variable'];
                 if(!in_array($var, $variables)) {
-                    msg(sprintf($this->helper->getLang('error_query_unknownselect'),utf8_tohtml(hsc($var))),-1);
+                    $this->helper->_fail(sprintf($this->helper->getLang('error_query_unknownselect'),utf8_tohtml(hsc($var))));
                     return array();
                 }
     
@@ -115,7 +113,11 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
     
             return $result;
         } catch(stratabasic_exception $e) {
-            return array();
+            return array('error'=>array(
+                'message'=>$e->getMessage(),
+                'regions'=>$e->getData(),
+                'lines'=>$lines
+            ));
         }
     }
 
@@ -198,6 +200,10 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
                 $R->emphasis_open();
                 $R->doc .= $R->_xmlEntities(sprintf($this->helper->getLang('content_error_explanation'),'Strata table'));
                 $R->emphasis_close();
+                $R->linebreak();
+                $R->doc .= $data['error']['message'];
+                $R->linebreak();
+                $R->doc .= $this->helper->debugTree($data['error']['lines'], $data['error']['regions']);
                 $R->tablecell_close();
                 $R->tablerow_close();
                 $R->table_close();
