@@ -63,8 +63,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
     
             // check double data
             if(count($result['fields']) && count($longFields)) {
-                msg($this->getLang('error_query_bothfields'),-1);
-                return array();
+                $this->helper->_fail($this->getLang('error_query_bothfields'));
             }
     
             // assign longfields if necessary
@@ -74,8 +73,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
     
             // check no data
             if(count($result['fields']) == 0) {
-                msg($this->helper->getLang('error_query_noselect'),-1);
-                return array();
+                $this->helper->_fail($this->helper->getLang('error_query_noselect'));
             }
     
             // determine the variables to project
@@ -97,7 +95,6 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
                 $var = $f['variable'];
                 if(!in_array($var, $variables)) {
                     $this->helper->_fail(sprintf($this->helper->getLang('error_query_unknownselect'),utf8_tohtml(hsc($var))));
-                    return array();
                 }
     
                 if(empty($f['type'])) {
@@ -293,6 +290,6 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         $R->doc .= $R->_xmlEntities($this->helper->getLang('content_error_explanation'));
         $R->doc .= $data['error']['message'];
         $R->doc .= '</div>';
-        $R->doc .= $this->helper->debugTree($data['error']['lines'], $data['error']['regions']);
+        if(isset($data['error']['regions'])) $R->doc .= $this->helper->debugTree($data['error']['lines'], $data['error']['regions']);
     }
 }

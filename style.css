@@ -3,6 +3,7 @@
     font-family: monospace;
     background-color: __background_neu__;
     border: 1px solid __border__;
+    border-top: 0;
     padding: 2px 0 2px 0;
 }
 
@@ -11,7 +12,6 @@
     background-repeat: no-repeat;
     background-position: .5em 0.1em;
     border: 1px solid;
-    border-bottom: 0;
     margin: 0;
     padding-left: 2.5em;
     background-color: #FCC;
