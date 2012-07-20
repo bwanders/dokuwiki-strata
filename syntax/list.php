@@ -21,14 +21,12 @@ class syntax_plugin_stratabasic_list extends syntax_plugin_stratabasic_select {
     }
 
     function render($mode, &$R, $data) {
-        if($data == array()) {
+        if($data == array() || isset($data['error'])) {
             if($mode == 'xhtml') {
                 $R->listu_open();
                 $R->listitem_open(1);
                 $R->listcontent_open();
-                $R->emphasis_open();
-                $R->doc .= $R->_xmlEntities(sprintf($this->helper->getLang('content_error_explanation'),'Strata list'));
-                $R->emphasis_close();
+                $this->displayError($R, $data);
                 $R->listcontent_close();
                 $R->listitem_close();
                 $R->listu_close();

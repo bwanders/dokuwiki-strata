@@ -197,13 +197,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
                 $R->table_open();
                 $R->tablerow_open();
                 $R->tablecell_open();
-                $R->emphasis_open();
-                $R->doc .= $R->_xmlEntities(sprintf($this->helper->getLang('content_error_explanation'),'Strata table'));
-                $R->emphasis_close();
-                $R->linebreak();
-                $R->doc .= $data['error']['message'];
-                $R->linebreak();
-                $R->doc .= $this->helper->debugTree($data['error']['lines'], $data['error']['regions']);
+                $this->displayError($R, $data);
                 $R->tablecell_close();
                 $R->tablerow_close();
                 $R->table_close();
@@ -292,5 +286,15 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
         }
 
         return false;
+    }
+
+    protected function displayError(&$R, $data) {
+        $R->emphasis_open();
+        $R->doc .= $R->_xmlEntities(sprintf($this->helper->getLang('content_error_explanation'),'Strata table'));
+        $R->emphasis_close();
+        $R->linebreak();
+        $R->doc .= $data['error']['message'];
+        $R->linebreak();
+        $R->doc .= $this->helper->debugTree($data['error']['lines'], $data['error']['regions']);
     }
 }
