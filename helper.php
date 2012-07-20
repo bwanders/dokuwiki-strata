@@ -80,6 +80,10 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
     function _fail($message, $regions=array()) {
         msg($message,-1);
 
+        if($this->isGroup($regions) || $this->isLine($regions)) {
+            $regions = array($regions);
+        }
+
         $lines = array();
         foreach($regions as $r) $lines[] = array('start'=>$r['start'], 'end'=>$r['end']);
         throw new stratabasic_exception($message, $lines);
@@ -658,7 +662,11 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                 }
             }
 
-            $result .= '<div class="strata__debug_line">'.hsc($line).'</div>'."\n";
+            if($line != '') {
+                $result .= '<div class="strata__debug_line">'.hsc($line).'</div>'."\n";
+            } else {
+                $result .= '<div class="strata__debug_line"><br/></div>'."\n";
+            }
         }
 
         if($count > 0) {
