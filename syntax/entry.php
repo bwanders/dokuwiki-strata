@@ -89,6 +89,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
 
         // now handle all lines
         foreach($lines as $line) {
+            $line = $line['text'];
             // match a "property_type(hint)*: value" pattern
             // (the * is only used to indicate that the value is actually a comma-seperated list)
             if(preg_match('/^('.STRATABASIC_PREDICATE.'?)(?:_([a-z0-9]+)(?:\(([^)]*)\))?)?(\*)?\s*:(.*)$/',$line,$parts)) {
