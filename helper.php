@@ -719,13 +719,13 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
      * Returns whether the given node is a line.
      */
     function isText(&$node) {
-        return isset($node['text']);
+        return array_key_exists('text', $node);
     }
 
     /**
      * Returns whether the given node is a group.
      */
     function isGroup(&$node) {
-        return isset($node['tag']);
+        return array_key_exists('tag', $node);
     }
 }
