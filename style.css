@@ -3,7 +3,7 @@
     font-family: monospace;
     background-color: __background_neu__;
     border: 1px solid __border__;
-    padding: 2px;
+    padding: 2px 0 2px 0;
 }
 
 .dokuwiki div.strata__debug_message {
@@ -21,9 +21,10 @@
 
 .dokuwiki div.strata__debug div.strata__debug_line {
     white-space: pre;
+    padding: 0 2px 0 2px;
 }
 
 .dokuwiki div.strata__debug div.strata__debug_highlight {
-    background-color: __background_alt__;
-    color: __text_alt__;
+    background-color: #FCC;
+    color: black;
 }
