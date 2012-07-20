@@ -1,7 +1,8 @@
 .dokuwiki div.strata__debug {
     font-family: monospace;
-    background-color: __background_neu__
-    color: __text_neu__
+    background-color: __background_neu__;
+    border: 1px solid __border__;
+    padding: 2px;
 }
 
 .dokuwiki div.strata__debug div.strata__debug_line {
@@ -9,6 +10,6 @@
 }
 
 .dokuwiki div.strata__debug div.strata__debug_highlight {
-    background-color: __background_alt__
-    color: __text_alt__
+    background-color: __background_alt__;
+    color: __text_alt__;
 }
