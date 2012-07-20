@@ -80,7 +80,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
     function _fail($message, $regions=array()) {
         msg($message,-1);
 
-        if($this->isGroup($regions) || $this->isLine($regions)) {
+        if($this->isGroup($regions) || $this->isText($regions)) {
             $regions = array($regions);
         }
 
