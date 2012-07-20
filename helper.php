@@ -171,7 +171,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
                     $result['grouping'][] = $match[1];
                 } else {
-                    $this->_fail(sprintf($this->getLang('error_query_groupline'), utf8_tohtml(hsc($line))), $line);
+                    $this->_fail(sprintf($this->getLang('error_query_groupline'), utf8_tohtml(hsc($line['text']))), $line);
                 }
             }
         }
