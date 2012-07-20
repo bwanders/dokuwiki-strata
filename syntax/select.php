@@ -289,12 +289,10 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
     }
 
     protected function displayError(&$R, $data) {
-        $R->emphasis_open();
-        $R->doc .= $R->_xmlEntities(sprintf($this->helper->getLang('content_error_explanation'),'Strata table'));
-        $R->emphasis_close();
-        $R->linebreak();
+        $R->doc .= '<div class="strata__debug_message">';
+        $R->doc .= $R->_xmlEntities($this->helper->getLang('content_error_explanation'));
         $R->doc .= $data['error']['message'];
-        $R->linebreak();
+        $R->doc .= '</div>';
         $R->doc .= $this->helper->debugTree($data['error']['lines'], $data['error']['regions']);
     }
 }

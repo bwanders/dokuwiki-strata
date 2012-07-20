@@ -1,8 +1,22 @@
 .dokuwiki div.strata__debug {
+    line-height: normal;
     font-family: monospace;
     background-color: __background_neu__;
     border: 1px solid __border__;
     padding: 2px;
+}
+
+.dokuwiki div.strata__debug_message {
+    color: black;
+    background-repeat: no-repeat;
+    background-position: .5em 0.1em;
+    border: 1px solid;
+    border-bottom: 0;
+    margin: 0;
+    padding-left: 2.5em;
+    background-color: #FCC;
+    background-image: url(../../images/error.png);
+    border-color: #FAA;
 }
 
 .dokuwiki div.strata__debug div.strata__debug_line {
