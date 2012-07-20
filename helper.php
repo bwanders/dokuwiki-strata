@@ -11,6 +11,8 @@ if (!defined('DOKU_INC')) die('meh.');
 if (!defined('STRATABASIC_PREDICATE')) define('STRATABASIC_PREDICATE','[^_:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+');
 if (!defined('STRATABASIC_VARIABLE')) define('STRATABASIC_VARIABLE','[^ _:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+');
 
+require_once(DOKU_PLUGIN.'stratabasic/stratabasic_exception.php');
+
 /**
  * Helper plugin for common syntax parsing.
  */
@@ -75,9 +77,12 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         return array('type'=>'variable', 'text'=>$var);
     }
 
-    function _fail($message) {
+    function _fail($message, $regions=array()) {
         msg($message,-1);
-        throw new Exception($message);
+
+        $lines = array();
+        foreach($regions as $r) $lines[] = array('start'=>$r['start'], 'end'=>$r['end']);
+        throw new stratabasic_exception($message, $lines);
     }
 
     /**
@@ -89,97 +94,92 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
      * @return a query structure
      */
     function constructQuery(&$root, &$typemap, $projection) {
-        try {
-            $result = array(
-                'type'=>'select',
-                'group'=>array(),
-                'projection'=>$projection,
-                'ordering'=>array(),
-                'grouping'=>array()
-            );
-    
-            // extract sort groups
-            $ordering = $this->extractGroups($root, 'sort');
+        $result = array(
+            'type'=>'select',
+            'group'=>array(),
+            'projection'=>$projection,
+            'ordering'=>array(),
+            'grouping'=>array()
+        );
 
-            $grouping = $this->extractGroups($root, 'group');
-    
-            // transform actual group
-            $where = $this->extractGroups($root, 'where');
-            $tree = null;
-            if(count($where)==0) {
-                $tree =& $root;
-            } elseif(count($where)==1) {
-                $tree =& $where[0];
-                if(count($root['cs'])) {
-                    $this->_fail($this->getLang('error_query_outofwhere'));
-                }
-            } else {
-                $this->_fail($this->getLang('error_query_singlewhere'));
+        // extract sort groups
+        $ordering = $this->extractGroups($root, 'sort');
+
+        $grouping = $this->extractGroups($root, 'group');
+
+        // transform actual group
+        $where = $this->extractGroups($root, 'where');
+        $tree = null;
+        if(count($where)==0) {
+            $tree =& $root;
+        } elseif(count($where)==1) {
+            $tree =& $where[0];
+            if(count($root['cs'])) {
+                $this->_fail($this->getLang('error_query_outofwhere'), $root['cs']);
             }
-
-            list($group, $scope) = $this->transformGroup($tree, $typemap);
-            $result['group'] = $group;
-            if(!$group) return false;
-    
-            // handle sort groups
-            if(count($ordering)) {
-                if(count($ordering) > 1) {
-                    $this->_fail($this->getLang('error_query_multisort'));
-                }
-   
-                // handle each line in the group 
-                foreach($ordering[0]['cs'] as $line) {
-                    if(is_array($line)) {
-                        $this->_fail($this->getLang('error_query_sortblock'));
-                    }
-    
-                    if(preg_match('/^\?('.STRATABASIC_VARIABLE.')\s*(?:\((asc|desc)(?:ending)?\))?$/S',utf8_trim($line),$match)) {
-                        if(!in_array($match[1], $scope)) {
-                            $this->_fail(sprintf($this->getLang('error_query_sortvar'),utf8_tohtml(hsc($match[1]))));
-                        }
-    
-                        $result['ordering'][] = array('variable'=>$match[1], 'direction'=>($match[2]?:'asc'));
-                    } else {
-                        $this->_fail(sprintf($this->getLang('error_query_sortline'), utf8_tohtml(hsc($line))));
-                    }
-                }
-            }
-
-            //handle grouping
-            if(count($grouping)) {
-                if(count($grouping) > 1) {
-                    $this->_fail($this->getLang('error_query_multigrouping'));
-                }
-
-                foreach($grouping[0]['cs'] as $line) {
-                    if(is_array($line)) {
-                        $this->_fail($this->getLang('error_query_groupblock'));
-                    }
-
-                    if(preg_match('/^\?('.STRATABASIC_VARIABLE.')$/',utf8_trim($line),$match)) {
-                        if(!in_array($match[1], $scope)) {
-                            $this->_fail(sprintf($this->getLang('error_query_groupvar'),utf8_tohtml(hsc($match[1]))));
-                        }
-
-                        $result['grouping'][] = $match[1];
-                    } else {
-                        $this->_fail(sprintf($this->getLang('error_query_groupline'), utf8_tohtml(hsc($line))));
-                    }
-                }
-            }
-    
-            foreach($projection as $var) {
-                if(!in_array($var, $scope)) {
-                    $this->_fail(sprintf($this->getLang('error_query_selectvar'), utf8_tohtml(hsc($var))));
-                }
-            }
-    
-            // return final query structure
-            return array($result, $scope);
-        } catch(Exception $e) {
-            // we failed somewhere in the transformation
-            return false;
+        } else {
+            $this->_fail($this->getLang('error_query_singlewhere'), $where);
         }
+
+        list($group, $scope) = $this->transformGroup($tree, $typemap);
+        $result['group'] = $group;
+        if(!$group) return false;
+
+        // handle sort groups
+        if(count($ordering)) {
+            if(count($ordering) > 1) {
+                $this->_fail($this->getLang('error_query_multisort'), $ordering);
+            }
+   
+            // handle each line in the group 
+            foreach($ordering[0]['cs'] as $line) {
+                if($this->isGroup($line)) {
+                    $this->_fail($this->getLang('error_query_sortblock'), $line);
+                }
+
+                if(preg_match('/^\?('.STRATABASIC_VARIABLE.')\s*(?:\((asc|desc)(?:ending)?\))?$/S',utf8_trim($line['text']),$match)) {
+                    if(!in_array($match[1], $scope)) {
+                        $this->_fail(sprintf($this->getLang('error_query_sortvar'),utf8_tohtml(hsc($match[1]))), $line);
+                    }
+
+                    $result['ordering'][] = array('variable'=>$match[1], 'direction'=>($match[2]?:'asc'));
+                } else {
+                    $this->_fail(sprintf($this->getLang('error_query_sortline'), utf8_tohtml(hsc($line['text']))), $line);
+                }
+            }
+        }
+
+        //handle grouping
+        if(count($grouping)) {
+            if(count($grouping) > 1) {
+                $this->_fail($this->getLang('error_query_multigrouping'), $grouping);
+            }
+
+            foreach($grouping[0]['cs'] as $line) {
+                if($this->isGroup($line)) {
+                    $this->_fail($this->getLang('error_query_groupblock'), $line);
+                }
+
+                if(preg_match('/^\?('.STRATABASIC_VARIABLE.')$/',utf8_trim($line['text']),$match)) {
+                    if(!in_array($match[1], $scope)) {
+                        $this->_fail(sprintf($this->getLang('error_query_groupvar'),utf8_tohtml(hsc($match[1]))), $line);
+                    }
+
+                    $result['grouping'][] = $match[1];
+                } else {
+                    $this->_fail(sprintf($this->getLang('error_query_groupline'), utf8_tohtml(hsc($line))), $line);
+                }
+            }
+        }
+
+        foreach($projection as $var) {
+            if(!in_array($var, $scope)) {
+                $this->_fail(sprintf($this->getLang('error_query_selectvar'), utf8_tohtml(hsc($var))));
+            }
+        }
+
+        // return final query structure
+        return array($result, $scope);
     }
 
     /**
@@ -204,7 +204,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
         // check for leftovers
         if(count($root['cs'])) {
-            $this->_fail(sprintf($this->getLang('error_query_group'),( isset($root['cs'][0]['tag']) ? sprintf($this->getLang('named_group'), utf8_tohtml(hsc($root['cs'][0]['tag']))) : $this->getLang('unnamed_group'))));
+            $this->_fail(sprintf($this->getLang('error_query_group'),( isset($root['cs'][0]['tag']) ? sprintf($this->getLang('named_group'), utf8_tohtml(hsc($root['cs'][0]['tag']))) : $this->getLang('unnamed_group'))), $root['cs']);
         }
 
         // split patterns into triples and filters
@@ -218,7 +218,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         }
 
         if(count($patterns) == 0) {
-            $this->_fail(sprintf($this->getLang('error_query_grouppattern')));
+            $this->_fail(sprintf($this->getLang('error_query_grouppattern')), $root);
         }
 
         // chain all patterns with ANDs 
@@ -236,10 +236,10 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         if(count($filters)) {
             foreach($filters as $f) {
                 if($f['lhs']['type'] == 'variable' && !in_array($f['lhs']['text'], $scope)) {
-                    $this->_fail('Strata basic: filter uses out-of-scope variable \'<code>'.utf8_tohtml(hsc($f['lhs']['text'])).'<code>\'.');
+                    $this->_fail('Strata basic: filter uses out-of-scope variable \'<code>'.utf8_tohtml(hsc($f['lhs']['text'])).'<code>\'.', $root);
                 }
                 if($f['rhs']['type'] == 'variable' && !in_array($f['rhs']['text'], $scope)) {
-                    $this->_fail('Strata basic: filter uses out-of-scope variable \'<code>'.utf8_tohtml(hsc($f['rhs']['text'])).'</code>\'.');
+                    $this->_fail('Strata basic: filter uses out-of-scope variable \'<code>'.utf8_tohtml(hsc($f['rhs']['text'])).'</code>\'.', $root);
                 }
             }
 
@@ -293,11 +293,11 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
         // do sanity checks
         if(count($root['cs'])) {
-            $this->_fail($this->getLang('error_query_unionblocks'));
+            $this->_fail($this->getLang('error_query_unionblocks'), $root['cs']);
         }
 
         if(count($subs) < 2) {
-            $this->_fail($this->getLang('error_query_unionreq'));
+            $this->_fail($this->getLang('error_query_unionreq'), $root);
         }
 
         // transform the first group
@@ -334,8 +334,8 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         $triples = array();
         $filters = array();
 
-        foreach($lines as $line) {
-            $line = trim($line);
+        foreach($lines as $lineNode) {
+            $line = trim($lineNode['text']);
 
             if(preg_match('/^((?:\?'.STRATABASIC_VARIABLE.')|(?:\[\[[^]]*\]\]))\s+(?:((?:'.STRATABASIC_PREDICATE.')|(?:\?'.STRATABASIC_VARIABLE.'))(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*:\s*(.+?)\s*$/S',$line,$match)) {
                 // triple pattern
@@ -483,7 +483,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                 $filters[] = array('type'=>'filter','lhs'=>$lhs, 'operator'=>$operator, 'rhs'=>$rhs);
             } else {
                 // unknown lines are fail
-                $this->_fail(sprintf($this->getLang('error_query_pattern'),utf8_tohtml(hsc($line))));
+                $this->_fail(sprintf($this->getLang('error_query_pattern'),utf8_tohtml(hsc($line))), $lineNode);
             }
         }
 
@@ -499,14 +499,12 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         // parse 'long syntax' if we don't have projection information yet
         if(count($fieldsGroups)) {
             if(count($fieldsGroups) > 1) {
-                msg($this->getLang('error_query_fieldsgroups'),-1);
-                return array();
+                $this->_fail($this->getLang('error_query_fieldsgroups'), $fieldsGroups);
             }
 
             $fieldsLines = $this->extractText($fieldsGroups[0]);
             if(count($fieldsGroups[0]['cs'])) {
-                msg(sprintf($this->getLang('error_query_fieldsblock'),( isset($fieldsGroups[0]['cs'][0]['tag']) ? sprintf($this->getLang('named_group'),hsc($fieldsGroups[0]['cs'][0]['tag'])) : $this->getLang('unnamed_group'))),-1);
-                return array();
+                $this->_fail(sprintf($this->getLang('error_query_fieldsblock'),( isset($fieldsGroups[0]['cs'][0]['tag']) ? sprintf($this->getLang('named_group'),hsc($fieldsGroups[0]['cs'][0]['tag'])) : $this->getLang('unnamed_group'))), $fieldsGroups[0]['cs']);
             }
             $fields = $this->parseFieldsLong($fieldsLines, $typemap);
             if(!$fields) return array();
@@ -521,8 +519,8 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
     function parseFieldsLong($lines, &$typemap) {
         $result = array();
 
-        foreach($lines as $line) {
-            $line = trim($line);
+        foreach($lines as $lineNode) {
+            $line = trim($lineNode['text']);
             if(preg_match('/^(?:([^_]*)(?:_([a-z0-9]*)(?:\(([^)]+)\))?)?(:))?\s*\?('.STRATABASIC_VARIABLE.')(?:@([a-z0-9]*)(?:\(([^)]+)\))?)?(?:_([a-z0-9]*)(?:\(([^)]+)\))?)?$/S',$line, $match)) {
                 list($_, $caption, $type, $hint, $nocaphint, $variable, $agg, $agghint, $rtype, $rhint) = $match;
                 if(!$nocaphint || (!$nocaphint && !$caption && !$type)) $caption = ucfirst($variable);
@@ -534,13 +532,12 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                 }
 
                 if($type && $rtype && ($type!=$rtype || $hint!=$rhint)) {
-                    msg(sprintf($this->getLang('error_query_fieldsdoubletyped'), utf8_tohtml(hsc($variable))),-1);
+                    $this->_fail(sprintf($this->getLang('error_query_fieldsdoubletyped'), utf8_tohtml(hsc($variable))), $lineNode);
                 }
                 $this->updateTypemap($typemap, $variable, $type, $hint);
                 $result[] = array('variable'=>$variable,'caption'=>$caption, 'aggregate'=>($agg?:null), 'aggregateHint'=>($agg?$agghint:null), 'type'=>$type, 'hint'=>$hint);
             } else {
-                msg(sprintf($this->getLang('error_query_fieldsline'),utf8_tohtml(hsc($line))),-1);
-                return false;
+                $this->_fail(sprintf($this->getLang('error_query_fieldsline'),utf8_tohtml(hsc($line))), $lineNode);
             }
         }
 
@@ -584,10 +581,8 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         $root = array(
             'tag'=>'',
             'cs'=>array(),
-            'lines'=>array(
-                'start'=>1,
-                'end'=>1
-            )
+            'start'=>1,
+            'end'=>1
         );
 
         $stack = array();
@@ -606,21 +601,23 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                 $stack[$top]['cs'][] = array(
                     'tag'=>$tag?:null,
                     'cs'=>array(),
-                    'lines'=>array(
-                        'start'=>$lineCount,
-                        'end'=>0
-                    )
+                    'start'=>$lineCount,
+                    'end'=>0
                 );
                 $stack[] =& $stack[$top]['cs'][count($stack[$top]['cs'])-1];
                 $top = count($stack)-1;
 
             } elseif(preg_match('/^}$/',utf8_trim($line))) {
-                $stack[$top]['lines']['end'] = $lineCount;
+                $stack[$top]['end'] = $lineCount;
                 array_pop($stack);
                 $top = count($stack)-1;
 
             } else {
-                $stack[$top]['cs'][] = $line;
+                $stack[$top]['cs'][] = array(
+                    'text'=>$line,
+                    'start'=>$lineCount,
+                    'end'=>$lineCount
+                );
             }
         }
 
@@ -654,7 +651,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                     $count++;
                 }
 
-                if($lineCount == $region['end']) {
+                if($lineCount == $region['end']+1) {
                     $count--;
 
                     if($count==0) $result .= '</div>';
@@ -662,6 +659,10 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
             }
 
             $result .= '<div class="strata__debug_line">'.hsc($line).'</div>'."\n";
+        }
+
+        if($count > 0) {
+            $result .= '</div>';
         }
 
         return '<div class="strata__debug">'.$result.'</div>';
@@ -679,6 +680,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
     function extractGroups(&$root, $tag) {
         $result = array();
         foreach($root['cs'] as $i=>&$tree) {
+            if(!$this->isGroup($tree)) continue;
             if($tree['tag'] == $tag || (($tag=='' || $tag==null) && $tree['tag'] == null) ) {
                 $result[] =& $tree;
                 array_splice($root['cs'],$i,1);
@@ -698,10 +700,24 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
     function extractText(&$root) {
         $result = array();
         foreach($root['cs'] as $i=>&$tree) {
-            if(is_array($tree)) continue;
+            if(!$this->isText($tree)) continue;
             $result[] =& $tree;
             array_splice($root['cs'],$i,1);
         }
         return $result;
+    }
+
+    /**
+     * Returns whether the given node is a line.
+     */
+    function isText(&$node) {
+        return isset($node['text']);
+    }
+
+    /**
+     * Returns whether the given node is a group.
+     */
+    function isGroup(&$node) {
+        return isset($node['tag']);
     }
 }

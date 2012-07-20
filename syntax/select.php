@@ -36,83 +36,87 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
     }
 
     function handle($match, $state, $pos, &$handler) {
-        $result = array();
-        $typemap = array();
-
-        // allow subclass handling of the whole match
-        $match = $this->preprocess($match, $handler, $result, $typemap);
-
-        // split into lines and remove header and footer
-        $lines = explode("\n",$match);
-        $header = trim(array_shift($lines));
-        $footer = trim(array_pop($lines));
-
-        // allow subclass header handling
-        $header = $this->handleHeader($header, $result, $typemap);
-
-        // parse projection information in 'short syntax' if available
-        if(trim($header) != '') {
-            $result['fields'] = $this->helper->parseFieldsShort($header, $typemap);
-        }
-
-        $tree = $this->helper->constructTree($lines,'query');
-
-        // parse long fields, if available
-        $longFields = $this->helper->getFields($tree, $typemap);
-
-        // check double data
-        if(count($result['fields']) && count($longFields)) {
-            msg($this->getLang('error_query_bothfields'),-1);
-            return array();
-        }
-
-        // assign longfields if necessary
-        if(count($result['fields']) == 0) {
-            $result['fields'] = $longFields;
-        }
-
-        // check no data
-        if(count($result['fields']) == 0) {
-            msg($this->helper->getLang('error_query_noselect'),-1);
-            return array();
-        }
-
-        // determine the variables to project
-        $projection = array();
-        foreach($result['fields'] as $f) $projection[] = $f['variable'];
-        $projection = array_unique($projection);
-
-        // allow subclass body handling
-        $this->handleBody($tree, $result, $typemap);
-
-        // parse the query itself
-        list($result['query'], $variables) = $this->helper->constructQuery($tree, $typemap, $projection);
-        if(!$result['query']) return array();
-
-
-        // allow subclass footer handling
-        $footer = $this->handleFooter($footer, &$result, &$typemap, &$variable);
-
-        // check projected variables and load types
-        foreach($result['fields'] as $i=>$f) {
-            $var = $f['variable'];
-            if(!in_array($var, $variables)) {
-                msg(sprintf($this->helper->getLang('error_query_unknownselect'),utf8_tohtml(hsc($var))),-1);
+        try {
+            $result = array();
+            $typemap = array();
+    
+            // allow subclass handling of the whole match
+            $match = $this->preprocess($match, $handler, $result, $typemap);
+    
+            // split into lines and remove header and footer
+            $lines = explode("\n",$match);
+            $header = trim(array_shift($lines));
+            $footer = trim(array_pop($lines));
+    
+            // allow subclass header handling
+            $header = $this->handleHeader($header, $result, $typemap);
+    
+            // parse projection information in 'short syntax' if available
+            if(trim($header) != '') {
+                $result['fields'] = $this->helper->parseFieldsShort($header, $typemap);
+            }
+    
+            $tree = $this->helper->constructTree($lines,'query');
+    
+            // parse long fields, if available
+            $longFields = $this->helper->getFields($tree, $typemap);
+    
+            // check double data
+            if(count($result['fields']) && count($longFields)) {
+                msg($this->getLang('error_query_bothfields'),-1);
                 return array();
             }
-
-            if(empty($f['type'])) {
-                if(!empty($typemap[$var])) {
-                    $result['fields'][$i] = array_merge($result['fields'][$i],$typemap[$var]);
-                } else {
-                    list($type, $hint) = $this->types->getDefaultType();
-                    $result['fields'][$i]['type'] = $type;
-                    $result['fields'][$i]['hint'] = $hint;
+    
+            // assign longfields if necessary
+            if(count($result['fields']) == 0) {
+                $result['fields'] = $longFields;
+            }
+    
+            // check no data
+            if(count($result['fields']) == 0) {
+                msg($this->helper->getLang('error_query_noselect'),-1);
+                return array();
+            }
+    
+            // determine the variables to project
+            $projection = array();
+            foreach($result['fields'] as $f) $projection[] = $f['variable'];
+            $projection = array_unique($projection);
+    
+            // allow subclass body handling
+            $this->handleBody($tree, $result, $typemap);
+    
+            // parse the query itself
+            list($result['query'], $variables) = $this->helper->constructQuery($tree, $typemap, $projection);
+            if(!$result['query']) return array();
+    
+    
+            // allow subclass footer handling
+            $footer = $this->handleFooter($footer, &$result, &$typemap, &$variable);
+    
+            // check projected variables and load types
+            foreach($result['fields'] as $i=>$f) {
+                $var = $f['variable'];
+                if(!in_array($var, $variables)) {
+                    msg(sprintf($this->helper->getLang('error_query_unknownselect'),utf8_tohtml(hsc($var))),-1);
+                    return array();
+                }
+    
+                if(empty($f['type'])) {
+                    if(!empty($typemap[$var])) {
+                        $result['fields'][$i] = array_merge($result['fields'][$i],$typemap[$var]);
+                    } else {
+                        list($type, $hint) = $this->types->getDefaultType();
+                        $result['fields'][$i]['type'] = $type;
+                        $result['fields'][$i]['hint'] = $hint;
+                    }
                 }
             }
+    
+            return $result;
+        } catch(stratabasic_exception $e) {
+            return array();
         }
-
-        return $result;
     }
 
     /**
