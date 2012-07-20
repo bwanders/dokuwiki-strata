@@ -583,14 +583,20 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
     function constructTree($lines, $what) {
         $root = array(
             'tag'=>'',
-            'cs'=>array()
+            'cs'=>array(),
+            'lines'=>array(
+                'start'=>1,
+                'end'=>1
+            )
         );
 
         $stack = array();
         $stack[] =& $root;
         $top = count($stack)-1;
+        $lineCount = 0;
 
         foreach($lines as $line) {
+            $lineCount++;
             if($this->ignorableLine($line)) continue;
 
             if(preg_match('/^([^\{]*) *{$/',utf8_trim($line),$match)) {
@@ -599,12 +605,17 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
                 $stack[$top]['cs'][] = array(
                     'tag'=>$tag?:null,
-                    'cs'=>array()
+                    'cs'=>array(),
+                    'lines'=>array(
+                        'start'=>$lineCount,
+                        'end'=>0
+                    )
                 );
                 $stack[] =& $stack[$top]['cs'][count($stack[$top]['cs'])-1];
                 $top = count($stack)-1;
 
             } elseif(preg_match('/^}$/',utf8_trim($line))) {
+                $stack[$top]['lines']['end'] = $lineCount;
                 array_pop($stack);
                 $top = count($stack)-1;
 
@@ -617,7 +628,43 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
             msg(sprintf($this->getLang('error_syntax_braces'),$what),-1);
         }
 
+        $root['lines']['end'] = $lineCount;
+
         return $root;
+    }
+
+    /**
+     * Renders a debug display of the syntax.
+     *
+     * @param lines array the lines that form the syntax
+     * @param region array the region to highlight
+     * @return a string with markup
+     */
+    function debugTree($lines, $regions) {
+        $result = '';
+        $lineCount = 0;
+        $count = 0;
+
+        foreach($lines as $line) {
+            $lineCount++;
+
+            foreach($regions as $region) {
+                if($lineCount == $region['start']) {
+                    if($count == 0) $result .= '<div class="strata__debug_highlight">';
+                    $count++;
+                }
+
+                if($lineCount == $region['end']) {
+                    $count--;
+
+                    if($count==0) $result .= '</div>';
+                }
+            }
+
+            $result .= '<div class="strata__debug_line">'.hsc($line).'</div>'."\n";
+        }
+
+        return '<div class="strata__debug">'.$result.'</div>';
     }
 
     /**

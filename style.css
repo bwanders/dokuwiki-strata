@@ -1,0 +1,14 @@
+.dokuwiki div.strata__debug {
+    font-family: monospace;
+    background-color: __background_neu__
+    color: __text_neu__
+}
+
+.dokuwiki div.strata__debug div.strata__debug_line {
+    white-space: pre;
+}
+
+.dokuwiki div.strata__debug div.strata__debug_highlight {
+    background-color: __background_alt__
+    color: __text_alt__
+}

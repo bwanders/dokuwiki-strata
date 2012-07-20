@@ -186,7 +186,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
     }
 
     function render($mode, &$R, $data) {
-        if($data == array()) {
+        if($data == array() || isset($data['error'])) {
             if($mode == 'xhtml') {
                 $R->table_open();
                 $R->tablerow_open();
