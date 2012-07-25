@@ -63,6 +63,7 @@ class syntax_plugin_stratabasic_list extends syntax_plugin_stratabasic_select {
             $fields[] = array(
                 'variable'=>$meta['variable'],
                 'type'=>$this->types->loadType($meta['type']),
+                'typeName'=>$meta['type'],
                 'hint'=>$meta['hint'],
                 'aggregate'=>$this->types->loadAggregate($meta['aggregate']),
                 'aggergateHint'=>$meta['aggregateHint']
@@ -88,11 +89,15 @@ class syntax_plugin_stratabasic_list extends syntax_plugin_stratabasic_select {
                     if($fieldCount>1) $R->doc .= '; ';
                     if($fieldCount==1) $R->doc .= ' (';
                     $firstValue = true;
+                    $R->doc .= '<span class="strata_field">';
                     foreach($values as $value) {
                         if(!$firstValue) $R->doc .= ', ';
+                        $R->doc .= '<span class="strata_value stratatype_'.$f['typeName'].'">';
                         $f['type']->render($mode, $R, $this->triples, $value, $f['hint']);
+                        $R->doc .= '</span>';
                         $firstValue = false;
                     }
+                    $R->doc .= '</span>';
                     $fieldCount++;
                 }
 

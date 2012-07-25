@@ -250,12 +250,16 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                 $R->emphasis_open();
                 $R->doc .= ' (';
                 $values = $data['data'][$this->triples->getIsaKey()];
+                $R->doc .= '<span class="strata_field">';
                 for($i=0;$i<count($values);$i++) {
                     $triple =& $values[$i];
                     if($i!=0) $R->doc .= ', ';
                     $type = $this->types->loadType($triple['type']);
+                    $R->doc .= '<span class="strata_value stratatype_'.$triple['type'].'">';
                     $type->render($mode, $R, $this->triples, $triple['value'], $triple['hint']);
+                    $R->doc .= '</span>';
                 }
+                $R->doc .= '</span>';
                 $R->doc .= ')';
                 $R->emphasis_close();
             }
@@ -270,17 +274,26 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                 // render row header
                 $R->tablerow_open();
                 $R->tableheader_open();
+                $R->doc .= '<span class="strata_field">';
+                list($predicateType,) = $this->types->getPredicateType();
+                $R->doc .= '<span class="strata_value stratatype_'.$predicateType.'">';
                 $this->helper->renderPredicate($mode, $R, $this->triples, $key);
+                $R->doc .= '</span>';
+                $R->doc .= '</span>';
                 $R->tableheader_close();
 
                 // render row content
                 $R->tablecell_open();
+                $R->doc .= '<span class="strata_field">';
                 for($i=0;$i<count($values);$i++) {
                     $triple =& $values[$i];
                     if($i!=0) $R->doc .= ', ';
                     $type = $this->types->loadType($triple['type']);
+                    $R->doc .= '<span class="strata_value stratatype_'.$triple['type'].'">';
                     $type->render($mode, $R, $this->triples, $triple['value'], $triple['hint']);
+                    $R->doc .= '</span>';
                 }
+                $R->doc .= '</span>';
                 $R->tablecell_close();
                 $R->tablerow_close();
            }
