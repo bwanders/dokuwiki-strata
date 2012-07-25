@@ -213,6 +213,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
                 'variable'=>$meta['variable'],
                 'caption'=>$meta['caption'],
                 'type'=>$this->types->loadType($meta['type']),
+                'typeName'=>$meta['type'],
                 'hint'=>$meta['hint'],
                 'aggregate'=>$this->types->loadAggregate($meta['aggregate']),
                 'aggregateHint'=>$meta['aggregateHint']
@@ -237,28 +238,32 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
 
             $R->doc .= '<tbody>'.DOKU_LF;
             if($result != false) {
-              // render each row
-              foreach($result as $row) {
-                  $R->tablerow_open();
-                      foreach($fields as $f) {
-                          $R->tablecell_open();
-                          $first = true;
-                          foreach($f['aggregate']->aggregate($row[$f['variable']],$f['aggregateHint']) as $value) {
-                              if(!$first) $R->doc .= ', ';
-                              $f['type']->render($mode, $R, $this->triples, $value, $f['hint']);
-                              $first = false;
-                          }
-                          $R->tablecell_close();
-                      }
-                  $R->tablerow_close();
-              }
-              $result->closeCursor();
+                // render each row
+                foreach($result as $row) {
+                    $R->tablerow_open();
+                    foreach($fields as $f) {
+                        $R->tablecell_open();
+                        $R->doc .= '<span class="strata_field">';
+                        $first = true;
+                        foreach($f['aggregate']->aggregate($row[$f['variable']],$f['aggregateHint']) as $value) {
+                            if(!$first) $R->doc .= ', ';
+                            $R->doc .= '<span class="strata_value stratatype_'.$f['typeName'].'">';
+                            $f['type']->render($mode, $R, $this->triples, $value, $f['hint']);
+                            $R->doc .= '</span>';
+                            $first = false;
+                        }
+                        $R->doc .= '</span>';
+                        $R->tablecell_close();
+                    }
+                    $R->tablerow_close();
+                }
+                $result->closeCursor();
             } else {
-              $R->tablecell_open(count($fields));
-              $R->emphasis_open();
-              $R->doc .= $R->_xmlEntities(sprintf($this->helper->getLang('content_error_explanation'),'Strata table'));
-              $R->emphasis_close();
-              $R->tablecell_close();
+                $R->tablecell_open(count($fields));
+                $R->emphasis_open();
+                $R->doc .= $R->_xmlEntities(sprintf($this->helper->getLang('content_error_explanation'),'Strata table'));
+                $R->emphasis_close();
+                $R->tablecell_close();
             }
             $R->doc .= '</tbody>'.DOKU_LF;
 
