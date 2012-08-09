@@ -88,7 +88,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
             list($result['query'], $variables) = $this->helper->constructQuery($tree, $typemap, $projection);
     
             // allow subclass footer handling
-            $footer = $this->handleFooter($footer, &$result, &$typemap, &$variable);
+            $footer = $this->handleFooter($footer, $result, $typemap, $variable);
     
             // check projected variables and load types
             foreach($result['fields'] as $i=>$f) {
