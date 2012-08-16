@@ -6,6 +6,8 @@ $lang['named_group'] = '\'<code>%s</code>\' group';
 $lang['error_entry_block'] = 'I don\'t know what to do with the %s in the \'%s\' data entry';
 $lang['error_entry_line'] = 'I don\'t understand data entry line \'<code>%s</code>\'';
 
+$lang['error_pattern_garbage'] = 'I don\'t know what to do with the text after the object variable.';
+
 $lang['error_query_bothfields'] = 'Query contains both <code>fields</code> group and normal selection';
 $lang['error_query_fieldsgroups'] = 'I don\'t know how to handle a query containing multiple <code>fields</code> groups.';
 $lang['error_query_fieldsblock'] = 'I don\'t know what to do with the %s in the <code>fields</code> group.';

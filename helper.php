@@ -369,7 +369,9 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                 $object = utf8_trim($object);
                 if($object[0] == '?') {
                     // match a proper type variable
-                    preg_match('/(?:\?('.STRATABASIC_VARIABLE.'))(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?/',$object,$captures);
+                    if(preg_match('/^(?:\?('.STRATABASIC_VARIABLE.'))(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?$/',$object,$captures)!=1) {
+                        $this->_fail($this->getLang('error_pattern_garbage'),$lineNode);
+                    }
                     list(, $var, $vtype, $vhint) = $captures;
 
                     // create the object node
