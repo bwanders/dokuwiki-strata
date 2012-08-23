@@ -103,13 +103,18 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
             'group'=>array(),
             'projection'=>$projection,
             'ordering'=>array(),
-            'grouping'=>array()
+            'grouping'=>array(),
+            'considering'=>array()
         );
 
         // extract sort groups
         $ordering = $this->extractGroups($root, 'sort');
 
+        // extract grouping groups
         $grouping = $this->extractGroups($root, 'group');
+
+        // extract additional projection groups
+        $considering = $this->extractGroups($root, 'consider');
 
         // transform actual group
         $where = $this->extractGroups($root, 'where');
@@ -172,6 +177,29 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                     $result['grouping'][] = $match[1];
                 } else {
                     $this->_fail(sprintf($this->getLang('error_query_groupline'), utf8_tohtml(hsc($line['text']))), $line);
+                }
+            }
+        }
+
+        //handle considering
+        if(count($considering)) {
+            if(count($considering) > 1) {
+                $this->_fail($this->getLang('error_query_multiconsidering'), $considering);
+            }
+
+            foreach($considering[0]['cs'] as $line) {
+                if($this->isGroup($line)) {
+                    $this->_fail($this->getLang('error_query_considerblock'), $line);
+                }
+
+                if(preg_match('/^\?('.STRATABASIC_VARIABLE.')$/',utf8_trim($line['text']),$match)) {
+                    if(!in_array($match[1], $scope)) {
+                        $this->_fail(sprintf($this->getLang('error_query_considervar'),utf8_tohtml(hsc($match[1]))), $line);
+                    }
+
+                    $result['considering'][] = $match[1];
+                } else {
+                    $this->_fail(sprintf($this->getLang('error_query_considerline'), utf8_tohtml(hsc($line['text']))), $line);
                 }
             }
         }
