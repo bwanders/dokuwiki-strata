@@ -687,6 +687,7 @@ class stratastorage_sql_generator {
         $vars = $query['projection'];
         $order = $query['ordering'];
         $group = $query['grouping'];
+        $consider = $query['considering'];
         $terms = array();
         $fields = array();
 
@@ -748,6 +749,13 @@ class stratastorage_sql_generator {
             if(in_array($v, $group)) {
                 $this->grouped[$name] = $v;
             }
+        }
+
+        // add fields suggested for consideration
+        foreach($consider as $v) {
+            $name = $this->_name(array('type'=>'variable', 'text'=>$v));
+            $alias = $this->_alias('c');
+            $fields[] = "$name AS $alias";
         }
 
         // assign ordering if required
