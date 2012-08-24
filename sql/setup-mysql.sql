@@ -3,7 +3,7 @@ CREATE TABLE data (
     predicate TEXT NOT NULL,
     object TEXT NOT NULL,
     graph TEXT NOT NULL
-) CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+) CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ENGINE InnoDB;
 
 -- index for subject-primary retrieval (index prefixes: s, sp)
 CREATE INDEX idx_spo ON data(subject(32), predicate(32), object(32)); -- Prefix length is arbitrary
