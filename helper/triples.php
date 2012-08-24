@@ -114,6 +114,20 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
     }
 
     /**
+     * Begins a preview.
+     */
+    function beginPreview() {
+        $this->_db->beginTransaction();
+    }
+
+    /**
+     * Ends a preview.
+     */
+    function endPreview() {
+        $this->_db->rollback();
+    }
+
+    /**
      * Removes all triples matching the given triple pattern. One or more parameters
      * can be left out to indicate 'any'.
      */

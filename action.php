@@ -24,6 +24,69 @@ class action_plugin_stratastorage extends DokuWiki_Action_Plugin {
     public function register(Doku_Event_Handler &$controller) {
         $controller->register_hook('IO_WIKIPAGE_WRITE', 'BEFORE', $this, '_io_page_write');
         $controller->register_hook('PARSER_METADATA_RENDER', 'BEFORE', $this, '_parser_metadata_render');
+        $controller->register_hook('STRATASTORAGE_PREVIEW_METADATA_RENDER', 'BEFORE', $this, '_parser_metadata_render');
+        $controller->register_hook('TPL_ACT_RENDER', 'BEFORE', $this, '_preview_before');
+        $controller->register_hook('TPL_ACT_RENDER', 'AFTER', $this, '_preview_after');
+    }
+
+
+    public function _preview_before(&$event, $param) {
+        global $ACT;
+        global $TEXT;
+        global $SUF;
+        global $PRE;
+        global $ID;
+        global $METADATA_RENDERERS;
+
+        if($ACT == 'preview') {
+            $triples =& plugin_load('helper', 'stratastorage_triples');
+            $triples->beginPreview();
+
+            $text = $PRE.$TEXT.$SUF;
+            $orig = p_read_metadata($ID);
+
+            // store the original metadata in the global $METADATA_RENDERERS so p_set_metadata can use it
+            $METADATA_RENDERERS[$ID] =& $orig;
+        
+            // add an extra key for the event - to tell event handlers the page whose metadata this is
+            $orig['page'] = $ID;
+            $evt = new Doku_Event('STRATASTORAGE_PREVIEW_METADATA_RENDER', $orig);
+            if ($evt->advise_before()) {
+                // get instructions
+                $instructions = p_get_instructions($text);
+                if(is_null($instructions)){
+                    unset($METADATA_RENDERERS[$ID]);
+                    return null; // something went wrong with the instructions
+                }
+        
+                // set up the renderer
+                $renderer = new renderer_plugin_stratastorage();
+                $renderer->meta =& $orig['current'];
+                $renderer->persistent =& $orig['persistent'];
+        
+                // loop through the instructions
+                foreach ($instructions as $instruction){
+                    // execute the callback against the renderer
+                    call_user_func_array(array(&$renderer, $instruction[0]), (array) $instruction[1]);
+                }
+        
+                $evt->result = array('current'=>&$renderer->meta,'persistent'=>&$renderer->persistent);
+            }
+            $evt->advise_after();
+        
+            // clean up
+            unset($METADATA_RENDERERS[$id]);
+        }
+    }
+
+
+    public function _preview_after(&$event, $param) {
+        global $ACT;
+
+        if($ACT == 'preview') {
+            $triples =& plugin_load('helper', 'stratastorage_triples');
+            $triples->endPreview();
+        }
     }
 
     /**
