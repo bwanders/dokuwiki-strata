@@ -33,8 +33,7 @@ class action_plugin_stratabasic extends DokuWiki_Action_Plugin {
 
         if(isset($current['stratabasic']['fixTitle']) && $current['stratabasic']['fixTitle']) {
             // get triples helper
-            $triples =& plugin_load('helper', 'stratastorage_triples', false);
-            $triples->initialize();
+            $triples =& plugin_load('helper', 'stratastorage_triples');
 
             $types =& plugin_load('helper', 'stratastorage_types');
 

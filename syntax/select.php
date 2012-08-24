@@ -15,8 +15,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
     function __construct() {
         $this->helper =& plugin_load('helper', 'stratabasic');
         $this->types =& plugin_load('helper', 'stratastorage_types');
-        $this->triples =& plugin_load('helper', 'stratastorage_triples', false);
-        $this->triples->initialize();
+        $this->triples =& plugin_load('helper', 'stratastorage_triples');
     }
 
     function getType() {
