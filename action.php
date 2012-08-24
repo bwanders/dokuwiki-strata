@@ -19,6 +19,7 @@ class action_plugin_stratabasic extends DokuWiki_Action_Plugin {
      */
     public function register(Doku_Event_Handler &$controller) {
         $controller->register_hook('PARSER_METADATA_RENDER', 'AFTER', $this, '_parser_metadata_render');
+        $controller->register_hook('STRATASTORAGE_PREVIEW_METADATA_RENDER', 'AFTER', $this, '_parser_metadata_render');
     }
 
     /**

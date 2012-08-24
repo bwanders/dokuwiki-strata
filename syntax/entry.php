@@ -301,7 +301,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
             
             return true;
 
-        } elseif($mode == 'metadata') {
+        } elseif($mode == 'metadata' || $mode == 'preview_metadata') {
             $triples = array();
             $subject = $ID.'#'.$data['entry'];
 
