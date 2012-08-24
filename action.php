@@ -54,8 +54,7 @@ class action_plugin_stratastorage extends DokuWiki_Action_Plugin {
      */
     private function _purge_data($id) {
         // get triples helper
-        $triples =& plugin_load('helper', 'stratastorage_triples', false);
-        $triples->initialize();
+        $triples =& plugin_load('helper', 'stratastorage_triples');
 
         // remove all triples defined in this graph
         $triples->removeTriples(null,null,null,$id);

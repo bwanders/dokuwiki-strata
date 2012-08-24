@@ -22,6 +22,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
 
     function helper_plugin_stratastorage_triples() {
         $this->types =& plugin_load('helper', 'stratastorage_types');
+        $this->_initialize();
     }
 
     function getMethods() {
@@ -58,12 +59,10 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
      * @param dsn string an optional alternative DSN
      * @return true if initialization succeeded, false otherwise
      */
-    function initialize($dsn=null) {
+    function _initialize() {
         // load default DSN
-        if($dsn == null) {
-            $dsn = $this->getConf('default_dsn');
-            $dsn = $this->_expandTokens($dsn);
-        }
+        $dsn = $this->getConf('default_dsn');
+        $dsn = $this->_expandTokens($dsn);
 
         $this->_dsn = $dsn;
 
