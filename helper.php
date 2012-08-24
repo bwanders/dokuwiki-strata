@@ -659,7 +659,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
             msg(sprintf($this->getLang('error_syntax_braces'),$what),-1);
         }
 
-        $root['lines']['end'] = $lineCount;
+        $root['end'] = $lineCount;
 
         return $root;
     }
