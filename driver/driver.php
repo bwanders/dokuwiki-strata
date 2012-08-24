@@ -235,13 +235,28 @@ abstract class plugin_strata_driver {
         return true;
     }
 
+    private $transactions = array();
+    private $transactionCount = 0;
+
+    private function _transactionId() {
+        return "t".$this->transactionCount++;
+    }
+
     /**
      * Begins a transaction.
      */
     public function beginTransaction() {
         if($this->_db == false) return false;
 
-        return $this->_db->beginTransaction();
+        if(count($this->transactions)) {
+            $t = $this->_transactionId();
+            array_push($this->transactions, $t);
+            $this->_db->query('SAVEPOINT '.$t.';');
+            return true;
+        } else {
+            array_push($this->transactions, 'work');
+            return $this->_db->beginTransaction();
+        }
     }
 
     /**
@@ -250,7 +265,12 @@ abstract class plugin_strata_driver {
     public function commit() {
         if($this->_db == false) return false;
 
-        return $this->_db->commit();
+        array_pop($this->transactions);
+        if(count($this->transactions)) {
+            return true;
+        } else {
+            return $this->_db->commit();
+        }
     }
 
     /**
@@ -259,7 +279,13 @@ abstract class plugin_strata_driver {
     public function rollBack() {
         if($this->_db == false) return false;
 
-        return $this->_db->rollBack();
+        $t = array_pop($this->transactions);
+        if(count($this->transactions)) {
+            $this->_db->query('ROLLBACK TO '.$t.';');
+            return true;
+        } else {
+            return $this->_db->rollBack();
+        }
     }
 }
 
