@@ -17,6 +17,9 @@ require_once(DOKU_PLUGIN.'stratastorage/strata_querytree_visitor.php');
  * The triples helper is responsible for querying.
  */
 class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
+    public static $readable = 'data';
+    public static $writable = 'data';
+
     function helper_plugin_stratastorage_triples() {
         $this->types =& plugin_load('helper', 'stratastorage_types');
     }
@@ -125,7 +128,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
             }
         }
 
-        $sql .= "DELETE FROM data WHERE ". implode(" AND ", $filters);
+        $sql .= "DELETE FROM ".self::$writable." WHERE ". implode(" AND ", $filters);
 
         // prepare query
         $query = $this->_db->prepare($sql);
@@ -155,7 +158,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
             }
         }
 
-        $sql .= "SELECT subject, predicate, object, graph FROM data WHERE ". implode(" AND ", $filters);
+        $sql .= "SELECT subject, predicate, object, graph FROM ".self::$readable." WHERE ". implode(" AND ", $filters);
 
         // prepare queyr
         $query = $this->_db->prepare($sql);
@@ -195,7 +198,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
      */
     function addTriples($triples, $graph) {
         // prepare insertion query
-        $sql = "INSERT INTO data(subject, predicate, object, graph) VALUES(?, ?, ?, ?)";
+        $sql = "INSERT INTO ".self::$writable."(subject, predicate, object, graph) VALUES(?, ?, ?, ?)";
         $query = $this->_db->prepare($sql);
         if($query == false) return false;
 
@@ -477,7 +480,7 @@ class stratastorage_sql_generator {
      */
     function _trans_tp($tp) {
         return array(
-            'sql'=>'SELECT '.$this->_genPR($tp).' FROM data WHERE '.$this->_genCond($tp),
+            'sql'=>'SELECT '.$this->_genPR($tp).' FROM '.helper_plugin_stratastorage_triples::$readable.' WHERE '.$this->_genCond($tp),
             'terms'=>array($this->_name($tp['subject']),$this->_name($tp['predicate']), $this->_name($tp['object']))
         );
     }
