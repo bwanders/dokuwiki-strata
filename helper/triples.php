@@ -266,10 +266,10 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         }
 
         // wrap the results in an iterator, and return it
-        if(count($grouped) == 0) {
-            return new stratastorage_relations_iterator($query, $projected);
-        } else {
+        if(count($grouped) > 0 || $queryTree['grouping'] === true) {
             return new stratastorage_aggregating_iterator($query, $projected, $grouped);
+        } else {
+            return new stratastorage_relations_iterator($query, $projected);
         }
     }
 
@@ -706,6 +706,9 @@ class stratastorage_sql_generator {
         $consider = $query['considering'];
         $terms = array();
         $fields = array();
+
+        // a 'group everything'
+        if($group === true) $group = array();
 
         // massage ordering to comply with grouping
         // we do this by combining ordering and sorting information as follows:
