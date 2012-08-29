@@ -170,11 +170,19 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                 }
 
                 if(preg_match('/^\?('.STRATABASIC_VARIABLE.')$/',utf8_trim($line['text']),$match)) {
+                    if($result['grouping'] === true) {
+                        $this->_fail($this->getLang('error_query_groupeverything'),$line);
+                    }
                     if(!in_array($match[1], $scope)) {
                         $this->_fail(sprintf($this->getLang('error_query_groupvar'),utf8_tohtml(hsc($match[1]))), $line);
                     }
 
                     $result['grouping'][] = $match[1];
+                } elseif(utf8_trim($line['text']) == 'everything') {
+                    if(count($result['grouping']) > 0) {
+                       $this->_fail($this->getLang('error_query_groupeverything'),$line); 
+                    }
+                    $result['grouping'] = true;
                 } else {
                     $this->_fail(sprintf($this->getLang('error_query_groupline'), utf8_tohtml(hsc($line['text']))), $line);
                 }
