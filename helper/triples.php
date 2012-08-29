@@ -316,7 +316,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         );
 
         // remove grouping
-        $query['grouping'] = array();
+        $query['grouping'] = false;
 
         // execute query
         $result = $this->queryRelations($query);
