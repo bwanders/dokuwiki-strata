@@ -266,6 +266,21 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
             );
         }
 
+        // apply all optionals
+        if(count($optionals)) {
+            foreach($optionals as $optional) {
+                // convert eacfh optional
+                list($optional, $s) = $this->transformGroup($optional, $typemap);
+                $scope = array_merge($scope, $s);
+                $result = array(
+                    'type'=>'optional',
+                    'lhs'=>$result,
+                    'rhs'=>$optional
+                );
+            }
+        }
+
+
         // add all filters; these are a bit weird, as only a single FILTER is really supported
         // (we have defined multiple filters as being a conjunction)
         if(count($filters)) {
@@ -294,20 +309,6 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                     'type'=>'minus',
                     'lhs'=>$result,
                     'rhs'=>$minus
-                );
-            }
-        }
-
-        // apply all optionals
-        if(count($optionals)) {
-            foreach($optionals as $optional) {
-                // convert eacfh optional
-                list($optional, $s) = $this->transformGroup($optional, $typemap);
-                $scope = array_merge($scope, $s);
-                $result = array(
-                    'type'=>'optional',
-                    'lhs'=>$result,
-                    'rhs'=>$optional
                 );
             }
         }
