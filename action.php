@@ -24,15 +24,19 @@ class action_plugin_strata extends DokuWiki_Action_Plugin {
     public function register(Doku_Event_Handler &$controller) {
         $controller->register_hook('IO_WIKIPAGE_WRITE', 'BEFORE', $this, '_io_page_write');
         $controller->register_hook('PARSER_METADATA_RENDER', 'BEFORE', $this, '_parser_metadata_render_before');
-        $controller->register_hook('STRATASTORAGE_PREVIEW_METADATA_RENDER', 'BEFORE', $this, '_parser_metadata_render_before');
+        $controller->register_hook('STRATA_PREVIEW_METADATA_RENDER', 'BEFORE', $this, '_parser_metadata_render_before');
         $controller->register_hook('TPL_ACT_RENDER', 'BEFORE', $this, '_preview_before');
         $controller->register_hook('TPL_ACT_RENDER', 'AFTER', $this, '_preview_after');
 
         $controller->register_hook('PARSER_METADATA_RENDER', 'AFTER', $this, '_parser_metadata_render_after');
-        $controller->register_hook('STRATASTORAGE_PREVIEW_METADATA_RENDER', 'AFTER', $this, '_parser_metadata_render_after');
+        $controller->register_hook('STRATA_PREVIEW_METADATA_RENDER', 'AFTER', $this, '_parser_metadata_render_after');
     }
 
 
+    /**
+     * Triggers before preview xhtml render,
+     * allows plugins to metadata render on the preview.
+     */
     public function _preview_before(&$event, $param) {
         global $ACT;
         global $TEXT;
@@ -42,7 +46,7 @@ class action_plugin_strata extends DokuWiki_Action_Plugin {
         global $METADATA_RENDERERS;
 
         if($ACT == 'preview') {
-            $triples =& plugin_load('helper', 'stratastorage_triples');
+            $triples =& plugin_load('helper', 'strata_triples');
             $triples->beginPreview();
 
             $text = $PRE.$TEXT.$SUF;
@@ -53,7 +57,7 @@ class action_plugin_strata extends DokuWiki_Action_Plugin {
         
             // add an extra key for the event - to tell event handlers the page whose metadata this is
             $orig['page'] = $ID;
-            $evt = new Doku_Event('STRATASTORAGE_PREVIEW_METADATA_RENDER', $orig);
+            $evt = new Doku_Event('STRATA_PREVIEW_METADATA_RENDER', $orig);
             if ($evt->advise_before()) {
                 // get instructions
                 $instructions = p_get_instructions($text);
@@ -87,7 +91,7 @@ class action_plugin_strata extends DokuWiki_Action_Plugin {
         global $ACT;
 
         if($ACT == 'preview') {
-            $triples =& plugin_load('helper', 'stratastorage_triples');
+            $triples =& plugin_load('helper', 'strata_triples');
             $triples->endPreview();
         }
     }
@@ -123,13 +127,13 @@ class action_plugin_strata extends DokuWiki_Action_Plugin {
 
         $current =& $event->data['current'];
 
-        if(isset($current['stratabasic']['fixTitle']) && $current['stratabasic']['fixTitle']) {
+        if(isset($current['strata']['fixTitle']) && $current['strata']['fixTitle']) {
             // get triples helper
-            $triples =& plugin_load('helper', 'stratastorage_triples');
+            $triples =& plugin_load('helper', 'strata_triples');
 
-            $types =& plugin_load('helper', 'stratastorage_types');
+            $types =& plugin_load('helper', 'strata_types');
 
-            $helper =& plugin_load('helper', 'stratabasic');
+            $helper =& plugin_load('helper', 'strata_syntax');
 
             $titleKey = $helper->normalizePredicate($triples->getTitleKey());
 
@@ -152,7 +156,7 @@ class action_plugin_strata extends DokuWiki_Action_Plugin {
      */
     private function _purge_data($id) {
         // get triples helper
-        $triples =& plugin_load('helper', 'stratastorage_triples');
+        $triples =& plugin_load('helper', 'strata_triples');
 
         // remove all triples defined in this graph
         $triples->removeTriples(null,null,null,$id);

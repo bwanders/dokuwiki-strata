@@ -6,7 +6,7 @@
 // must be run within Dokuwiki
 if(!defined('DOKU_INC')) die('Meh.');
 
-require_once(DOKU_PLUGIN.'stratastorage/driver/driver.php');
+require_once(DOKU_PLUGIN.'strata/driver/driver.php');
 
 /**
  * The MySQL database driver.

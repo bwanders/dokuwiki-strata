@@ -2,7 +2,7 @@
 require_once(DOKU_INC.'_test/lib/unittest.php');
 require_once(DOKU_INC.'inc/init.php');
 require_once(DOKU_INC.'inc/plugin.php');
-require_once(DOKU_INC.'lib/plugins/stratastorage/helper/triples.php');
+require_once(DOKU_INC.'lib/plugins/strata/helper/triples.php');
 class Strata_UnitTestCase extends Doku_UnitTestCase {
 
 	function setup() {

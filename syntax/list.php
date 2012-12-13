@@ -11,9 +11,9 @@ if (!defined('DOKU_INC')) die('Meh.');
 /**
  * List syntax for basic query handling.
  */
-class syntax_plugin_stratabasic_list extends syntax_plugin_stratabasic_select {
+class syntax_plugin_strata_list extends syntax_plugin_stratabasic_select {
     function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('<list'.$this->helper->fieldsShortPattern().'* *>\s*?\n.+?\n\s*?</list>',$mode, 'plugin_stratabasic_list');
+        $this->Lexer->addSpecialPattern('<list'.$this->helper->fieldsShortPattern().'* *>\s*?\n.+?\n\s*?</list>',$mode, 'plugin_strata_list');
     }
 
     function handleHeader($header, &$result, &$typemap) {
@@ -73,7 +73,7 @@ class syntax_plugin_stratabasic_list extends syntax_plugin_stratabasic_select {
 
         if($mode == 'xhtml') {
             // render header
-            $R->doc .= '<div class="stratabasic-list">'.DOKU_LF;
+            $R->doc .= '<div class="strata-list">'.DOKU_LF;
             $R->listu_open();
 
             // render each row
@@ -89,10 +89,10 @@ class syntax_plugin_stratabasic_list extends syntax_plugin_stratabasic_select {
                     if($fieldCount>1) $R->doc .= '; ';
                     if($fieldCount==1) $R->doc .= ' (';
                     $firstValue = true;
-                    $R->doc .= '<span class="strata_field">';
+                    $R->doc .= '<span class="strata-field">';
                     foreach($values as $value) {
                         if(!$firstValue) $R->doc .= ', ';
-                        $R->doc .= '<span class="strata_value stratatype_'.$f['typeName'].'">';
+                        $R->doc .= '<span class="strata-value strata-type-'.$f['typeName'].'">';
                         $f['type']->render($mode, $R, $this->triples, $value, $f['hint']);
                         $R->doc .= '</span>';
                         $firstValue = false;

@@ -50,6 +50,7 @@ class plugin_strata_type {
      * the following keys:
      *   - desc: A human-readable description of the type
      *   - synthetic: an optional boolean indicating that the type is synthethic
+     *                (see class docs for definition of synthetic types)
      *   - hint: an optional string indicating what the type hint's function is
      *   - tags: an array op applicable tags
      *

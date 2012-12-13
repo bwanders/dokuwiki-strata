@@ -1,6 +1,6 @@
 <?php
 /**
- * DokuWiki Plugin stratabasic (Helper Component)
+ * DokuWiki Plugin strata (Helper Component)
  *
  * @license GPL 2 http://www.gnu.org/licenses/gpl-2.0.html
  * @author  Brend Wanders <b.wanders@utwente.nl>
@@ -8,17 +8,17 @@
 
 if (!defined('DOKU_INC')) die('meh.');
 
-if (!defined('STRATABASIC_PREDICATE')) define('STRATABASIC_PREDICATE','[^_:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+');
-if (!defined('STRATABASIC_VARIABLE')) define('STRATABASIC_VARIABLE','[^ _:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+');
+if (!defined('STRATA_PREDICATE')) define('STRATA_PREDICATE','[^_:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+');
+if (!defined('STRATA_VARIABLE')) define('STRATA_VARIABLE','[^ _:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+');
 
-require_once(DOKU_PLUGIN.'stratabasic/stratabasic_exception.php');
+require_once(DOKU_PLUGIN.'strata/strata_exception.php');
 
 /**
  * Helper plugin for common syntax parsing.
  */
-class helper_plugin_stratabasic extends DokuWiki_Plugin {
-    function helper_plugin_stratabasic() {
-        $this->types =& plugin_load('helper', 'stratastorage_types');
+class helper_plugin_strata_syntax extends DokuWiki_Plugin {
+    function helper_plugin_strata_syntax() {
+        $this->types =& plugin_load('helper', 'strata_types');
     }
 
     /**
@@ -86,7 +86,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
         $lines = array();
         foreach($regions as $r) $lines[] = array('start'=>$r['start'], 'end'=>$r['end']);
-        throw new stratabasic_exception($message, $lines);
+        throw new strata_exception($message, $lines);
     }
 
     /**
@@ -146,7 +146,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                     $this->_fail($this->getLang('error_query_sortblock'), $line);
                 }
 
-                if(preg_match('/^\?('.STRATABASIC_VARIABLE.')\s*(?:\((asc|desc)(?:ending)?\))?$/S',utf8_trim($line['text']),$match)) {
+                if(preg_match('/^\?('.STRATA_VARIABLE.')\s*(?:\((asc|desc)(?:ending)?\))?$/S',utf8_trim($line['text']),$match)) {
                     if(!in_array($match[1], $scope)) {
                         $this->_fail(sprintf($this->getLang('error_query_sortvar'),utf8_tohtml(hsc($match[1]))), $line);
                     }
@@ -172,7 +172,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                     $this->_fail($this->getLang('error_query_groupblock'), $line);
                 }
 
-                if(preg_match('/^\?('.STRATABASIC_VARIABLE.')$/',utf8_trim($line['text']),$match)) {
+                if(preg_match('/^\?('.STRATA_VARIABLE.')$/',utf8_trim($line['text']),$match)) {
                     if(!in_array($match[1], $scope)) {
                         $this->_fail(sprintf($this->getLang('error_query_groupvar'),utf8_tohtml(hsc($match[1]))), $line);
                     }
@@ -195,7 +195,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                     $this->_fail($this->getLang('error_query_considerblock'), $line);
                 }
 
-                if(preg_match('/^\?('.STRATABASIC_VARIABLE.')$/',utf8_trim($line['text']),$match)) {
+                if(preg_match('/^\?('.STRATA_VARIABLE.')$/',utf8_trim($line['text']),$match)) {
                     if(!in_array($match[1], $scope)) {
                         $this->_fail(sprintf($this->getLang('error_query_considervar'),utf8_tohtml(hsc($match[1]))), $line);
                     }
@@ -287,11 +287,11 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
             foreach($filters as $f) {
                 if($f['lhs']['type'] == 'variable' && !in_array($f['lhs']['text'], $scope)) {
                     // TODO: put string in translation!
-                    $this->_fail('Strata basic: filter uses out-of-scope variable \'<code>'.utf8_tohtml(hsc($f['lhs']['text'])).'</code>\'.', $root);
+                    $this->_fail('Strata: filter uses out-of-scope variable \'<code>'.utf8_tohtml(hsc($f['lhs']['text'])).'</code>\'.', $root);
                 }
                 if($f['rhs']['type'] == 'variable' && !in_array($f['rhs']['text'], $scope)) {
                     // TODO: put string in translation!
-                    $this->_fail('Strata basic: filter uses out-of-scope variable \'<code>'.utf8_tohtml(hsc($f['rhs']['text'])).'</code>\'.', $root);
+                    $this->_fail('Strata: filter uses out-of-scope variable \'<code>'.utf8_tohtml(hsc($f['rhs']['text'])).'</code>\'.', $root);
                 }
             }
 
@@ -375,7 +375,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         foreach($lines as $lineNode) {
             $line = trim($lineNode['text']);
 
-            if(preg_match('/^((?:\?'.STRATABASIC_VARIABLE.')|(?:\[\[[^]]*\]\]))\s+(?:((?:'.STRATABASIC_PREDICATE.')|(?:\?'.STRATABASIC_VARIABLE.'))(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*:\s*(.+?)\s*$/S',$line,$match)) {
+            if(preg_match('/^((?:\?'.STRATA_VARIABLE.')|(?:\[\[[^]]*\]\]))\s+(?:((?:'.STRATA_PREDICATE.')|(?:\?'.STRATA_VARIABLE.'))(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*:\s*(.+?)\s*$/S',$line,$match)) {
                 // triple pattern
                 list(, $subject, $predicate, $type, $hint, $object) = $match;
 
@@ -403,7 +403,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                 $object = utf8_trim($object);
                 if($object[0] == '?') {
                     // match a proper type variable
-                    if(preg_match('/^(?:\?('.STRATABASIC_VARIABLE.'))(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?$/',$object,$captures)!=1) {
+                    if(preg_match('/^(?:\?('.STRATA_VARIABLE.'))(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?$/',$object,$captures)!=1) {
                         $this->_fail($this->getLang('error_pattern_garbage'),$lineNode);
                     }
                     list(, $var, $vtype, $vhint) = $captures;
@@ -429,7 +429,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
                 $triples[] = array('type'=>'triple','subject'=>$subject, 'predicate'=>$predicate, 'object'=>$object);
 
-            } elseif(preg_match('/^(?:\?('.STRATABASIC_VARIABLE.')(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*(!=|>=|<=|>|<|=|!~|!\^~|!\$~|\^~|\$~|~)\s*(?:\?('.STRATABASIC_VARIABLE.')(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*$/S',$line, $match)) {
+            } elseif(preg_match('/^(?:\?('.STRATA_VARIABLE.')(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*(!=|>=|<=|>|<|=|!~|!\^~|!\$~|\^~|\$~|~)\s*(?:\?('.STRATA_VARIABLE.')(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*$/S',$line, $match)) {
                 // var op var
                 list(,$lhs, $ltype, $lhint, $operator, $rhs, $rtype, $rhint) = $match;
 
@@ -459,7 +459,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
                 $filters[] = array('type'=>'filter', 'lhs'=>$lhs, 'operator'=>$operator, 'rhs'=>$rhs);
 
-            } elseif(preg_match('/^(?:\?('.STRATABASIC_VARIABLE.')(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*(!=|>=|<=|>|<|=|!~|!\^~|!\$~|\^~|\$~|~)\s*(.+?)\s*$/S',$line, $match)) {
+            } elseif(preg_match('/^(?:\?('.STRATA_VARIABLE.')(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*(!=|>=|<=|>|<|=|!~|!\^~|!\$~|\^~|\$~|~)\s*(.+?)\s*$/S',$line, $match)) {
                 // var op lit
 
                 // filter pattern
@@ -490,7 +490,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
                 $rhs = $this->literal($type->normalize($rhs,$hint));
 
                 $filters[] = array('type'=>'filter','lhs'=>$lhs, 'operator'=>$operator, 'rhs'=>$rhs);
-            } elseif(preg_match('/^(.+?)\s*(!=|>=|<=|>|<|=|!~|!\^~|!\$~|\^~|\$~|~)\s*(?:\?('.STRATABASIC_VARIABLE.')(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*$/S',$line, $match)) {
+            } elseif(preg_match('/^(.+?)\s*(!=|>=|<=|>|<|=|!~|!\^~|!\$~|\^~|\$~|~)\s*(?:\?('.STRATA_VARIABLE.')(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*$/S',$line, $match)) {
                 // lit op var
 
                 // filter pattern
@@ -561,7 +561,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
         foreach($lines as $lineNode) {
             $line = trim($lineNode['text']);
-            if(preg_match('/^(?:([^_]*)(?:_([a-z0-9]*)(?:\(([^)]+)\))?)?(:))?\s*\?('.STRATABASIC_VARIABLE.')(?:@([a-z0-9]*)(?:\(([^)]+)\))?)?(?:_([a-z0-9]*)(?:\(([^)]+)\))?)?$/S',$line, $match)) {
+            if(preg_match('/^(?:([^_]*)(?:_([a-z0-9]*)(?:\(([^)]+)\))?)?(:))?\s*\?('.STRATA_VARIABLE.')(?:@([a-z0-9]*)(?:\(([^)]+)\))?)?(?:_([a-z0-9]*)(?:\(([^)]+)\))?)?$/S',$line, $match)) {
                 list($_, $caption, $type, $hint, $nocaphint, $variable, $agg, $agghint, $rtype, $rhint) = $match;
                 if(!$nocaphint || (!$nocaphint && !$caption && !$type)) $caption = ucfirst($variable);
 
@@ -590,7 +590,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
     function parseFieldsShort($line, &$typemap) {
         $result = array();
 
-        if(preg_match_all('/(?:\s*\?('.STRATABASIC_VARIABLE.')(?:@([a-z0-9]*)(?:\(([^\)]*)\))?)?(?:_([a-z0-9]*)(?:\(([^\)]*)\))?)?\s*(?:(")([^"]*)")?)/',$line,$match, PREG_SET_ORDER)) {
+        if(preg_match_all('/(?:\s*\?('.STRATA_VARIABLE.')(?:@([a-z0-9]*)(?:\(([^\)]*)\))?)?(?:_([a-z0-9]*)(?:\(([^\)]*)\))?)?\s*(?:(")([^"]*)")?)/',$line,$match, PREG_SET_ORDER)) {
             foreach($match as $m) {
                 list(, $variable, $agg, $agghint, $type, $hint, $caption_indicator, $caption) = $m;
                 if(!$caption_indicator) $caption = ucfirst($variable);
@@ -609,7 +609,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
      * @param captions boolean Whether the pattern should include caption matching (defaults to true)
      */
     function fieldsShortPattern($captions = true) {
-        return '(?:\s*\?'.STRATABASIC_VARIABLE.'(?:@[a-z0-9]*(?:\([^\)]*\))?)?(?:_[a-z0-9]*(?:\([^\)]*\))?)?'.($captions?'\s*(?:"[^"]*")?':'').')';
+        return '(?:\s*\?'.STRATA_VARIABLE.'(?:@[a-z0-9]*(?:\([^\)]*\))?)?(?:_[a-z0-9]*(?:\([^\)]*\))?)?'.($captions?'\s*(?:"[^"]*")?':'').')';
     }
 
     /**
@@ -687,7 +687,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
 
             foreach($regions as $region) {
                 if($lineCount == $region['start']) {
-                    if($count == 0) $result .= '<div class="strata__debug_highlight">';
+                    if($count == 0) $result .= '<div class="strata-debug-highlight">';
                     $count++;
                 }
 
@@ -699,9 +699,9 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
             }
 
             if($line != '') {
-                $result .= '<div class="strata__debug_line">'.hsc($line).'</div>'."\n";
+                $result .= '<div class="strata-debug-line">'.hsc($line).'</div>'."\n";
             } else {
-                $result .= '<div class="strata__debug_line"><br/></div>'."\n";
+                $result .= '<div class="strata-debug-line"><br/></div>'."\n";
             }
         }
 
@@ -709,7 +709,7 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
             $result .= '</div>';
         }
 
-        return '<div class="strata__debug">'.$result.'</div>';
+        return '<div class="strata-debug">'.$result.'</div>';
     }
 
     /**

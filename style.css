@@ -1,4 +1,4 @@
-.dokuwiki div.strata__debug {
+.dokuwiki div.strata-debug {
     line-height: normal;
     font-family: monospace;
     background-color: __background_neu__;
@@ -7,7 +7,7 @@
     padding: 2px 0 2px 0;
 }
 
-.dokuwiki div.strata__debug_message {
+.dokuwiki div.strata-debug-message {
     color: black;
     background-repeat: no-repeat;
     background-position: .5em 0.1em;
@@ -19,12 +19,12 @@
     border-color: #FAA;
 }
 
-.dokuwiki div.strata__debug div.strata__debug_line {
+.dokuwiki div.strata-debug div.strata-debug-line {
     white-space: pre;
     padding: 0 2px 0 2px;
 }
 
-.dokuwiki div.strata__debug div.strata__debug_highlight {
+.dokuwiki div.strata-debug div.strata-debug-highlight {
     background-color: #FCC;
     color: black;
 }

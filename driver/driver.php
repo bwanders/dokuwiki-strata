@@ -7,7 +7,7 @@
 if(!defined('DOKU_INC')) die('Meh.');
 
 // Define the location of the local credentials file.
-if(!defined('STRATA_CREDENTIALS')) define('STRATA_CREDENTIALS', DOKU_PLUGIN.'stratastorage/credentials.local.php');
+if(!defined('STRATA_CREDENTIALS')) define('STRATA_CREDENTIALS', DOKU_PLUGIN.'strata/credentials.local.php');
 
 /**
  * The base class for database drivers.
@@ -36,7 +36,7 @@ abstract class plugin_strata_driver {
      */
     function __construct($debug=false) {
         $this->_debug = $debug;
-        $this->helper =& plugin_load('helper', 'stratastorage_types');
+        $this->helper =& plugin_load('helper', 'strata_types');
     }
 
     /**
@@ -147,7 +147,7 @@ abstract class plugin_strata_driver {
         if ($this->_debug) msg(sprintf($this->helper->getLang('driver_setup_start'), hsc($driver)));
 
         // load SQL script
-        $sqlfile = DOKU_PLUGIN . "stratastorage/sql/setup-$driver.sql";
+        $sqlfile = DOKU_PLUGIN . "strata/sql/setup-$driver.sql";
 
         $sql = io_readFile($sqlfile, false);
         $lines = explode("\n",$sql);

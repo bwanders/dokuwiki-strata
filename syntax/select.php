@@ -1,6 +1,6 @@
 <?php
 /**
- * Strata Basic, data entry plugin
+ * Strata, data entry plugin
  *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author     Brend Wanders <b.wanders@utwente.nl>
@@ -11,11 +11,11 @@ if(!defined('DOKU_INC')) die('Meh.');
 /**
  * Select syntax for basic query handling.
  */
-class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
+class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
     function __construct() {
-        $this->helper =& plugin_load('helper', 'stratabasic');
-        $this->types =& plugin_load('helper', 'stratastorage_types');
-        $this->triples =& plugin_load('helper', 'stratastorage_triples');
+        $this->helper =& plugin_load('helper', 'strata_syntax');
+        $this->types =& plugin_load('helper', 'strata_types');
+        $this->triples =& plugin_load('helper', 'strata_triples');
     }
 
     function getType() {
@@ -31,7 +31,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
     }
 
     function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('<table'.$this->helper->fieldsShortPattern().'* *>\s*?\n.+?\n\s*?</table>',$mode, 'plugin_stratabasic_select');
+        $this->Lexer->addSpecialPattern('<table'.$this->helper->fieldsShortPattern().'* *>\s*?\n.+?\n\s*?</table>',$mode, 'plugin_strata_select');
     }
 
     function handle($match, $state, $pos, &$handler) {
@@ -108,7 +108,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
             }
     
             return $result;
-        } catch(stratabasic_exception $e) {
+        } catch(strata_exception $e) {
             return array('error'=>array(
                 'message'=>$e->getMessage(),
                 'regions'=>$e->getData(),
@@ -181,7 +181,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
      */
     function prepareQuery($query) {
         // fire event
-        trigger_event('STRATABASIC_PREPARE_QUERY', $query);
+        trigger_event('STRATA_PREPARE_QUERY', $query);
 
         // return the (possibly modified) query
         return $query;
@@ -221,7 +221,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
 
         if($mode == 'xhtml') {
             // render header
-            $R->doc .= '<div class="stratabasic-table">'.DOKU_LF;
+            $R->doc .= '<div class="strata-table">'.DOKU_LF;
             $R->table_open();
             $R->doc .= '<thead>'.DOKU_LF;
             $R->tablerow_open();
@@ -242,11 +242,11 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
                     $R->tablerow_open();
                     foreach($fields as $f) {
                         $R->tablecell_open();
-                        $R->doc .= '<span class="strata_field">';
+                        $R->doc .= '<span class="strata-field">';
                         $first = true;
                         foreach($f['aggregate']->aggregate($row[$f['variable']],$f['aggregateHint']) as $value) {
                             if(!$first) $R->doc .= ', ';
-                            $R->doc .= '<span class="strata_value stratatype_'.$f['typeName'].'">';
+                            $R->doc .= '<span class="strata-value strata-type-'.$f['typeName'].'">';
                             $f['type']->render($mode, $R, $this->triples, $value, $f['hint']);
                             $R->doc .= '</span>';
                             $first = false;
@@ -290,7 +290,7 @@ class syntax_plugin_stratabasic_select extends DokuWiki_Syntax_Plugin {
     }
 
     protected function displayError(&$R, $data) {
-        $R->doc .= '<div class="strata__debug_message">';
+        $R->doc .= '<div class="strata-debug-message">';
         $R->doc .= $R->_xmlEntities($this->helper->getLang('content_error_explanation'));
         $R->doc .= ': '.$data['error']['message'];
         $R->doc .= '</div>';

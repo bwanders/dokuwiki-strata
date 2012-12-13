@@ -9,7 +9,7 @@
 // must be run within Dokuwiki
 if (!defined('DOKU_INC')) die('Meh.');
 
-class stratabasic_exception extends Exception {
+class strata_exception extends Exception {
     protected $data;
 
     /**

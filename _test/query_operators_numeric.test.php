@@ -1,6 +1,6 @@
 <?php
 require_once('strataquerytest.inc.php');
-require_once(DOKU_INC.'lib/plugins/stratastorage/helper/types.php');
+require_once(DOKU_INC.'lib/plugins/strata/helper/types.php');
 class query_operators_numeric_test extends Strata_Query_UnitTestCase {
 
     function setup() {

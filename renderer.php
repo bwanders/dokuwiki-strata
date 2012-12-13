@@ -1,6 +1,6 @@
 <?php
 /**
- * DokuWiki Plugin Strata Storage (Metadata Preview Renderer Component)
+ * DokuWiki Plugin Strata (Metadata Preview Renderer Component)
  *
  * @license GPL 2 http://www.gnu.org/licenses/gpl-2.0.html
  * @author  Brend Wanders <b.wanders@utwente.nl>
@@ -11,7 +11,7 @@ if (!defined('DOKU_INC')) die('Meh.');
 
 require_once DOKU_INC . 'inc/parser/metadata.php';
 
-class renderer_plugin_stratastorage extends Doku_Renderer_metadata {
+class renderer_plugin_strata extends Doku_Renderer_metadata {
     function getFormat() {
         return 'preview_metadata';
     }

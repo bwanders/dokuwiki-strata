@@ -1,6 +1,6 @@
 <?php
 /**
- * DokuWiki Plugin stratastorage (Syntax Component)
+ * DokuWiki Plugin strata (Syntax Component)
  *
  * @license GPL 2 http://www.gnu.org/licenses/gpl-2.0.html
  * @author  Brend Wanders <b.wanders@utwente.nl>
@@ -12,7 +12,7 @@ if (!defined('DOKU_INC')) die('Meh.');
 /**
  * Simple plugin that sets the 'no data' flag.
  */
-class syntax_plugin_stratastorage_nodata extends DokuWiki_Syntax_Plugin {
+class syntax_plugin_strata_nodata extends DokuWiki_Syntax_Plugin {
     public function __construct() {
     }
 
@@ -31,7 +31,7 @@ class syntax_plugin_stratastorage_nodata extends DokuWiki_Syntax_Plugin {
 
 
     public function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('~~NODATA~~',$mode,'plugin_stratastorage_nodata');
+        $this->Lexer->addSpecialPattern('~~NODATA~~',$mode,'plugin_strata_nodata');
     }
 
     public function handle($match, $state, $pos, &$handler){

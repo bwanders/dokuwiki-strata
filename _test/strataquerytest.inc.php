@@ -1,6 +1,6 @@
 <?php
 require_once('stratatest.inc.php');
-require_once(DOKU_INC.'lib/plugins/stratastorage/helper/types.php');
+require_once(DOKU_INC.'lib/plugins/strata/helper/types.php');
 class Strata_Query_UnitTestCase extends Strata_UnitTestCase {
 
     function setup() {

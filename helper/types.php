@@ -1,6 +1,6 @@
 <?php
 /**
- * DokuWiki Plugin stratastorage (Helper Component)
+ * DokuWiki Plugin strata (Helper Component)
  *
  * @license GPL 2 http://www.gnu.org/licenses/gpl-2.0.html
  * @author  Brend Wanders <b.wanders@utwente.nl>
@@ -12,7 +12,7 @@ if (!defined('DOKU_INC')) die('Meh.');
 /**
  * The types helper is used to cached types and aggregates.
  */
-class helper_plugin_stratastorage_types extends DokuWiki_Plugin {
+class helper_plugin_strata_types extends DokuWiki_Plugin {
     /**
      * The currently loaded types.
      */

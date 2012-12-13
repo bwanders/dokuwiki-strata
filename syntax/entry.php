@@ -1,6 +1,6 @@
 <?php
 /**
- * Strata Basic, data entry plugin
+ * Strata, data entry plugin
  *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author     Brend Wanders <b.wanders@utwente.nl>
@@ -11,11 +11,11 @@ if (!defined('DOKU_INC')) die('Meh.');
 /**
  * Data entry syntax for dedicated data blocks.
  */
-class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
+class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
     function syntax_plugin_stratabasic_entry() {
-        $this->helper =& plugin_load('helper', 'stratabasic');
-        $this->types =& plugin_load('helper', 'stratastorage_types');
-        $this->triples =& plugin_load('helper', 'stratastorage_triples');
+        $this->helper =& plugin_load('helper', 'strata_syntax');
+        $this->types =& plugin_load('helper', 'strata_types');
+        $this->triples =& plugin_load('helper', 'strata_triples');
     }
 
     function getType() {
@@ -32,7 +32,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
 
     function connectTo($mode) {
         if($this->getConf('enable_entry')) {
-            $this->Lexer->addSpecialPattern('<data(?: +[^#>]+?)?(?: *#[^>]*?)?>\s*?\n(?:.*?\n)*?\s*?</data>',$mode, 'plugin_stratabasic_entry');
+            $this->Lexer->addSpecialPattern('<data(?: +[^#>]+?)?(?: *#[^>]*?)?>\s*?\n(?:.*?\n)*?\s*?</data>',$mode, 'plugin_strata_entry');
         }
     }
 
@@ -91,7 +91,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
             $line = $line['text'];
             // match a "property_type(hint)*: value" pattern
             // (the * is only used to indicate that the value is actually a comma-seperated list)
-            if(preg_match('/^('.STRATABASIC_PREDICATE.'?)(?:_([a-z0-9]+)(?:\(([^)]*)\))?)?(\*)?\s*:(.*)$/',$line,$parts)) {
+            if(preg_match('/^('.STRATA_PREDICATE.'?)(?:_([a-z0-9]+)(?:\(([^)]*)\))?)?(\*)?\s*:(.*)$/',$line,$parts)) {
                 // assign useful names
                 list($match, $property, $type, $hint, $multi, $values) = $parts;
 
@@ -249,12 +249,12 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                 $R->emphasis_open();
                 $R->doc .= ' (';
                 $values = $data['data'][$this->triples->getIsaKey()];
-                $R->doc .= '<span class="strata_field">';
+                $R->doc .= '<span class="strata-field">';
                 for($i=0;$i<count($values);$i++) {
                     $triple =& $values[$i];
                     if($i!=0) $R->doc .= ', ';
                     $type = $this->types->loadType($triple['type']);
-                    $R->doc .= '<span class="strata_value stratatype_'.$triple['type'].'">';
+                    $R->doc .= '<span class="strata-value strata-type-'.$triple['type'].'">';
                     $type->render($mode, $R, $this->triples, $triple['value'], $triple['hint']);
                     $R->doc .= '</span>';
                 }
@@ -273,9 +273,9 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                 // render row header
                 $R->tablerow_open();
                 $R->tableheader_open();
-                $R->doc .= '<span class="strata_field">';
+                $R->doc .= '<span class="strata-field">';
                 list($predicateType,) = $this->types->getPredicateType();
-                $R->doc .= '<span class="strata_value stratatype_'.$predicateType.'">';
+                $R->doc .= '<span class="strata-value strata-type-'.$predicateType.'">';
                 $this->helper->renderPredicate($mode, $R, $this->triples, $key);
                 $R->doc .= '</span>';
                 $R->doc .= '</span>';
@@ -283,12 +283,12 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
 
                 // render row content
                 $R->tablecell_open();
-                $R->doc .= '<span class="strata_field">';
+                $R->doc .= '<span class="strata-field">';
                 for($i=0;$i<count($values);$i++) {
                     $triple =& $values[$i];
                     if($i!=0) $R->doc .= ', ';
                     $type = $this->types->loadType($triple['type']);
-                    $R->doc .= '<span class="strata_value stratatype_'.$triple['type'].'">';
+                    $R->doc .= '<span class="strata-value strata-type-'.$triple['type'].'">';
                     $type->render($mode, $R, $this->triples, $triple['value'], $triple['hint']);
                     $R->doc .= '</span>';
                 }
@@ -354,7 +354,7 @@ class syntax_plugin_stratabasic_entry extends DokuWiki_Syntax_Plugin {
                 
                 // set flag for title addendum
                 if($fixTitle) {
-                    $R->meta['stratabasic']['fixTitle'] = true;
+                    $R->meta['strata']['fixTitle'] = true;
                 }
             }
 

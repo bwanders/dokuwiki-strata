@@ -1,6 +1,6 @@
 <?php
 /**
- * DokuWiki Plugin stratastorage (Helper Component)
+ * DokuWiki Plugin strata (Helper Component)
  *
  * @license GPL 2 http://www.gnu.org/licenses/gpl-2.0.html
  * @author  Brend Wanders <b.wanders@utwente.nl>
@@ -10,18 +10,18 @@
 if (!defined('DOKU_INC')) die('Meh.');
 
 // FIXME: This include should be where the visitor is actually needed!
-// FIXME: It should really be handled by the auto-loader of stratastorage!
-require_once(DOKU_PLUGIN.'stratastorage/strata_querytree_visitor.php');
+// FIXME: It should really be handled by the auto-loader!
+require_once(DOKU_PLUGIN.'strata/strata_querytree_visitor.php');
 
 /**
  * The triples helper is responsible for querying.
  */
-class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
+class helper_plugin_strata_triples extends DokuWiki_Plugin {
     public static $readable = 'data';
     public static $writable = 'data';
 
-    function helper_plugin_stratastorage_triples() {
-        $this->types =& plugin_load('helper', 'stratastorage_types');
+    function helper_plugin_strata_triples() {
+        $this->types =& plugin_load('helper', 'strata_types');
         $this->_initialize();
     }
 
@@ -68,7 +68,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
 
         // construct driver
         list($driver,$connection) = explode(':',$dsn,2);
-        $driverFile = DOKU_PLUGIN."stratastorage/driver/$driver.php";
+        $driverFile = DOKU_PLUGIN."strata/driver/$driver.php";
         if(!@file_exists($driverFile)) {
             msg(sprintf($this->getLang('error_triples_nodriver'), $driver), -1);
             return false;
@@ -244,7 +244,7 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
      */
     function queryRelations($queryTree) {
         // create the SQL generator, and generate the SQL query
-        $generator = new stratastorage_sql_generator($this);
+        $generator = new strata_sql_generator($this);
         list($sql, $literals, $projected, $grouped) = $generator->translate($queryTree);
 
         // prepare the query
@@ -267,9 +267,9 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
 
         // wrap the results in an iterator, and return it
         if($queryTree['grouping'] === false) {
-            return new stratastorage_relations_iterator($query, $projected);
+            return new strata_relations_iterator($query, $projected);
         } else {
-            return new stratastorage_aggregating_iterator($query, $projected, $grouped);
+            return new strata_aggregating_iterator($query, $projected, $grouped);
         }
     }
 
@@ -326,14 +326,14 @@ class helper_plugin_stratastorage_triples extends DokuWiki_Plugin {
         }
 
         // invoke iterator that's going to aggregate the resulting relations
-        return new stratastorage_resource_iterator($result,$query['projection']);
+        return new strata_resource_iterator($result,$query['projection']);
     }
 }
 
 /**
  * SQL generator.
  */
-class stratastorage_sql_generator {
+class strata_sql_generator {
     /**
      * Stores all literal values keyed to their placeholder.
      */
@@ -352,7 +352,7 @@ class stratastorage_sql_generator {
     /**
      * Constructor.
      */
-    function stratastorage_sql_generator($triples) {
+    function strata_sql_generator($triples) {
         $this->_triples = $triples;
         $this->_db = $this->_triples->_db;
     }
@@ -840,7 +840,7 @@ class stratastorage_sql_generator {
  * This iterator is used to offer an interface over a
  * relations query result.
  */
-class stratastorage_relations_iterator implements Iterator {
+class strata_relations_iterator implements Iterator {
     function __construct($pdostatement, $projection) {
         // backend iterator
         $this->data = $pdostatement;
@@ -913,7 +913,7 @@ class stratastorage_relations_iterator implements Iterator {
  * This iterator is used to offer an interface over a
  * resources query result.
  */
-class stratastorage_resource_iterator implements Iterator {
+class strata_resource_iterator implements Iterator {
     function __construct($relations, $projection) {
         // backend iterator (ordered by tuple)
         $this->data = $relations;
@@ -990,7 +990,7 @@ class stratastorage_resource_iterator implements Iterator {
  * This iterator aggregates the results of the underlying
  * iterator for the given grouping key.
  */
-class stratastorage_aggregating_iterator implements Iterator {
+class strata_aggregating_iterator implements Iterator {
     function __construct($pdostatement, $projection, $grouped) {
         // backend iterator (ordered by tuple)
         $this->data = $pdostatement;
