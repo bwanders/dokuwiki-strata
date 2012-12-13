@@ -11,7 +11,7 @@ if (!defined('DOKU_INC')) die('Meh.');
 /**
  * List syntax for basic query handling.
  */
-class syntax_plugin_strata_list extends syntax_plugin_stratabasic_select {
+class syntax_plugin_strata_list extends syntax_plugin_strata_select {
     function connectTo($mode) {
         $this->Lexer->addSpecialPattern('<list'.$this->helper->fieldsShortPattern().'* *>\s*?\n.+?\n\s*?</list>',$mode, 'plugin_strata_list');
     }

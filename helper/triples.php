@@ -493,7 +493,7 @@ class strata_sql_generator {
      */
     function _trans_tp($tp) {
         return array(
-            'sql'=>'SELECT '.$this->_genPR($tp).' FROM '.helper_plugin_stratastorage_triples::$readable.' WHERE '.$this->_genCond($tp),
+            'sql'=>'SELECT '.$this->_genPR($tp).' FROM '.helper_plugin_strata_triples::$readable.' WHERE '.$this->_genCond($tp),
             'terms'=>array($this->_name($tp['subject']),$this->_name($tp['predicate']), $this->_name($tp['object']))
         );
     }
