@@ -6,3 +6,5 @@ $meta['default_dsn'] = array('string', '_pattern'=>'/.+:.*/');
 $meta['isa_key'] = array('string');
 $meta['title_key'] = array('string');
 $meta['debug'] = array('onoff');
+
+$meta['enable_entry'] = array('onoff');

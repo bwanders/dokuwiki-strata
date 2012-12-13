@@ -1,7 +1,7 @@
-base   stratastorage
+base   strata
 author Brend Wanders
 email  b.wanders@utwente.nl
-date   2012-02-22
-name   Strata Storage
-desc   Helper plugin for query and type handling
-url    http://github.com/bwanders/dokuwiki-plugin-stratastorage
+date   2012-12-13
+name   Strata
+desc   Semi-Structured data plugin
+url    http://github.com/bwanders/dokuwiki-strata
