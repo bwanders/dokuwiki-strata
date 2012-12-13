@@ -286,9 +286,11 @@ class helper_plugin_stratabasic extends DokuWiki_Plugin {
         if(count($filters)) {
             foreach($filters as $f) {
                 if($f['lhs']['type'] == 'variable' && !in_array($f['lhs']['text'], $scope)) {
-                    $this->_fail('Strata basic: filter uses out-of-scope variable \'<code>'.utf8_tohtml(hsc($f['lhs']['text'])).'<code>\'.', $root);
+                    // TODO: put string in translation!
+                    $this->_fail('Strata basic: filter uses out-of-scope variable \'<code>'.utf8_tohtml(hsc($f['lhs']['text'])).'</code>\'.', $root);
                 }
                 if($f['rhs']['type'] == 'variable' && !in_array($f['rhs']['text'], $scope)) {
+                    // TODO: put string in translation!
                     $this->_fail('Strata basic: filter uses out-of-scope variable \'<code>'.utf8_tohtml(hsc($f['rhs']['text'])).'</code>\'.', $root);
                 }
             }

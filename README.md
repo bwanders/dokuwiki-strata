@@ -1,3 +1,6 @@
+Strata Basic
+============
+
 Strata Basic is a minimalist data entry and query plugin for dokuwiki.
 
 This plugin is part of the Strata family of plugins.
