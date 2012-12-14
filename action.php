@@ -67,7 +67,7 @@ class action_plugin_strata extends DokuWiki_Action_Plugin {
                 }
         
                 // set up the renderer
-                $renderer = new renderer_plugin_stratastorage();
+                $renderer = new renderer_plugin_strata();
                 $renderer->meta =& $orig['current'];
                 $renderer->persistent =& $orig['persistent'];
         
