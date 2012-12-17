@@ -17,7 +17,7 @@ require_once(DOKU_PLUGIN.'strata/strata_exception.php');
  * Helper plugin for common syntax parsing.
  */
 class helper_plugin_strata_syntax extends DokuWiki_Plugin {
-    function helper_plugin_strata_syntax() {
+    function __construct() {
         $this->types =& plugin_load('helper', 'strata_types');
     }
 

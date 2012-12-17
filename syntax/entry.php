@@ -12,7 +12,7 @@ if (!defined('DOKU_INC')) die('Meh.');
  * Data entry syntax for dedicated data blocks.
  */
 class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
-    function syntax_plugin_strata_entry() {
+    function __construct() {
         $this->helper =& plugin_load('helper', 'strata_syntax');
         $this->types =& plugin_load('helper', 'strata_types');
         $this->triples =& plugin_load('helper', 'strata_triples');

@@ -20,7 +20,7 @@ class helper_plugin_strata_triples extends DokuWiki_Plugin {
     public static $readable = 'data';
     public static $writable = 'data';
 
-    function helper_plugin_strata_triples() {
+    function __construct() {
         $this->types =& plugin_load('helper', 'strata_types');
         $this->_initialize();
     }
