@@ -18,23 +18,7 @@ require_once(DOKU_PLUGIN.'strata/strata_exception.php');
  */
 class helper_plugin_strata_syntax extends DokuWiki_Plugin {
     function __construct() {
-        $this->types =& plugin_load('helper', 'strata_types');
-    }
-
-    /**
-     * Normalizes a predicate.
-     */
-    function normalizePredicate($p) {
-        list($type, $hint) = $this->types->getPredicateType();
-        return $this->types->loadType($type)->normalize($p, $hint);
-    }
-
-    /**
-     * Renders a predicate.
-     */
-    function renderPredicate($mode, &$R, &$T, $p) {
-        list($type, $hint) = $this->types->getPredicateType();
-        return $this->types->loadType($type)->render($mode, $R, $T, $p, $hint);
+        $this->util =& plugin_load('helper', 'strata_util');
     }
 
     /**
@@ -387,7 +371,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                 } else {
                     global $ID;
                     $subject = substr($subject,2,-2);
-                    $subject = $this->types->loadType('ref')->normalize($subject,null);
+                    $subject = $this->util->loadType('ref')->normalize($subject,null);
                     $subject = $this->literal($subject);
                 }
 
@@ -397,7 +381,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                     $scope[] = $predicate['text'];
                     $this->updateTypemap($typemap, $predicate['text'], 'text');
                 } else {
-                    $predicate = $this->literal($this->normalizePredicate($predicate));
+                    $predicate = $this->literal($this->util->normalizePredicate($predicate));
                 }
 
                 $object = utf8_trim($object);
@@ -421,9 +405,9 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                         $object='';
                     }
                     if(!$type) {
-                        list($type, $hint) = $this->types->getDefaultType();
+                        list($type, $hint) = $this->util->getDefaultType();
                     }
-                    $type = $this->types->loadType($type);
+                    $type = $this->util->loadType($type);
                     $object = $this->literal($type->normalize($object,$hint));
                 }
 
@@ -477,7 +461,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                     if(!empty($typemap[$lhs['text']])) {
                         extract($typemap[$lhs['text']]);
                     } else {
-                        list($type, $hint) = $this->types->getDefaultType();
+                        list($type, $hint) = $this->util->getDefaultType();
                     }
                 }
 
@@ -486,7 +470,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                     $rhs = '';
                 }
 
-                $type = $this->types->loadType($type);
+                $type = $this->util->loadType($type);
                 $rhs = $this->literal($type->normalize($rhs,$hint));
 
                 $filters[] = array('type'=>'filter','lhs'=>$lhs, 'operator'=>$operator, 'rhs'=>$rhs);
@@ -508,7 +492,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                     if(!empty($typemap[$rhs['text']])) {
                         extract($typemap[$rhs['text']]);
                     } else {
-                        list($type, $hint) = $this->types->getDefaultType();
+                        list($type, $hint) = $this->util->getDefaultType();
                     }
                 }
 
@@ -517,7 +501,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                     $lhs = '';
                 }
 
-                $type = $this->types->loadType($type);
+                $type = $this->util->loadType($type);
                 $lhs = $this->literal($type->normalize($lhs,$hint));
 
                 $filters[] = array('type'=>'filter','lhs'=>$lhs, 'operator'=>$operator, 'rhs'=>$rhs);

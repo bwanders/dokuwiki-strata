@@ -36,7 +36,7 @@ abstract class plugin_strata_driver {
      */
     function __construct($debug=false) {
         $this->_debug = $debug;
-        $this->helper =& plugin_load('helper', 'strata_types');
+        $this->util =& plugin_load('helper', 'strata_util');
     }
 
     /**
@@ -94,9 +94,9 @@ abstract class plugin_strata_driver {
             $this->_db = $this->initializePDO($dsn);
         } catch(PDOException $e) {
             if ($this->_debug) {
-                msg(sprintf($this->helper->getLang('driver_failed_detail'), hsc($dsn), hsc($e->getMessage())), -1);
+                msg(sprintf($this->util->getLang('driver_failed_detail'), hsc($dsn), hsc($e->getMessage())), -1);
             } else {
-                msg($this->helper->getLang('driver_failed'), -1);
+                msg($this->util->getLang('driver_failed'), -1);
             }
             return false;
         }
@@ -144,7 +144,7 @@ abstract class plugin_strata_driver {
 
         // determine driver
         list($driver, $connection) = explode(':', $this->_dsn, 2);
-        if ($this->_debug) msg(sprintf($this->helper->getLang('driver_setup_start'), hsc($driver)));
+        if ($this->_debug) msg(sprintf($this->util->getLang('driver_setup_start'), hsc($driver)));
 
         // load SQL script
         $sqlfile = DOKU_PLUGIN . "strata/sql/setup-$driver.sql";
@@ -171,15 +171,15 @@ abstract class plugin_strata_driver {
             // skip empty lines (usually the last line is empty, due to the final semicolon)
             if(trim($s) == '') continue;
 
-            if ($this->_debug) msg(sprintf($this->helper->getLang('driver_setup_statement'),hsc($s)));
-            if(!$this->query($s, $this->helper->getLang('driver_setup_failed'))) {
+            if ($this->_debug) msg(sprintf($this->util->getLang('driver_setup_statement'),hsc($s)));
+            if(!$this->query($s, $this->util->getLang('driver_setup_failed'))) {
                 $this->rollBack();
                 return false;
             }
         }
         $this->commit();
 
-        if($this->_debug) msg($this->helper->getLang('driver_setup_succes'), 1);
+        if($this->_debug) msg($this->util->getLang('driver_setup_succes'), 1);
 
         return true;
     }
@@ -190,7 +190,7 @@ abstract class plugin_strata_driver {
      * @return whether the database was removed successfully
      */
     public function removeDatabase() {
-        return $this->query('DROP TABLE data', $this->helper->getLang('driver_remove_failed'));
+        return $this->query('DROP TABLE data', $this->util->getLang('driver_remove_failed'));
     }
 
     /**
@@ -205,7 +205,7 @@ abstract class plugin_strata_driver {
         $result = $this->_db->prepare($query);
         if ($result === false) {
             $error = $this->_db->errorInfo();
-            msg(sprintf($this->helper->getLang('driver_prepare_failed'),hsc($query), hsc($error[2])),-1);
+            msg(sprintf($this->util->getLang('driver_prepare_failed'),hsc($query), hsc($error[2])),-1);
             return false;
         }
 
@@ -223,13 +223,13 @@ abstract class plugin_strata_driver {
         if($this->_db == false) return false;
 
         if($message === false) {
-            $message = $this->helper->getLang('driver_query_failed_default');
+            $message = $this->util->getLang('driver_query_failed_default');
         }
 
         $res = $this->_db->query($query);
         if ($res === false) {
             $error = $this->_db->errorInfo();
-            msg(sprintf($this->helper->getLang('driver_query_failed'), $message, hsc($query), hsc($error[2])),-1);
+            msg(sprintf($this->utiutil->getLang('driver_query_failed'), $message, hsc($query), hsc($error[2])),-1);
             return false;
         }
         return true;

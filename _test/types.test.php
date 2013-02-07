@@ -2,11 +2,11 @@
 require_once(DOKU_INC.'_test/lib/unittest.php');
 require_once(DOKU_INC.'inc/init.php');
 require_once(DOKU_INC.'inc/plugin.php');
-require_once(DOKU_INC.'lib/plugins/strata/helper/types.php');
+require_once(DOKU_INC.'lib/plugins/strata/helper/util.php');
 class types_test extends Doku_UnitTestCase {
 
 	function setup() {
-		$this->_types = new helper_plugin_strata_types();
+		$this->_types = new helper_plugin_strata_util();
 	}
 
 	function testString() {

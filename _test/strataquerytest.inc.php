@@ -1,12 +1,12 @@
 <?php
 require_once('stratatest.inc.php');
-require_once(DOKU_INC.'lib/plugins/strata/helper/types.php');
+require_once(DOKU_INC.'lib/plugins/strata/helper/util.php');
 class Strata_Query_UnitTestCase extends Strata_UnitTestCase {
 
     function setup() {
         parent::setup();
         // Load types
-        $types = new helper_plugin_stratastorage_types();
+        $types = new helper_plugin_strata_util();
         $string = $types->loadType('string'); 
         $ref = $types->loadType('ref'); 
         $image = $types->loadType('image'); 

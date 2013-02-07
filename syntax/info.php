@@ -16,7 +16,7 @@ if (!defined('DOKU_INC')) die('Meh.');
  */
 class syntax_plugin_strata_info extends DokuWiki_Syntax_Plugin {
     public function __construct() {
-        $this->types =& plugin_load('helper', 'strata_types');
+        $this->util =& plugin_load('helper', 'strata_util');
     }
 
     public function getType() {
@@ -48,8 +48,8 @@ class syntax_plugin_strata_info extends DokuWiki_Syntax_Plugin {
             if(preg_match("@/([^/]+)/${kind}s/([^/]+)\.php@",$type,$matches)) {
                 // ...load each type...
                 switch($kind) {
-                    case 'type': $meta = $this->types->loadType($matches[2])->getInfo(); break;
-                    case 'aggregate': $meta = $this->types->loadAggregate($matches[2])->getInfo(); break;
+                    case 'type': $meta = $this->util->loadType($matches[2])->getInfo(); break;
+                    case 'aggregate': $meta = $this->util->loadAggregate($matches[2])->getInfo(); break;
                 }
 
                 // ...and check if it's synthetic (i.e., not user-usable)

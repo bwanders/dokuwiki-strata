@@ -10,78 +10,31 @@
 if (!defined('DOKU_INC')) die('Meh.');
 
 /**
- * The types helper is used to cached types and aggregates.
+ * This utility helper offers methods for configuration handling
+ * type and aggregator loading, and rendering.
  */
-class helper_plugin_strata_types extends DokuWiki_Plugin {
-    /**
-     * The currently loaded types.
-     */
-    var $loaded = array();
-
-    function __construct() {
-        $this->loaded['type'] = array();
-        $this->loaded['aggregate'] = array();
-    }
-
+class helper_plugin_strata_util extends DokuWiki_Plugin {
     function getMethods() {
         $result = array();
-        $result[] = array(
-            'name'=> 'loadType',
-            'desc'=> 'Loads a type and returns it.',
-            'params'=> array(
-                'type'=>'string'
-            ),
-            'return' => array('type'=>'object')
-        );
-
-        $result[] = array(
-            'name'=> 'loadAggregate',
-            'desc'=> 'Loads an aggregate and returns it.',
-            'params'=> array(
-                'type'=>'string'
-            ),
-            'return' => array('type'=>'object')
-        );
-
-        $result[] = array(
-            'name'=> 'parseType',
-            'desc'=> "Parses a 'name(hint)' pattern",
-            'params'=> array(
-                'text'=>'string'
-            ),
-            'return'=>array('parsed'=>'array')
-        );
-
-        $result[] = array(
-            'name'=> 'getDefaultType',
-            'desc'=> 'Determines the default type name and hint',
-            'params'=> array(
-            ),
-            'return' => array('type'=>'array')
-        );
-
-        $result[] = array(
-            'name'=> 'getDefaultPredicateType',
-            'desc'=> 'Determines the default predicate type name and hint',
-            'params'=> array(
-            ),
-            'return' => array('type'=>'array')
-        );
-
         return $result;
     }
 
     /**
+     * The loaded types and aggregates cache.
+     */
+    var $loaded = array();
+
+    /**
      * Loads something.
      */
-    function _load($kind, $name, $default) {
+    private function _load($kind, $name, $default) {
         // handle null value
         if($name == null) {
             $name = $default;
         }
 
         // use cache if possible
-        if(!isset($this->loaded[$kind][$name])) {
+        if(empty($this->loaded[$kind][$name])) {
             $class = "plugin_strata_${kind}_${name}";
             $this->loaded[$kind][$name] = new $class();
         }
@@ -105,8 +58,6 @@ class helper_plugin_strata_types extends DokuWiki_Plugin {
         return $this->_load('aggregate', $aggregate, 'all');
     }
 
-    var $configTypes = array();
-
     /**
      * Parses a 'name(hint)' pattern.
      *
@@ -124,9 +75,17 @@ class helper_plugin_strata_types extends DokuWiki_Plugin {
         }
     }
 
+    /**
+     * The parsed configuration types.
+     */
+    var $configTypes = array();
+
+    /**
+     * Parses a type from configuration.
+     */
     function _parseConfigType($key) {
-        // laze load
-        if($this->defaultType == null) {
+        // lazy parse
+        if(empty($this->configTypes[$key])) {
             // parse
             $this->configTypes[$key] = $this->parseType($this->getConf($key));
 
@@ -143,18 +102,54 @@ class helper_plugin_strata_types extends DokuWiki_Plugin {
         return $this->configTypes[$key];
     }
 
-
     /**
-     * Returns the configured default type.
+     * Returns the default type.
      */
     function getDefaultType() {
         return $this->_parseConfigType('default_type');
     }
 
     /**
-     * Returns the configured predicate type.
+     * Returns the type used for predicates.
      */
     function getPredicateType() {
         return $this->_parseConfigType('predicate_type');
+    }
+
+    /**
+     * Returns the normalized value for the 'is a' predicate.
+     */
+    function getIsaKey() {
+        return $this->normalizePredicate($this->getConf('isa_key'));
+    }
+
+    /**
+     * Returns the normalized valued for the 'title' predicate.
+     */
+    function getTitleKey() {
+        return $this->normalizePredicate($this->getConf('title_key'));
+    }
+
+    /**
+     * Normalizes a predicate.
+     * 
+     * @param p the string to normalize
+     */
+    function normalizePredicate($p) {
+        list($type, $hint) = $this->getPredicateType();
+        return $this->loadType($type)->normalize($p, $hint);
+    }
+
+    /**
+     * Renders a predicate.
+     *
+     * @param mode the rendering mode
+     * @param R the renderer
+     * @param T the triples helper
+     * @param p the predicate
+     */
+    function renderPredicate($mode, &$R, &$T, $p) {
+        list($type, $hint) = $this->getPredicateType();
+        return $this->loadType($type)->render($mode, $R, $T, $p, $hint);
     }
 }

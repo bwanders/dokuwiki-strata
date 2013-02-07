@@ -14,7 +14,7 @@ if(!defined('DOKU_INC')) die('Meh.');
 class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
     function __construct() {
         $this->helper =& plugin_load('helper', 'strata_syntax');
-        $this->types =& plugin_load('helper', 'strata_types');
+        $this->util =& plugin_load('helper', 'strata_util');
         $this->triples =& plugin_load('helper', 'strata_triples');
     }
 
@@ -100,7 +100,7 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
                     if(!empty($typemap[$var])) {
                         $result['fields'][$i] = array_merge($result['fields'][$i],$typemap[$var]);
                     } else {
-                        list($type, $hint) = $this->types->getDefaultType();
+                        list($type, $hint) = $this->util->getDefaultType();
                         $result['fields'][$i]['type'] = $type;
                         $result['fields'][$i]['hint'] = $hint;
                     }
@@ -211,10 +211,10 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
             $fields[] = array(
                 'variable'=>$meta['variable'],
                 'caption'=>$meta['caption'],
-                'type'=>$this->types->loadType($meta['type']),
+                'type'=>$this->util->loadType($meta['type']),
                 'typeName'=>$meta['type'],
                 'hint'=>$meta['hint'],
-                'aggregate'=>$this->types->loadAggregate($meta['aggregate']),
+                'aggregate'=>$this->util->loadAggregate($meta['aggregate']),
                 'aggregateHint'=>$meta['aggregateHint']
             );
         }

@@ -62,10 +62,10 @@ class syntax_plugin_strata_list extends syntax_plugin_strata_select {
         foreach($data['fields'] as $meta) {
             $fields[] = array(
                 'variable'=>$meta['variable'],
-                'type'=>$this->types->loadType($meta['type']),
+                'type'=>$this->util->loadType($meta['type']),
                 'typeName'=>$meta['type'],
                 'hint'=>$meta['hint'],
-                'aggregate'=>$this->types->loadAggregate($meta['aggregate']),
+                'aggregate'=>$this->util->loadAggregate($meta['aggregate']),
                 'aggergateHint'=>$meta['aggregateHint']
             );
         }

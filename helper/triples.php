@@ -21,23 +21,12 @@ class helper_plugin_strata_triples extends DokuWiki_Plugin {
     public static $writable = 'data';
 
     function __construct() {
-        $this->types =& plugin_load('helper', 'strata_types');
         $this->_initialize();
     }
 
     function getMethods() {
         $result = array();
         return $result;
-    }
-
-    function getIsaKey() {
-        list($type, $hint) = $this->types->getPredicateType();
-        return $this->types->loadType($type)->normalize($this->getConf('isa_key'), $hint);
-    }
-
-    function getTitleKey() {
-        list($type, $hint) = $this->types->getPredicateType();
-        return $this->types->loadType($type)->normalize($this->getConf('title_key'), $hint);
     }
 
     /**

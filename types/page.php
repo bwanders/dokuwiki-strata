@@ -10,6 +10,9 @@ if(!defined('DOKU_INC')) die('Meh.');
  * The page link type.
  */
 class plugin_strata_type_page extends plugin_strata_type {
+    function __construct() {
+    }
+
     function normalize($value, $hint) {
         global $ID;
 

@@ -10,12 +10,17 @@ if(!defined('DOKU_INC')) die('Meh.');
  * The reference link type.
  */
 class plugin_strata_type_ref extends plugin_strata_type_page {
+    function __construct() {
+        $this->util =& plugin_load('helper', 'strata_util');
+        parent::__construct();
+    }
+
     function render($mode, &$R, &$T, $value, $hint) {
         $heading = null;
 
         // only use heading if allowed by configuration
         if(useHeading('content')) {
-            $titles = $T->fetchTriples($value, $T->getTitleKey());
+            $titles = $T->fetchTriples($value, $this->util->getTitleKey());
             if($titles) {
                 $heading = $titles[0]['object'];
             }

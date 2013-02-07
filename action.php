@@ -128,24 +128,18 @@ class action_plugin_strata extends DokuWiki_Action_Plugin {
         $current =& $event->data['current'];
 
         if(isset($current['strata']['fixTitle']) && $current['strata']['fixTitle']) {
-            // get triples helper
+            // get helpers
             $triples =& plugin_load('helper', 'strata_triples');
-
-            $types =& plugin_load('helper', 'strata_types');
-
-            $helper =& plugin_load('helper', 'strata_syntax');
-
-            $titleKey = $helper->normalizePredicate($triples->getTitleKey());
+            $util =& plugin_load('helper', 'strata_util');
 
             $title = $current['title'];
             if(!$title) {
                 $title = noNS($id);
             }
 
-            $type = $types->loadType('text');
-            $title = $type->normalize($title,'');
+            $title = $util->loadType('text')->normalize($title,'');
 
-            $triples->addTriple($id, $titleKey, $title, $id);
+            $triples->addTriple($id, $util->getTitleKey(), $title, $id);
         }
     }
 
