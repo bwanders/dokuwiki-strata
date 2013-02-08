@@ -270,12 +270,10 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
         if(count($filters)) {
             foreach($filters as $f) {
                 if($f['lhs']['type'] == 'variable' && !in_array($f['lhs']['text'], $scope)) {
-                    // TODO: put string in translation!
-                    $this->_fail('Strata: filter uses out-of-scope variable \'<code>'.utf8_tohtml(hsc($f['lhs']['text'])).'</code>\'.', $root);
+                    $this->_fail(sprintf($this->getLang('error_query_filterscope'),utf8_tohtml(hsc($f['lhs']['text']))), $root);
                 }
                 if($f['rhs']['type'] == 'variable' && !in_array($f['rhs']['text'], $scope)) {
-                    // TODO: put string in translation!
-                    $this->_fail('Strata: filter uses out-of-scope variable \'<code>'.utf8_tohtml(hsc($f['rhs']['text'])).'</code>\'.', $root);
+                    $this->_fail(sprintf($this->getLang('error_query_filterscope'),utf8_tohtml(hsc($f['rhs']['text']))), $root);
                 }
             }
 

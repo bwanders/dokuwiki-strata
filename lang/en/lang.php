@@ -66,4 +66,6 @@ $lang['error_query_considerline'] = 'I can\'t handle line \'<code>%s</code>\' in
 
 $lang['error_query_grouppattern'] = 'I can\'t handle a group without at least one triple pattern or union group.';
 
+$lang['error_query_filterscope'] = 'Filter uses out-of-scope variable \'<code>%s</code>\'.';
+
 $lang['content_error_explanation'] = 'An error ocurred';
