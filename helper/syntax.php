@@ -14,11 +14,99 @@ if (!defined('STRATA_VARIABLE')) define('STRATA_VARIABLE','[^ _:\(\)\[\]\{\}\<\>
 require_once(DOKU_PLUGIN.'strata/strata_exception.php');
 
 /**
+ * A single capture. Used as a return value for the RegexHelper's
+ * capture methods.
+ */
+class helper_plugin_strata_syntax_RegexHelperCapture {
+    function __construct($values) {
+        $this->values = $values;
+    }
+
+    function __get($name) {
+        if(array_key_exists($name, $this->values)) {
+            return $this->values[$name];
+        } else {
+            return null;
+        }
+    }
+}
+
+/**
+ * Helper to construct and handle syntax fragments.
+ */
+class helper_plugin_strata_syntax_RegexHelper {
+    /**
+     * Regular expression fragment table. This is used for interpolation of
+     * syntax patterns, and should be without captures. Do not assume any
+     * specific delimiter.
+     */
+    var $regexFragments = array(
+        'variable'  => '(?:\?[^\s_:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+)',
+        'predicate' => '(?:[^_:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+)',
+        'reflit'    => '(?:\[\[[^]]*\]\])',
+        'type'      => '(?:_[a-z0-9]+(?:\([^)]+\))?)',
+        'aggregate' => '(?:@[a-z0-9]*(?:\([^)]+\))?)'
+    );
+
+    /**
+     * Patterns used to extract information from captured fragments. These patterns
+     * are used with '/' as delimiter, and should contain at least one capture group.
+     */
+    var $regexCaptures = array(
+        'variable'  => array('\?(.*)', array('name')),
+        'type'      => array('_([a-z0-9]+)(?:\(([^)]+)\))?', array('type', 'hint')),
+        'reflit'    => array('\[\[(.*)\]\]',array('reference'))
+    );
+
+    /**
+     * Grabs the syntax fragment.
+     */
+    function __get($name) {
+        if(array_key_exists($name, $this->regexFragments)) {
+            return $this->regexFragments[$name];
+        } else {
+            $trace = debug_backtrace();
+            trigger_error("Undefined syntax fragment '$name' on {$trace[0]['file']}:{$trace[0]['line']}", E_USER_NOTICE);
+        }
+    }
+
+    /**
+     * Extracts information from a fragment, based on the type.
+     */
+    function __call($name, $arguments) {
+        if(array_key_exists($name, $this->regexCaptures)) {
+            list($pattern, $names) = $this->regexCaptures[$name];
+            $result = preg_match("/^{$pattern}$/", $arguments[0], $match);
+            if($result == 1) {
+                array_shift($match);
+                $shortest = min(count($names), count($match));
+                return new helper_plugin_strata_syntax_RegexHelperCapture(array_combine(array_slice($names,0,$shortest), array_slice($match, 0, $shortest)));
+            } else {
+                return null;
+            }
+        } else {
+            $trace = debug_backtrace();
+            trigger_error("Undefined syntax capture '$name' on {$trace[0]['file']}:{$trace[0]['line']}", E_USER_NOTICE);
+        }
+    }
+}
+
+
+/**
  * Helper plugin for common syntax parsing.
  */
 class helper_plugin_strata_syntax extends DokuWiki_Plugin {
     function __construct() {
         $this->util =& plugin_load('helper', 'strata_util');
+        $this->regexHelper = new helper_plugin_strata_syntax_RegexHelper();
+    }
+
+
+    /**
+     * Returns an object describing the pattern fragments.
+     */
+    function getPatterns() {
+        return $this->regexHelper;
     }
 
     /**
@@ -82,6 +170,8 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
      * @return a query structure
      */
     function constructQuery(&$root, &$typemap, $projection) {
+        $p = $this->getPatterns();
+
         $result = array(
             'type'=>'select',
             'group'=>array(),
@@ -130,12 +220,13 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                     $this->_fail($this->getLang('error_query_sortblock'), $line);
                 }
 
-                if(preg_match('/^\?('.STRATA_VARIABLE.')\s*(?:\((asc|desc)(?:ending)?\))?$/S',utf8_trim($line['text']),$match)) {
-                    if(!in_array($match[1], $scope)) {
-                        $this->_fail(sprintf($this->getLang('error_query_sortvar'),utf8_tohtml(hsc($match[1]))), $line);
+                if(preg_match("/^({$p->variable})\s*(?:\((asc|desc)(?:ending)?\))?$/S",utf8_trim($line['text']),$match)) {
+                    $var = $p->variable($match[1]);
+                    if(!in_array($var->name, $scope)) {
+                        $this->_fail(sprintf($this->getLang('error_query_sortvar'),utf8_tohtml(hsc($var->name))), $line);
                     }
 
-                    $result['ordering'][] = array('variable'=>$match[1], 'direction'=>($match[2]?:'asc'));
+                    $result['ordering'][] = array('variable'=>$var->name, 'direction'=>($match[2]?:'asc'));
                 } else {
                     $this->_fail(sprintf($this->getLang('error_query_sortline'), utf8_tohtml(hsc($line['text']))), $line);
                 }
@@ -156,12 +247,13 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                     $this->_fail($this->getLang('error_query_groupblock'), $line);
                 }
 
-                if(preg_match('/^\?('.STRATA_VARIABLE.')$/',utf8_trim($line['text']),$match)) {
-                    if(!in_array($match[1], $scope)) {
-                        $this->_fail(sprintf($this->getLang('error_query_groupvar'),utf8_tohtml(hsc($match[1]))), $line);
+                if(preg_match("/({$p->variable})$/",utf8_trim($line['text']),$match)) {
+                    $var = $p->variable($match[1]);
+                    if(!in_array($var->name, $scope)) {
+                        $this->_fail(sprintf($this->getLang('error_query_groupvar'),utf8_tohtml(hsc($var->name))), $line);
                     }
 
-                    $result['grouping'][] = $match[1];
+                    $result['grouping'][] = $var->name;
                 } else {
                     $this->_fail(sprintf($this->getLang('error_query_groupline'), utf8_tohtml(hsc($line['text']))), $line);
                 }
@@ -179,12 +271,13 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                     $this->_fail($this->getLang('error_query_considerblock'), $line);
                 }
 
-                if(preg_match('/^\?('.STRATA_VARIABLE.')$/',utf8_trim($line['text']),$match)) {
-                    if(!in_array($match[1], $scope)) {
-                        $this->_fail(sprintf($this->getLang('error_query_considervar'),utf8_tohtml(hsc($match[1]))), $line);
+                if(preg_match("/^({$p->variable})$/",utf8_trim($line['text']),$match)) {
+                    $var = $p->variable($match[1]);
+                    if(!in_array($var->name, $scope)) {
+                        $this->_fail(sprintf($this->getLang('error_query_considervar'),utf8_tohtml(hsc($var->name))), $line);
                     }
 
-                    $result['considering'][] = $match[1];
+                    $result['considering'][] = $var->name;
                 } else {
                     $this->_fail(sprintf($this->getLang('error_query_considerline'), utf8_tohtml(hsc($line['text']))), $line);
                 }
@@ -349,6 +442,9 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
         // we need this to resolve things
         global $ID;
 
+        // we need patterns
+        $p = $this->getPatterns();
+
         // result holders
         $scope = array();
         $triples = array();
@@ -357,9 +453,10 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
         foreach($lines as $lineNode) {
             $line = trim($lineNode['text']);
 
-            if(preg_match('/^((?:\?'.STRATA_VARIABLE.')|(?:\[\[[^]]*\]\]))\s+(?:((?:'.STRATA_PREDICATE.')|(?:\?'.STRATA_VARIABLE.'))(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*:\s*(.+?)\s*$/S',$line,$match)) {
+            //if(preg_match('/^((?:\?'.STRATA_VARIABLE.')|(?:\[\[[^]]*\]\]))\s+(?:((?:'.STRATA_PREDICATE.')|(?:\?'.STRATA_VARIABLE.'))(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*:\s*(.+?)\s*$/S',$line,$match)) {
+            if(preg_match("/^({$p->variable}|{$p->reflit})\s+({$p->variable}|{$p->predicate})({$p->type})?\s*:\s*(.+?)\s*$/S",$line,$match)) {
                 // triple pattern
-                list(, $subject, $predicate, $type, $hint, $object) = $match;
+                list(, $subject, $predicate, $type, $object) = $match;
 
                 $subject = utf8_trim($subject);
                 if($subject[0] == '?') {
@@ -368,7 +465,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                     $this->updateTypemap($typemap, $subject['text'], 'ref');
                 } else {
                     global $ID;
-                    $subject = substr($subject,2,-2);
+                    $subject = $p->reflit($subject)->reference;
                     $subject = $this->util->loadType('ref')->normalize($subject,null);
                     $subject = $this->literal($subject);
                 }
@@ -385,18 +482,20 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                 $object = utf8_trim($object);
                 if($object[0] == '?') {
                     // match a proper type variable
-                    if(preg_match('/^(?:\?('.STRATA_VARIABLE.'))(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?$/',$object,$captures)!=1) {
+                    if(preg_match("/^({$p->variable})({$p->type})?$/",$object,$captures)!=1) {
                         $this->_fail($this->getLang('error_pattern_garbage'),$lineNode);
                     }
-                    list(, $var, $vtype, $vhint) = $captures;
+                    list(, $var, $vtype) = $captures;
 
                     // create the object node
                     $object = $this->variable($var);
                     $scope[] = $object['text'];
 
                     // try direct type first, implied type second
-                    $this->updateTypemap($typemap, $object['text'], $vtype, $vhint);
-                    $this->updateTypemap($typemap, $object['text'], $type, $hint);
+                    $vtype = $p->type($vtype);
+                    $type = $p->type($type);
+                    $this->updateTypemap($typemap, $object['text'], $vtype->type, $vtype->hint);
+                    $this->updateTypemap($typemap, $object['text'], $type->type, $type->hint);
                 } else {
                     // check for empty string token
                     if($object == '[[]]') {
