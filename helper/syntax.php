@@ -80,8 +80,8 @@ class helper_plugin_strata_syntax_RegexHelper {
         'variable'  => '(?:\?[^\s_:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+)',
         'predicate' => '(?:[^_:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+)',
         'reflit'    => '(?:\[\[[^]]*\]\])',
-        'type'      => '(?:_[a-z0-9]+(?:\([^)]+\))?)',
-        'aggregate' => '(?:@[a-z0-9]*(?:\([^)]+\))?)',
+        'type'      => '(?:_[a-z0-9]+(?:\([^\)]*\))?)',
+        'aggregate' => '(?:@[a-z0-9]+(?:\([^\)]*\))?)',
         'operator'  => '(?:!=|>=|<=|>|<|=|!~|!\^~|!\$~|\^~|\$~|~)',
         'any'       => '(?:.+?)'
     );
@@ -92,7 +92,8 @@ class helper_plugin_strata_syntax_RegexHelper {
      */
     var $regexCaptures = array(
         'variable'  => array('\?(.*)', array('name')),
-        'type'      => array('_([a-z0-9]+)(?:\(([^)]+)\))?', array('type', 'hint')),
+        'aggregate' => array('@([a-z0-9]+)(?:\(([^\)]*)\))?', array('aggregate','hint')),
+        'type'      => array('_([a-z0-9]+)(?:\(([^\)]*)\))?', array('type', 'hint')),
         'reflit'    => array('\[\[(.*)\]\]',array('reference'))
     );
 
@@ -674,25 +675,22 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
      * Parses a projection group in 'long syntax'.
      */
     function parseFieldsLong($lines, &$typemap) {
+        $p = $this->getPatterns();
         $result = array();
 
         foreach($lines as $lineNode) {
             $line = trim($lineNode['text']);
-            if(preg_match('/^(?:([^_]*)(?:_([a-z0-9]*)(?:\(([^)]+)\))?)?(:))?\s*\?('.STRATA_VARIABLE.')(?:@([a-z0-9]*)(?:\(([^)]+)\))?)?(?:_([a-z0-9]*)(?:\(([^)]+)\))?)?$/S',$line, $match)) {
-                list($_, $caption, $type, $hint, $nocaphint, $variable, $agg, $agghint, $rtype, $rhint) = $match;
-                if(!$nocaphint || (!$nocaphint && !$caption && !$type)) $caption = ucfirst($variable);
+            // FIELDLONG := (ANY ':')? VARIABLE AGGREGATE? TYPE?
+            if(preg_match("/^(?:({$p->any})?\s*(:))?\s*({$p->variable})({$p->aggregate})?({$p->type})?$/S",$line, $match)) {
+                list(, $caption, $nocaphint, $var, $vaggregate, $vtype) = $match;
+                $variable = $p->variable($var)->name;
+                if(!$nocaphint || (!$nocaphint && !$caption)) $caption = ucfirst($variable);
 
-                // use right-hand type if no left-hand type available
-                if(!$type) {
-                    $type = $rtype;
-                    $hint = $rhint;
-                }
+                list($type,$hint) = $p->type($vtype);
+                list($agg,$agghint) = $p->aggregate($vaggregate);
 
-                if($type && $rtype && ($type!=$rtype || $hint!=$rhint)) {
-                    $this->_fail(sprintf($this->getLang('error_query_fieldsdoubletyped'), utf8_tohtml(hsc($variable))), $lineNode);
-                }
                 $this->updateTypemap($typemap, $variable, $type, $hint);
-                $result[] = array('variable'=>$variable,'caption'=>$caption, 'aggregate'=>($agg?:null), 'aggregateHint'=>($agg?$agghint:null), 'type'=>$type, 'hint'=>$hint);
+                $result[] = array('variable'=>$variable,'caption'=>$caption, 'aggregate'=>$agg, 'aggregateHint'=>$agghint, 'type'=>$type, 'hint'=>$hint);
             } else {
                 $this->_fail(sprintf($this->getLang('error_query_fieldsline'),utf8_tohtml(hsc($line))), $lineNode);
             }
@@ -705,14 +703,19 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
      * Parses a projection group in 'short syntax'.
      */
     function parseFieldsShort($line, &$typemap) {
+        $p = $this->getPatterns();
         $result = array();
 
-        if(preg_match_all('/(?:\s*\?('.STRATA_VARIABLE.')(?:@([a-z0-9]*)(?:\(([^\)]*)\))?)?(?:_([a-z0-9]*)(?:\(([^\)]*)\))?)?\s*(?:(")([^"]*)")?)/',$line,$match, PREG_SET_ORDER)) {
+        // FIELDSHORT := VARIABLE AGGREGATE? TYPE? CAPTION?
+        if(preg_match_all("/\s*({$p->variable})({$p->aggregate})?({$p->type})?\s*(?:(\")([^\"]*)\")?/",$line,$match, PREG_SET_ORDER)) {
             foreach($match as $m) {
-                list(, $variable, $agg, $agghint, $type, $hint, $caption_indicator, $caption) = $m;
+                list(, $var, $vaggregate, $vtype, $caption_indicator, $caption) = $m;
+                $variable = $p->variable($var)->name;
+                list($type, $hint) = $p->type($vtype);
+                list($agg, $agghint) = $p->aggregate($vaggregate);
                 if(!$caption_indicator) $caption = ucfirst($variable);
                 $this->updateTypemap($typemap, $variable, $type, $hint);
-                $result[] = array('variable'=>$variable,'caption'=>$caption, 'aggregate'=>($agg?:null), 'aggregateHint'=>($agg?$agghint:null), 'type'=>$type, 'hint'=>$hint);
+                $result[] = array('variable'=>$variable,'caption'=>$caption, 'aggregate'=>$agg, 'aggregateHint'=>$agghint, 'type'=>$type, 'hint'=>$hint);
             }
         }
 
@@ -726,7 +729,8 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
      * @param captions boolean Whether the pattern should include caption matching (defaults to true)
      */
     function fieldsShortPattern($captions = true) {
-        return '(?:\s*\?'.STRATA_VARIABLE.'(?:@[a-z0-9]*(?:\([^\)]*\))?)?(?:_[a-z0-9]*(?:\([^\)]*\))?)?'.($captions?'\s*(?:"[^"]*")?':'').')';
+        $p = $this->getPatterns();
+        return "(?:\s*{$p->variable}{$p->aggregate}?{$p->type}?".($captions?'\s*(?:"[^"]*")?':'').")";
     }
 
     /**
