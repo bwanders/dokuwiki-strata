@@ -17,7 +17,7 @@ require_once(DOKU_PLUGIN.'strata/strata_exception.php');
  * A single capture. Used as a return value for the RegexHelper's
  * capture methods.
  */
-class helper_plugin_strata_syntax_RegexHelperCapture {
+class helper_plugin_strata_syntax_RegexHelperCapture implements ArrayAccess {
     function __construct($values) {
         $this->values = $values;
     }
@@ -28,6 +28,42 @@ class helper_plugin_strata_syntax_RegexHelperCapture {
         } else {
             return null;
         }
+    }
+
+    function offsetExists($offset) {
+        // the index is valid iff:
+        //   it is an existing field name
+        //   it is a correct nummeric index (with 0 being the first name and count-1 the last)
+        return isset($this->values[$offset]) || ($offset >= 0 && $offset < count($this->values));
+    }
+
+    function offsetGet($offset) {
+        // return the correct offset
+        if (isset($this->values[$offset])) {
+            return $this->values[$offset];
+        } else {
+            // or try the numeric offsets
+            if(is_numeric($offset) && $offset >= 0 && $offset < count($this->values)) {
+                // translate numeric offset to key
+                $keys = array_keys($this->values);
+                return $this->values[$keys[intval($offset)]];
+            } else {
+                // offset unknown, return without value
+                return;
+            }
+        }
+    }
+    
+    function offsetSet($offset, $value) {
+        // noop
+        $trace = debug_backtrace();
+        trigger_error("Syntax fragment fields are read-only on {$trace[0]['file']}:{$trace[0]['line']}", E_USER_NOTICE);
+    }
+
+    function offsetUnset($offset) {
+        // noop
+        $trace = debug_backtrace();
+        trigger_error("Syntax fragment fields are read-only on {$trace[0]['file']}:{$trace[0]['line']}", E_USER_NOTICE);
     }
 }
 
@@ -45,7 +81,9 @@ class helper_plugin_strata_syntax_RegexHelper {
         'predicate' => '(?:[^_:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+)',
         'reflit'    => '(?:\[\[[^]]*\]\])',
         'type'      => '(?:_[a-z0-9]+(?:\([^)]+\))?)',
-        'aggregate' => '(?:@[a-z0-9]*(?:\([^)]+\))?)'
+        'aggregate' => '(?:@[a-z0-9]*(?:\([^)]+\))?)',
+        'operator'  => '(?:!=|>=|<=|>|<|=|!~|!\^~|!\$~|\^~|\$~|~)',
+        'any'       => '(?:.+?)'
     );
 
     /**
@@ -77,7 +115,7 @@ class helper_plugin_strata_syntax_RegexHelper {
         if(array_key_exists($name, $this->regexCaptures)) {
             list($pattern, $names) = $this->regexCaptures[$name];
             $result = preg_match("/^{$pattern}$/", $arguments[0], $match);
-            if($result == 1) {
+            if($result === 1) {
                 array_shift($match);
                 $shortest = min(count($names), count($match));
                 return new helper_plugin_strata_syntax_RegexHelperCapture(array_combine(array_slice($names,0,$shortest), array_slice($match, 0, $shortest)));
@@ -453,9 +491,8 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
         foreach($lines as $lineNode) {
             $line = trim($lineNode['text']);
 
-            //if(preg_match('/^((?:\?'.STRATA_VARIABLE.')|(?:\[\[[^]]*\]\]))\s+(?:((?:'.STRATA_PREDICATE.')|(?:\?'.STRATA_VARIABLE.'))(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*:\s*(.+?)\s*$/S',$line,$match)) {
-            if(preg_match("/^({$p->variable}|{$p->reflit})\s+({$p->variable}|{$p->predicate})({$p->type})?\s*:\s*(.+?)\s*$/S",$line,$match)) {
-                // triple pattern
+            // [grammar] TRIPLEPATTERN := (VARIABLE|REFLIT) ' ' (VARIABLE|PREDICATE) TYPE? : ANY
+            if(preg_match("/^({$p->variable}|{$p->reflit})\s+({$p->variable}|{$p->predicate})({$p->type})?\s*:\s*({$p->any})$/S",$line,$match)) {
                 list(, $subject, $predicate, $type, $object) = $match;
 
                 $subject = utf8_trim($subject);
@@ -510,51 +547,52 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
 
                 $triples[] = array('type'=>'triple','subject'=>$subject, 'predicate'=>$predicate, 'object'=>$object);
 
-            } elseif(preg_match('/^(?:\?('.STRATA_VARIABLE.')(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*(!=|>=|<=|>|<|=|!~|!\^~|!\$~|\^~|\$~|~)\s*(?:\?('.STRATA_VARIABLE.')(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*$/S',$line, $match)) {
-                // var op var
-                list(,$lhs, $ltype, $lhint, $operator, $rhs, $rtype, $rhint) = $match;
+            // [grammar] FILTER := VARIABLE TYPE? OPERATOR VARIABLE TYPE?
+            } elseif(preg_match("/^({$p->variable})({$p->type})?\s*({$p->operator})\s*({$p->variable})({$p->type})?$/S",$line, $match)) {
+                list(,$lhs, $ltype, $operator, $rhs, $rtype) = $match;
 
                 $lhs = $this->variable($lhs);
                 $rhs = $this->variable($rhs);
 
                 // do type information propagation
+                $rtype = $p->type($rtype);
+                $ltype = $p->type($ltype);
 
                 if($ltype) {
                     // left has a defined type, so update the map
-                    $this->updateTypemap($typemap, $lhs['text'], $ltype, $lhint);
+                    $this->updateTypemap($typemap, $lhs['text'], $ltype->type, $ltype->hint);
 
                     // and propagate to right if possible
                     if(!$rtype) {
-                        $this->updateTypemap($typemap, $rhs['text'], $ltype, $lhint);
+                        $this->updateTypemap($typemap, $rhs['text'], $ltype->type, $lhint->hint);
                     }
                 }
                 if($rtype) {
                     // right has a defined type, so update the map
-                    $this->updateTypemap($typemap, $rhs['text'], $rtype, $rhint);
+                    $this->updateTypemap($typemap, $rhs['text'], $rtype->type, $rtype->hint);
 
                     // and propagate to left if possible
                     if(!$ltype) {
-                        $this->updateTypemap($typemap, $lhs['text'], $rtype, $rhint);
+                        $this->updateTypemap($typemap, $lhs['text'], $rtype->type, $rtype->hint);
                     }
                 }
 
                 $filters[] = array('type'=>'filter', 'lhs'=>$lhs, 'operator'=>$operator, 'rhs'=>$rhs);
 
-            } elseif(preg_match('/^(?:\?('.STRATA_VARIABLE.')(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*(!=|>=|<=|>|<|=|!~|!\^~|!\$~|\^~|\$~|~)\s*(.+?)\s*$/S',$line, $match)) {
-                // var op lit
+            // [grammar] FILTER := VARIABLE TYPE? OPERATOR ANY
+            } elseif(preg_match("/^({$p->variable})({$p->type})?\s*({$p->operator})\s*({$p->any})$/S",$line, $match)) {
 
                 // filter pattern
-                list(, $lhs,$type,$hint,$operator,$rhs) = $match;
+                list(, $lhs,$ltype,$operator,$rhs) = $match;
 
                 $lhs = $this->variable($lhs);
 
                 // update typemap if a type was defined
+                list($type,$hint) = $p->type($ltype);
                 if($type) {
                     $this->updateTypemap($typemap, $lhs['text'],$type,$hint);
-                }
-
-                // use the already declared type if no type was defined
-                if(!$type) {
+                } else {
+                    // use the already declared type if no type was defined
                     if(!empty($typemap[$lhs['text']])) {
                         extract($typemap[$lhs['text']]);
                     } else {
@@ -571,21 +609,19 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                 $rhs = $this->literal($type->normalize($rhs,$hint));
 
                 $filters[] = array('type'=>'filter','lhs'=>$lhs, 'operator'=>$operator, 'rhs'=>$rhs);
-            } elseif(preg_match('/^(.+?)\s*(!=|>=|<=|>|<|=|!~|!\^~|!\$~|\^~|\$~|~)\s*(?:\?('.STRATA_VARIABLE.')(?:_([a-z0-9]+)(?:\(([^)]+)\))?)?)\s*$/S',$line, $match)) {
-                // lit op var
 
-                // filter pattern
-                list(, $lhs,$operator,$rhs,$type,$hint) = $match;
+            // [grammar] FILTER := ANY OPERATOR VARIABLE TYPE?
+            } elseif(preg_match("/^({$p->any})\s*({$p->operator})\s*({$p->variable})({$p->type})?$/S",$line, $match)) {
+                list(, $lhs,$operator,$rhs,$rtype) = $match;
 
                 $rhs = $this->variable($rhs);
 
                 // update typemap if a type was defined
+                list($type, $hint) = $p->type($rtype);
                 if($type) {
                     $this->updateTypemap($typemap, $rhs['text'],$type,$hint);
-                }
-
-                // use the already declared type if no type was defined
-                if(!$type) {
+                } else {
+                    // use the already declared type if no type was defined
                     if(!empty($typemap[$rhs['text']])) {
                         extract($typemap[$rhs['text']]);
                     } else {
