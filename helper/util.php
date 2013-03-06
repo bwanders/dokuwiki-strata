@@ -14,6 +14,17 @@ if (!defined('DOKU_INC')) die('Meh.');
  * type and aggregator loading, and rendering.
  */
 class helper_plugin_strata_util extends DokuWiki_Plugin {
+    /**
+     * Constructor.
+     */
+    function __construct() {
+        // we can't depend on the syntax helper due to recursive dependencies.
+        // Since we really only need the pattern helper anyway, we grab it
+        // directly. (This isn't the nicest solution -- but depending on
+        // a helper that depends on us isn't either)
+        $this->patterns = helper_plugin_strata_syntax::$patterns;
+    }
+
     function getMethods() {
         $result = array();
         return $result;
@@ -65,11 +76,11 @@ class helper_plugin_strata_util extends DokuWiki_Plugin {
      * @return an array with a name and hint, or false
      */
     function parseType($string) {
-        if(preg_match('/^([a-z0-9]+)(?:\(([^\)]*)\))?$/',$string,$match)) {
-            return array(
-                $match[1],
-                $match[2]
-            );
+        $p = $this->patterns;
+        if(preg_match("/^({$p->type})?$/", '_'.$string, $match)) {
+            // TODO: could be replaced with 'return $p->type($match[1]);' which will return the fragment parse (that behaves like an array...)
+            list($type, $hint) = $p->type($match[1]);
+            return array($type, $hint);
         } else {
             return false;
         }

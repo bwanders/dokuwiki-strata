@@ -135,17 +135,30 @@ class helper_plugin_strata_syntax_RegexHelper {
  * Helper plugin for common syntax parsing.
  */
 class helper_plugin_strata_syntax extends DokuWiki_Plugin {
-    function __construct() {
-        $this->util =& plugin_load('helper', 'strata_util');
-        $this->regexHelper = new helper_plugin_strata_syntax_RegexHelper();
+    public static $patterns;
+
+    /**
+     * Static initializer called directly after class declaration.
+     *
+     * This static method exists because we want to keep the static $patterns
+     * and its initialization close together.
+     */
+    static function initialize() {
+        self::$patterns = new helper_plugin_strata_syntax_RegexHelper();
     }
 
+    /**
+     * Constructor.
+     */
+    function __construct() {
+        $this->util =& plugin_load('helper', 'strata_util');
+    }
 
     /**
      * Returns an object describing the pattern fragments.
      */
     function getPatterns() {
-        return $this->regexHelper;
+        return self::$patterns;
     }
 
     /**
@@ -886,3 +899,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
         return array_key_exists('tag', $node);
     }
 }
+
+// call static initiliazer (PHP doesn't offer this feature)
+helper_plugin_strata_syntax::initialize();
+
