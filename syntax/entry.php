@@ -67,6 +67,7 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
 
         // process the fragment if necessary
         $result['entry'] = $header[2];
+        $result['position'] = $pos;
         if($result['entry'] != '') {
             $result['title candidate'] = array('value'=>$result['entry'], 'type'=>'text', 'hint'=>null);
         }
@@ -217,7 +218,16 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
         }
 
         if($mode == 'xhtml') {
+            // determine positions of other data entries
+            $positions = p_get_metadata($ID, 'strata positions');
+            $positions = $positions[$data['entry']];
+            $currentPosition = array_search($data['position'],$positions);
+            $previousPosition = isset($positions[$currentPosition-1])?'strata_entry_'.$positions[$currentPosition-1]:null;
+            $nextPosition = isset($positions[$currentPosition+1])?'strata_entry_'.$positions[$currentPosition+1]:null;
+            $currentPosition = 'strata_entry_'.$positions[$currentPosition];
+
             // render table header
+            $R->doc .= '<div class="strata-entry" id="'.$currentPosition.'">';
             $R->table_open();
             $R->tablerow_open();
             $R->tableheader_open(2);
@@ -284,9 +294,20 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
                 $this->util->closeField($mode, $R);
                 $R->tablecell_close();
                 $R->tablerow_close();
-           }
+            }
+
+            if($previousPosition || $nextPosition) {
+                $R->tablerow_open();
+                $R->tableheader_open(2);
+                if($previousPosition) $R->internallink($ID.'#'.$previousPosition,'← Previous');
+                $R->doc .= ' ';
+                if($nextPosition) $R->internallink($ID.'#'.$nextPosition,'Next →');
+                $R->tableheader_close();
+                $R->tablerow_close();
+            }
 
             $R->table_close();
+            $R->doc .= '</div>';
             
             return true;
 
@@ -323,6 +344,10 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
                 }
             }
 
+            // store positions information
+            $R->meta['strata']['positions'][$data['entry']][] = $data['position'];
+
+            // process triples
             foreach($data['data'] as $property=>$bucket) {
                 $this->util->renderPredicate($mode, $R, $this->triples, $property);
 
