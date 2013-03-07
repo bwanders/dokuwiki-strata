@@ -78,7 +78,6 @@ class helper_plugin_strata_util extends DokuWiki_Plugin {
     function parseType($string) {
         $p = $this->patterns;
         if(preg_match("/^({$p->type})?$/", '_'.$string, $match)) {
-            // TODO: could be replaced with 'return $p->type($match[1]);' which will return the fragment parse (that behaves like an array...)
             list($type, $hint) = $p->type($match[1]);
             return array($type, $hint);
         } else {
@@ -152,7 +151,7 @@ class helper_plugin_strata_util extends DokuWiki_Plugin {
     }
 
     /**
-     * Renders a predicate.
+     * Renders a predicate as a full field.
      *
      * @param mode the rendering mode
      * @param R the renderer
@@ -160,7 +159,77 @@ class helper_plugin_strata_util extends DokuWiki_Plugin {
      * @param p the predicate
      */
     function renderPredicate($mode, &$R, &$T, $p) {
-        list($type, $hint) = $this->getPredicateType();
-        return $this->loadType($type)->render($mode, $R, $T, $p, $hint);
+        list($typename, $hint) = $this->getPredicateType();
+        $this->renderField($mode, $R, $T, $p, $typename, $hint);
     }
+
+    /**
+     * Renders a single value. If the mode is xhtml, this also surrounds the value with
+     * the necessary <span> tag to allow styling of types and to ease extraction of values
+     * with javascript.
+     * 
+     * @param mode the rendering mode
+     * @param R the renderer
+     * @param T the triples helper
+     * @param value the value to render
+     * @param typename name of the type
+     * @param hint optional type hint
+     * @param type optional type object, if omitted the typename will be used to get the type
+     */
+    function renderValue($mode, &$R, &$T, $value, $typename, $hint=null, &$type=null) {
+        // load type if needed
+        if($type == null)  $type = $this->loadType($typename);
+
+        // render value
+        $this->openValue($mode, $R, $typename);
+        $type->render($mode, $R, $T, $value, $hint);
+        $this->closeValue($mode, $R);
+    }
+
+    /**
+     * Renders multiple values. If the mode is xhtml, this also surrounds the field with
+     * the necessary <span> tag to allow styling of fields and to ease extraction of values
+     * with javascript.
+     * 
+     * @param mode the rendering mode
+     * @param R the renderer
+     * @param T the triples helper
+     * @param values a list of values to render, or optionally a single value
+     * @param typename the name of the type
+     * @param hint optional type hint
+     * @param type optional type object, if omitted typename will be used
+     */
+    function renderField($mode, &$R, &$T, $values, $typename, $hint=null, &$type=null, $separator=', ') {
+        // arrayfication of values (if a single value is given)
+        if(!is_array($values)) $values = array($values);
+
+        // load type if needed
+        if($type == null) $type = $this->loadType($typename);
+
+        // render values
+        $firstValue = true;
+        $this->openField($mode, $R);
+        foreach($values as $value) {
+            if(!$firstValue) $R->doc .= $separator;
+            $this->renderValue($mode, $R, $T, $value, $typename, $hint, $type);
+            $firstValue = false;
+        }
+        $this->closeField($mode, $R);
+    }
+
+    function openField($mode, &$R) {
+        if($mode == 'xhtml') $R->doc .= '<span class="strata-field">';
+    }
+
+    function closeField($mode, &$R) {
+        if($mode == 'xhtml') $R->doc .= '</span>';
+    }
+
+    function openValue($mode, &$R, $typename) {
+        if($mode == 'xhtml') $R->doc .= '<span class="strata-value strata-type-'.$typename.'">';
+    }
+
+    function closeValue($mode, &$R) {
+        if($mode == 'xhtml') $R->doc .= '</span>';
+    }   
 }
