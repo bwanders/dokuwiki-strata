@@ -13,7 +13,7 @@ if (!defined('DOKU_INC')) die('Meh.');
  */
 class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
     function __construct() {
-        $this->helper =& plugin_load('helper', 'strata_syntax');
+        $this->syntax =& plugin_load('helper', 'strata_syntax');
         $this->util =& plugin_load('helper', 'strata_util');
         $this->triples =& plugin_load('helper', 'strata_triples');
     }
@@ -72,28 +72,32 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
         }
 
         // parse tree
-        $tree = $this->helper->constructTree($lines,'data entry');
+        $tree = $this->syntax->constructTree($lines,'data entry');
 
         // allow subclasses first pick in the tree
         $this->handleBody($tree, $result);
         
         // fetch all lines
-        $lines = $this->helper->extractText($tree);
+        $lines = $this->syntax->extractText($tree);
 
         // sanity check
         if(count($tree['cs'])) {
-            msg(sprintf($this->helper->getLang('error_entry_block'), ($tree['cs'][0]['tag']?sprintf($this->helper->getLang('named_group'),utf8_tohtml(hsc($tree['cs'][0]['tag']))):$this->helper->getLang('unnamed_group')), utf8_tohtml(hsc($result['entry']))),-1);
+            msg(sprintf($this->syntax->getLang('error_entry_block'), ($tree['cs'][0]['tag']?sprintf($this->syntax->getLang('named_group'),utf8_tohtml(hsc($tree['cs'][0]['tag']))):$this->syntax->getLang('unnamed_group')), utf8_tohtml(hsc($result['entry']))),-1);
             return array();
         }
+
+        $p = $this->syntax->getPatterns();
 
         // now handle all lines
         foreach($lines as $line) {
             $line = $line['text'];
             // match a "property_type(hint)*: value" pattern
             // (the * is only used to indicate that the value is actually a comma-seperated list)
-            if(preg_match('/^('.STRATA_PREDICATE.'?)(?:_([a-z0-9]+)(?:\(([^)]*)\))?)?(\*)?\s*:(.*)$/',$line,$parts)) {
+            // [grammar] ENTRY := PREDICATE TYPE? '*'? ':' ANY
+            if(preg_match("/^({$p->predicate})({$p->type})?(\*)?:\s*({$p->any}?)$/",$line,$parts)) {
                 // assign useful names
-                list($match, $property, $type, $hint, $multi, $values) = $parts;
+                list(, $property, $ptype, $multi, $values) = $parts;
+                list($type,$hint) = $p->type($ptype);
 
                 // trim property so we don't get accidental 'name   ' keys
                 $property = utf8_trim($property);
@@ -104,12 +108,7 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
                 }
 
                 // determine values, splitting on commas if necessary
-                if($multi == '*') {
-                    $values = explode(',',$values);
-                } else {
-                    $values = array($values);
-                }
-                
+                $values = ($multi == '*') ? explode(',',$values) : array($values);
 
                 // generate triples from the values
                 foreach($values as $v) {
@@ -123,7 +122,7 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
                     $result['data'][$property][] = array('value'=>$v,'type'=>$type,'hint'=>($hint?:null));
                 }
             } else {
-                msg(sprintf($this->helper->getLang('error_entry_line'), utf8_tohtml(hsc($line))),-1);
+                msg(sprintf($this->syntax->getLang('error_entry_line'), utf8_tohtml(hsc($line))),-1);
             }
         }
 
