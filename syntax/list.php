@@ -88,16 +88,7 @@ class syntax_plugin_strata_list extends syntax_plugin_strata_select {
                     if(!count($values)) continue;
                     if($fieldCount>1) $R->doc .= '; ';
                     if($fieldCount==1) $R->doc .= ' (';
-                    $firstValue = true;
-                    $R->doc .= '<span class="strata-field">';
-                    foreach($values as $value) {
-                        if(!$firstValue) $R->doc .= ', ';
-                        $R->doc .= '<span class="strata-value strata-type-'.$f['typeName'].'">';
-                        $f['type']->render($mode, $R, $this->triples, $value, $f['hint']);
-                        $R->doc .= '</span>';
-                        $firstValue = false;
-                    }
-                    $R->doc .= '</span>';
+                    $this->util->renderField($mode, $R, $this->triples, $values, $f['typeName'], $f['hint'], $f['type']);
                     $fieldCount++;
                 }
 
@@ -116,9 +107,7 @@ class syntax_plugin_strata_list extends syntax_plugin_strata_select {
             // render all rows in metadata mode to enable things like backlinks
             foreach($result as $row) {
                 foreach($fields as $f) {
-                    foreach($f['aggregate']->aggregate($row[$f['variable']],$f['aggregateHint']) as $value) {
-                        $f['type']->render($mode, $R, $this->triples, $value, $f['hint']);
-                    }
+                    $this->util->renderField($mode, $R, $this->triples, $f['aggregate']->aggregate($row[$f['variable']],$f['aggregateHint']), $f['typeName'], $f['hint'], $f['type']);
                 }
             }
             $result->closeCursor();

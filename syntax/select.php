@@ -242,16 +242,7 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
                     $R->tablerow_open();
                     foreach($fields as $f) {
                         $R->tablecell_open();
-                        $R->doc .= '<span class="strata-field">';
-                        $first = true;
-                        foreach($f['aggregate']->aggregate($row[$f['variable']],$f['aggregateHint']) as $value) {
-                            if(!$first) $R->doc .= ', ';
-                            $R->doc .= '<span class="strata-value strata-type-'.$f['typeName'].'">';
-                            $f['type']->render($mode, $R, $this->triples, $value, $f['hint']);
-                            $R->doc .= '</span>';
-                            $first = false;
-                        }
-                        $R->doc .= '</span>';
+                        $this->util->renderField($mode, $R, $this->triples, $f['aggregate']->aggregate($row[$f['variable']],$f['aggregateHint']), $f['typeName'], $f['hint'], $f['type']);
                         $R->tablecell_close();
                     }
                     $R->tablerow_close();
@@ -276,9 +267,7 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
             // render all rows in metadata mode to enable things like backlinks
             foreach($result as $row) {
                 foreach($fields as $f) {
-                    foreach($f['aggregate']->aggregate($row[$f['variable']],$f['aggregateHint']) as $value) {
-                        $f['type']->render($mode, $R, $this->triples, $value, $f['hint']);
-                    }
+                    $this->util->renderField($mode, $R, $this->triples, $f['aggregate']->aggregate($row[$f['variable']],$f['aggregateHint']), $f['typeName'], $f['hint'], $f['type']);
                 }
             }
             $result->closeCursor();
