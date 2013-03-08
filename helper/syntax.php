@@ -8,9 +8,6 @@
 
 if (!defined('DOKU_INC')) die('meh.');
 
-if (!defined('STRATA_PREDICATE')) define('STRATA_PREDICATE','[^_:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+');
-if (!defined('STRATA_VARIABLE')) define('STRATA_VARIABLE','[^ _:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+');
-
 require_once(DOKU_PLUGIN.'strata/strata_exception.php');
 
 /**
