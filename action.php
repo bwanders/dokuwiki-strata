@@ -165,30 +165,37 @@ class action_plugin_strata extends DokuWiki_Action_Plugin {
  * @param fullname string the name of the class to load
  */
 function plugin_strata_autoload($fullname) {
+    static $classes = null;
+    if(is_null($classes)) $classes = array(
+        'strata_exception'         => DOKU_PLUGIN.'strata/lib/strata_exception.php',
+        'strata_querytree_visitor' => DOKU_PLUGIN.'strata/lib/strata_querytree_visitor.php',
+        'plugin_strata_type'       => DOKU_PLUGIN.'strata/lib/strata_type.php',
+        'plugin_strata_aggregate'  => DOKU_PLUGIN.'strata/lib/strata_aggregate.php',
+   );
+
+    if(isset($classes[$fullname])) {
+        require_once($classes[$fullname]);
+        return;
+    }
+
     // only load matching components
-    if(!preg_match('/^plugin_strata_(type|aggregate)_(.*)$/',$fullname, $matches)) {
-        return false;
+    if(preg_match('/^plugin_strata_(type|aggregate)_(.*)$/',$fullname, $matches)) {
+        // use descriptive names
+        list(,$kind,$name) = $matches;
+
+        // glob to find the required file
+        $filenames = glob(DOKU_PLUGIN."*/{$kind}s/{$name}.php");
+
+        if(count($filenames) == 0) {
+            // if we have no file, fake an implementation
+            eval("class $fullname extends plugin_strata_{$kind} { };");
+        } else {
+            // include the file
+            require_once $filenames[0];
+        }
+
+        return;
     }
-
-    // use descriptive names
-    $kind = $matches[1];
-    $name = $matches[2];
-
-    // load base class
-    require_once("strata_{$kind}.php");
-
-    // glob to find the required file
-    $filenames = glob(DOKU_PLUGIN."*/{$kind}s/{$name}.php");
-
-    if(count($filenames) == 0) {
-        // if we have no file, fake an implementation
-        eval("class $fullname extends plugin_strata_{$kind} { };");
-    } else {
-        // include the file
-        require_once $filenames[0];
-    }
-
-    return true;
 }
 
 // register autoloader with SPL loader stack

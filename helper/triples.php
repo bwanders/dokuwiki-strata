@@ -9,10 +9,6 @@
 // must be run within Dokuwiki
 if (!defined('DOKU_INC')) die('Meh.');
 
-// FIXME: This include should be where the visitor is actually needed!
-// FIXME: It should really be handled by the auto-loader!
-require_once(DOKU_PLUGIN.'strata/strata_querytree_visitor.php');
-
 /**
  * The triples helper is responsible for querying.
  */

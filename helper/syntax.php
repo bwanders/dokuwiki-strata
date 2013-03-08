@@ -8,8 +8,6 @@
 
 if (!defined('DOKU_INC')) die('meh.');
 
-require_once(DOKU_PLUGIN.'strata/strata_exception.php');
-
 /**
  * Helper to construct and handle syntax fragments.
  */
