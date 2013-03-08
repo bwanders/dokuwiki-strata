@@ -221,8 +221,8 @@ class helper_plugin_strata_util extends DokuWiki_Plugin {
         $this->closeField($mode, $R);
     }
 
-    function openField($mode, &$R) {
-        if($mode == 'xhtml') $R->doc .= '<span class="strata-field">';
+    function openField($mode, &$R, $field=null) {
+        if($mode == 'xhtml') $R->doc .= '<span class="strata-field" '.(!empty($field)?'data-field="'.hsc($field).'"':'').'>';
     }
 
     function closeField($mode, &$R) {
