@@ -11,60 +11,6 @@ if (!defined('DOKU_INC')) die('meh.');
 require_once(DOKU_PLUGIN.'strata/strata_exception.php');
 
 /**
- * A single capture. Used as a return value for the RegexHelper's
- * capture methods.
- */
-class helper_plugin_strata_syntax_RegexHelperCapture implements ArrayAccess {
-    function __construct($values) {
-        $this->values = $values;
-    }
-
-    function __get($name) {
-        if(array_key_exists($name, $this->values)) {
-            return $this->values[$name];
-        } else {
-            return null;
-        }
-    }
-
-    function offsetExists($offset) {
-        // the index is valid iff:
-        //   it is an existing field name
-        //   it is a correct nummeric index (with 0 being the first name and count-1 the last)
-        return isset($this->values[$offset]) || ($offset >= 0 && $offset < count($this->values));
-    }
-
-    function offsetGet($offset) {
-        // return the correct offset
-        if (isset($this->values[$offset])) {
-            return $this->values[$offset];
-        } else {
-            // or try the numeric offsets
-            if(is_numeric($offset) && $offset >= 0 && $offset < count($this->values)) {
-                // translate numeric offset to key
-                $keys = array_keys($this->values);
-                return $this->values[$keys[intval($offset)]];
-            } else {
-                // offset unknown, return without value
-                return;
-            }
-        }
-    }
-    
-    function offsetSet($offset, $value) {
-        // noop
-        $trace = debug_backtrace();
-        trigger_error("Syntax fragment fields are read-only on {$trace[0]['file']}:{$trace[0]['line']}", E_USER_NOTICE);
-    }
-
-    function offsetUnset($offset) {
-        // noop
-        $trace = debug_backtrace();
-        trigger_error("Syntax fragment fields are read-only on {$trace[0]['file']}:{$trace[0]['line']}", E_USER_NOTICE);
-    }
-}
-
-/**
  * Helper to construct and handle syntax fragments.
  */
 class helper_plugin_strata_syntax_RegexHelper {
@@ -127,6 +73,59 @@ class helper_plugin_strata_syntax_RegexHelper {
     }
 }
 
+/**
+ * A single capture. Used as a return value for the RegexHelper's
+ * capture methods.
+ */
+class helper_plugin_strata_syntax_RegexHelperCapture implements ArrayAccess {
+    function __construct($values) {
+        $this->values = $values;
+    }
+
+    function __get($name) {
+        if(array_key_exists($name, $this->values)) {
+            return $this->values[$name];
+        } else {
+            return null;
+        }
+    }
+
+    function offsetExists($offset) {
+        // the index is valid iff:
+        //   it is an existing field name
+        //   it is a correct nummeric index (with 0 being the first name and count-1 the last)
+        return isset($this->values[$offset]) || ($offset >= 0 && $offset < count($this->values));
+    }
+
+    function offsetGet($offset) {
+        // return the correct offset
+        if (isset($this->values[$offset])) {
+            return $this->values[$offset];
+        } else {
+            // or try the numeric offsets
+            if(is_numeric($offset) && $offset >= 0 && $offset < count($this->values)) {
+                // translate numeric offset to key
+                $keys = array_keys($this->values);
+                return $this->values[$keys[intval($offset)]];
+            } else {
+                // offset unknown, return without value
+                return;
+            }
+        }
+    }
+    
+    function offsetSet($offset, $value) {
+        // noop
+        $trace = debug_backtrace();
+        trigger_error("Syntax fragment fields are read-only on {$trace[0]['file']}:{$trace[0]['line']}", E_USER_NOTICE);
+    }
+
+    function offsetUnset($offset) {
+        // noop
+        $trace = debug_backtrace();
+        trigger_error("Syntax fragment fields are read-only on {$trace[0]['file']}:{$trace[0]['line']}", E_USER_NOTICE);
+    }
+}
 
 /**
  * Helper plugin for common syntax parsing.
