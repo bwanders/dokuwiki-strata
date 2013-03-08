@@ -222,9 +222,9 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
             $positions = p_get_metadata($ID, 'strata positions');
             $positions = $positions[$data['entry']];
             $currentPosition = array_search($data['position'],$positions);
-            $previousPosition = isset($positions[$currentPosition-1])?'strata_entry_'.$positions[$currentPosition-1]:null;
-            $nextPosition = isset($positions[$currentPosition+1])?'strata_entry_'.$positions[$currentPosition+1]:null;
-            $currentPosition = 'strata_entry_'.$positions[$currentPosition];
+            $previousPosition = isset($positions[$currentPosition-1])?'data_fragment_'.$positions[$currentPosition-1]:null;
+            $nextPosition = isset($positions[$currentPosition+1])?'data_fragment_'.$positions[$currentPosition+1]:null;
+            $currentPosition = 'data_fragment_'.$positions[$currentPosition];
 
             // render table header
             $R->doc .= '<div class="strata-entry" id="'.$currentPosition.'">';
