@@ -12,6 +12,8 @@ if (!defined('DOKU_INC')) die('Meh.');
  * Data entry syntax for dedicated data blocks.
  */
 class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
+    protected static $previewMetadata = array();
+
     function __construct() {
         $this->syntax =& plugin_load('helper', 'strata_syntax');
         $this->util =& plugin_load('helper', 'strata_util');
@@ -219,15 +221,22 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
 
         if($mode == 'xhtml') {
             // determine positions of other data entries
-            $positions = p_get_metadata($ID, 'strata positions');
-            $positions = $positions[$data['entry']];
-            $currentPosition = array_search($data['position'],$positions);
-            $previousPosition = isset($positions[$currentPosition-1])?'data_fragment_'.$positions[$currentPosition-1]:null;
-            $nextPosition = isset($positions[$currentPosition+1])?'data_fragment_'.$positions[$currentPosition+1]:null;
-            $currentPosition = 'data_fragment_'.$positions[$currentPosition];
+            // (self::$previewMetadata is only filled if a preview_metadata was run)
+            if(isset(self::$previewMetadata[$ID])) {
+                $positions = self::$previewMetadata[$ID]['strata']['positions'];
+            } else {
+                $positions = p_get_metadata($ID, 'strata positions');
+            }
+            if(is_array($positions)) {
+                $positions = $positions[$data['entry']];
+                $currentPosition = array_search($data['position'],$positions);
+                $previousPosition = isset($positions[$currentPosition-1])?'data_fragment_'.$positions[$currentPosition-1]:null;
+                $nextPosition = isset($positions[$currentPosition+1])?'data_fragment_'.$positions[$currentPosition+1]:null;
+                $currentPosition = 'data_fragment_'.$positions[$currentPosition];
+            }
 
             // render table header
-            $R->doc .= '<div class="strata-entry" id="'.$currentPosition.'">';
+            $R->doc .= '<div class="strata-entry" '.(isset($currentPosition)?'id="'.$currentPosition.'"':'').'>';
             $R->table_open();
             $R->tablerow_open();
             $R->tableheader_open(2);
@@ -265,7 +274,7 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
                     $type = $this->util->loadType($triple['type']);
                     $this->util->renderValue($mode, $R, $this->triples, $triple['value'], $triple['type'], $type, $triple['hint']);
                 }
-                $this->util->closeFIeld($mode, $R);
+                $this->util->closeField($mode, $R);
                 $R->doc .= ')';
                 $R->emphasis_close();
             }
@@ -299,9 +308,9 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
             if($previousPosition || $nextPosition) {
                 $R->tablerow_open();
                 $R->tableheader_open(2);
-                if($previousPosition) $R->internallink($ID.'#'.$previousPosition,'← Previous');
+                if($previousPosition) $R->locallink($previousPosition,'← Previous');
                 $R->doc .= ' ';
-                if($nextPosition) $R->internallink($ID.'#'.$nextPosition,'Next →');
+                if($nextPosition) $R->locallink($nextPosition,'Next →');
                 $R->tableheader_close();
                 $R->tablerow_close();
             }
@@ -345,7 +354,11 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
             }
 
             // store positions information
-            $R->meta['strata']['positions'][$data['entry']][] = $data['position'];
+            if($mode == 'preview_metadata') {
+                self::$previewMetadata[$ID]['strata']['positions'][$data['entry']][] = $data['position'];
+            } else {
+                $R->meta['strata']['positions'][$data['entry']][] = $data['position'];
+            }
 
             // process triples
             foreach($data['data'] as $property=>$bucket) {
