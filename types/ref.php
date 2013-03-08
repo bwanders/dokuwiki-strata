@@ -34,7 +34,7 @@ class plugin_strata_type_ref extends plugin_strata_type_page {
 
     function getInfo() {
         return array(
-            'desc'=>'References another piece of data or wiki page, and creates a link. The optional hint is used as namespace for the link.',
+            'desc'=>'References another piece of data or wiki page, and creates a link. The optional hint is used as namespace for the link. If the hint ends with a #, all values will be treated as fragments.',
             'hint'=>'namespace'
         );
     }
