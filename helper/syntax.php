@@ -21,8 +21,8 @@ class helper_plugin_strata_syntax_RegexHelper {
         'variable'  => '(?:\?[^\s:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+)',
         'predicate' => '(?:[^:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+)',
         'reflit'    => '(?:\[\[[^]]*\]\])',
-        'type'      => '(?:\[[a-z0-9]+(?:::[^\]]*)?\])',
-        'aggregate' => '(?:@[a-z0-9]+(?:\([^\)]*\))?)',
+        'type'      => '(?:\[\s*[a-z0-9]+\s*(?:::[^\]]*)?\])',
+        'aggregate' => '(?:@\s*[a-z0-9]+(?:\([^\)]*\))?)',
         'operator'  => '(?:!=|>=|<=|>|<|=|!~>|!~|!\^~|!\$~|\^~|\$~|~>|~)',
         'any'       => '(?:.+?)'
     );
@@ -33,8 +33,8 @@ class helper_plugin_strata_syntax_RegexHelper {
      */
     var $regexCaptures = array(
         'variable'  => array('\?(.*)', array('name')),
-        'aggregate' => array('@([a-z0-9]+)(?:\(([^\)]*)\))?', array('aggregate','hint')),
-        'type'      => array('\[([a-z0-9]+)(?:::([^\]]*))?\]', array('type', 'hint')),
+        'aggregate' => array('@\s*([a-z0-9]+)(?:\(([^\)]*)\))?', array('aggregate','hint')),
+        'type'      => array('\[\s*([a-z0-9]+)\s*(?:::([^\]]*))?\]', array('type', 'hint')),
         'reflit'    => array('\[\[(.*)\]\]',array('reference'))
     );
 
@@ -708,7 +708,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
         foreach($lines as $lineNode) {
             $line = trim($lineNode['text']);
             // FIELDLONG := VARIABLE AGGREGATE? TYPE? (':' ANY)?
-            if(preg_match("/^({$p->variable})\s*({$p->aggregate})?\s*({$p->type})?(?:\s*(:)?\s*({$p->any})?\s*)?$/S",$line, $match)) {
+            if(preg_match("/^({$p->variable})\s*({$p->aggregate})?\s*({$p->type})?(?:\s*(:)\s*({$p->any})?\s*)?$/S",$line, $match)) {
                 list(, $var, $vaggregate, $vtype, $nocaphint, $caption) = $match;
                 $variable = $p->variable($var)->name;
                 if(!$nocaphint || (!$nocaphint && !$caption)) $caption = ucfirst($variable);
@@ -757,7 +757,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
      */
     function fieldsShortPattern($captions = true) {
         $p = $this->getPatterns();
-        return "(?:\s*{$p->variable}{$p->aggregate}?{$p->type}?".($captions?'\s*(?:"[^"]*")?':'').")";
+        return "(?:\s*{$p->variable}\s*{$p->aggregate}?\s*{$p->type}?".($captions?'\s*(?:"[^"]*")?':'').")";
     }
 
     /**
