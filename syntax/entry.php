@@ -135,13 +135,14 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
         $result['data'] = array();
 
         foreach($buckets as $property=>&$bucket) {
+            // normalize the predicate
+            $property = $this->util->normalizePredicate($property);
+
+            // process all triples
             foreach($bucket as &$triple) {
                 // normalize the value
                 $type = $this->util->loadType($triple['type']);
                 $triple['value'] = $type->normalize($triple['value'], $triple['hint']);
-
-                // normalize the predicate
-                $property = $this->util->normalizePredicate($property);
 
                 // lazy create property bucket
                 if(!isset($result['data'][$property])) {
