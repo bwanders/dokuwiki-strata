@@ -690,9 +690,9 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
 
         foreach($lines as $lineNode) {
             $line = trim($lineNode['text']);
-            // FIELDLONG := (ANY ':')? VARIABLE AGGREGATE? TYPE?
-            if(preg_match("/^(?:({$p->any})?\s*(:))?\s*({$p->variable})\s*({$p->aggregate})?\s*({$p->type})?$/S",$line, $match)) {
-                list(, $caption, $nocaphint, $var, $vaggregate, $vtype) = $match;
+            // FIELDLONG := VARIABLE AGGREGATE? TYPE? (':' ANY)?
+            if(preg_match("/^({$p->variable})\s*({$p->aggregate})?\s*({$p->type})?(?:\s*(:)?\s*({$p->any})?\s*)?$/S",$line, $match)) {
+                list(, $var, $vaggregate, $vtype, $nocaphint, $caption) = $match;
                 $variable = $p->variable($var)->name;
                 if(!$nocaphint || (!$nocaphint && !$caption)) $caption = ucfirst($variable);
 
