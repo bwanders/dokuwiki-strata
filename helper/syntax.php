@@ -77,7 +77,7 @@ class helper_plugin_strata_syntax_RegexHelper {
         'variable'  => '(?:\?[^\s:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+)',
         'predicate' => '(?:[^:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+)',
         'reflit'    => '(?:\[\[[^]]*\]\])',
-        'type'      => '(?:\[[a-z0-9]+(?:::[^\)]*)?\])',
+        'type'      => '(?:\[[a-z0-9]+(?:::[^\]]*)?\])',
         'aggregate' => '(?:@[a-z0-9]+(?:\([^\)]*\))?)',
         'operator'  => '(?:!=|>=|<=|>|<|=|!~|!\^~|!\$~|\^~|\$~|~)',
         'any'       => '(?:.+?)'
@@ -90,7 +90,7 @@ class helper_plugin_strata_syntax_RegexHelper {
     var $regexCaptures = array(
         'variable'  => array('\?(.*)', array('name')),
         'aggregate' => array('@([a-z0-9]+)(?:\(([^\)]*)\))?', array('aggregate','hint')),
-        'type'      => array('\[([a-z0-9]+)(?:::([^\)]*))?\]', array('type', 'hint')),
+        'type'      => array('\[([a-z0-9]+)(?:::([^\]]*))?\]', array('type', 'hint')),
         'reflit'    => array('\[\[(.*)\]\]',array('reference'))
     );
 
