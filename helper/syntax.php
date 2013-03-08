@@ -410,11 +410,13 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
         // (we have defined multiple filters as being a conjunction)
         if(count($filters)) {
             foreach($filters as $f) {
+                $line = $f['_line'];
+                unset($f['_line']);
                 if($f['lhs']['type'] == 'variable' && !in_array($f['lhs']['text'], $scope)) {
-                    $this->_fail(sprintf($this->getLang('error_query_filterscope'),utf8_tohtml(hsc($f['lhs']['text']))), $root);
+                    $this->_fail(sprintf($this->getLang('error_query_filterscope'),utf8_tohtml(hsc($f['lhs']['text']))), $line);
                 }
                 if($f['rhs']['type'] == 'variable' && !in_array($f['rhs']['text'], $scope)) {
-                    $this->_fail(sprintf($this->getLang('error_query_filterscope'),utf8_tohtml(hsc($f['rhs']['text']))), $root);
+                    $this->_fail(sprintf($this->getLang('error_query_filterscope'),utf8_tohtml(hsc($f['rhs']['text']))), $line);
                 }
             }
 
@@ -589,7 +591,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                     }
                 }
 
-                $filters[] = array('type'=>'filter', 'lhs'=>$lhs, 'operator'=>$operator, 'rhs'=>$rhs);
+                $filters[] = array('type'=>'filter', 'lhs'=>$lhs, 'operator'=>$operator, 'rhs'=>$rhs, '_line'=>$lineNode);
 
             // [grammar] FILTER := VARIABLE TYPE? OPERATOR ANY
             } elseif(preg_match("/^({$p->variable})\s*({$p->type})?\s*({$p->operator})\s*({$p->any})$/S",$line, $match)) {
@@ -628,7 +630,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                 $type = $this->util->loadType($type);
                 $rhs = $this->literal($type->normalize($rhs,$hint));
 
-                $filters[] = array('type'=>'filter','lhs'=>$lhs, 'operator'=>$operator, 'rhs'=>$rhs);
+                $filters[] = array('type'=>'filter','lhs'=>$lhs, 'operator'=>$operator, 'rhs'=>$rhs, '_line'=>$lineNode);
 
             // [grammar] FILTER := ANY OPERATOR VARIABLE TYPE?
             } elseif(preg_match("/^({$p->any})\s*({$p->operator})\s*({$p->variable})\s*({$p->type})?$/S",$line, $match)) {
@@ -665,7 +667,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                 $type = $this->util->loadType($type);
                 $lhs = $this->literal($type->normalize($lhs,$hint));
 
-                $filters[] = array('type'=>'filter','lhs'=>$lhs, 'operator'=>$operator, 'rhs'=>$rhs);
+                $filters[] = array('type'=>'filter','lhs'=>$lhs, 'operator'=>$operator, 'rhs'=>$rhs, '_line'=>$lineNode);
             } else {
                 // unknown lines are fail
                 $this->_fail(sprintf($this->getLang('error_query_pattern'),utf8_tohtml(hsc($line))), $lineNode);
