@@ -25,7 +25,7 @@ class helper_plugin_strata_syntax_RegexHelper {
         'reflit'    => '(?:\[\[[^]]*\]\])',
         'type'      => '(?:\[[a-z0-9]+(?:::[^\]]*)?\])',
         'aggregate' => '(?:@[a-z0-9]+(?:\([^\)]*\))?)',
-        'operator'  => '(?:!=|>=|<=|>|<|=|!~|!\^~|!\$~|\^~|\$~|~)',
+        'operator'  => '(?:!=|>=|<=|>|<|=|!~>|!~|!\^~|!\$~|\^~|\$~|~>|~)',
         'any'       => '(?:.+?)'
     );
 
@@ -564,6 +564,8 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                 $lhs = $this->variable($lhs);
                 $rhs = $this->variable($rhs);
 
+                if($operator == '~>' || $operator == '!~>') $operator = str_replace('~>','^~',$operator);
+
                 // do type information propagation
                 $rtype = $p->type($rtype);
                 $ltype = $p->type($ltype);
@@ -615,6 +617,14 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                     $rhs = '';
                 }
 
+                // special case: the right hand side of the 'in' operator always normalizes with the 'text' type
+                if($operator == '~>' || $operator == '!~>') {
+                    $operator = str_replace('~>','^~', $operator);
+                    $type = 'text';
+                    unset($hint);
+                }
+
+                // normalize
                 $type = $this->util->loadType($type);
                 $rhs = $this->literal($type->normalize($rhs,$hint));
 
@@ -644,6 +654,14 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                     $lhs = '';
                 }
 
+                // special case: the left hand side of the 'in' operator always normalizes with the 'page' type
+                if($operator == '~>' || $operator == '!~>') {
+                    $operator = str_replace('~>','^~', $operator);
+                    $type = 'page';
+                    unset($hint);
+                }
+
+                // normalize
                 $type = $this->util->loadType($type);
                 $lhs = $this->literal($type->normalize($lhs,$hint));
 
