@@ -74,10 +74,10 @@ class helper_plugin_strata_syntax_RegexHelper {
      * specific delimiter.
      */
     var $regexFragments = array(
-        'variable'  => '(?:\?[^\s_:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+)',
-        'predicate' => '(?:[^_:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+)',
+        'variable'  => '(?:\?[^\s:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+)',
+        'predicate' => '(?:[^:\(\)\[\]\{\}\<\>\|\~\!\@\#\$\%\^\&\*\?\="]+)',
         'reflit'    => '(?:\[\[[^]]*\]\])',
-        'type'      => '(?:_[a-z0-9]+(?:\([^\)]*\))?)',
+        'type'      => '(?:\[[a-z0-9]+(?:::[^\)]*)?\])',
         'aggregate' => '(?:@[a-z0-9]+(?:\([^\)]*\))?)',
         'operator'  => '(?:!=|>=|<=|>|<|=|!~|!\^~|!\$~|\^~|\$~|~)',
         'any'       => '(?:.+?)'
@@ -90,7 +90,7 @@ class helper_plugin_strata_syntax_RegexHelper {
     var $regexCaptures = array(
         'variable'  => array('\?(.*)', array('name')),
         'aggregate' => array('@([a-z0-9]+)(?:\(([^\)]*)\))?', array('aggregate','hint')),
-        'type'      => array('_([a-z0-9]+)(?:\(([^\)]*)\))?', array('type', 'hint')),
+        'type'      => array('\[([a-z0-9]+)(?:::([^\)]*))?\]', array('type', 'hint')),
         'reflit'    => array('\[\[(.*)\]\]',array('reference'))
     );
 
@@ -503,7 +503,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
             $line = trim($lineNode['text']);
 
             // [grammar] TRIPLEPATTERN := (VARIABLE|REFLIT) ' ' (VARIABLE|PREDICATE) TYPE? : ANY
-            if(preg_match("/^({$p->variable}|{$p->reflit})\s+({$p->variable}|{$p->predicate})({$p->type})?\s*:\s*({$p->any})$/S",$line,$match)) {
+            if(preg_match("/^({$p->variable}|{$p->reflit})\s+({$p->variable}|{$p->predicate})\s*({$p->type})?\s*:\s*({$p->any})$/S",$line,$match)) {
                 list(, $subject, $predicate, $type, $object) = $match;
 
                 $subject = utf8_trim($subject);
@@ -530,7 +530,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                 $object = utf8_trim($object);
                 if($object[0] == '?') {
                     // match a proper type variable
-                    if(preg_match("/^({$p->variable})({$p->type})?$/",$object,$captures)!=1) {
+                    if(preg_match("/^({$p->variable})\s*({$p->type})?$/",$object,$captures)!=1) {
                         $this->_fail($this->getLang('error_pattern_garbage'),$lineNode);
                     }
                     list(, $var, $vtype) = $captures;
@@ -559,7 +559,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                 $triples[] = array('type'=>'triple','subject'=>$subject, 'predicate'=>$predicate, 'object'=>$object);
 
             // [grammar] FILTER := VARIABLE TYPE? OPERATOR VARIABLE TYPE?
-            } elseif(preg_match("/^({$p->variable})({$p->type})?\s*({$p->operator})\s*({$p->variable})({$p->type})?$/S",$line, $match)) {
+            } elseif(preg_match("/^({$p->variable})\s*({$p->type})?\s*({$p->operator})\s*({$p->variable})\s*({$p->type})?$/S",$line, $match)) {
                 list(,$lhs, $ltype, $operator, $rhs, $rtype) = $match;
 
                 $lhs = $this->variable($lhs);
@@ -591,7 +591,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                 $filters[] = array('type'=>'filter', 'lhs'=>$lhs, 'operator'=>$operator, 'rhs'=>$rhs);
 
             // [grammar] FILTER := VARIABLE TYPE? OPERATOR ANY
-            } elseif(preg_match("/^({$p->variable})({$p->type})?\s*({$p->operator})\s*({$p->any})$/S",$line, $match)) {
+            } elseif(preg_match("/^({$p->variable})\s*({$p->type})?\s*({$p->operator})\s*({$p->any})$/S",$line, $match)) {
 
                 // filter pattern
                 list(, $lhs,$ltype,$operator,$rhs) = $match;
@@ -622,7 +622,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                 $filters[] = array('type'=>'filter','lhs'=>$lhs, 'operator'=>$operator, 'rhs'=>$rhs);
 
             // [grammar] FILTER := ANY OPERATOR VARIABLE TYPE?
-            } elseif(preg_match("/^({$p->any})\s*({$p->operator})\s*({$p->variable})({$p->type})?$/S",$line, $match)) {
+            } elseif(preg_match("/^({$p->any})\s*({$p->operator})\s*({$p->variable})\s*({$p->type})?$/S",$line, $match)) {
                 list(, $lhs,$operator,$rhs,$rtype) = $match;
 
                 $rhs = $this->variable($rhs);
@@ -691,7 +691,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
         foreach($lines as $lineNode) {
             $line = trim($lineNode['text']);
             // FIELDLONG := (ANY ':')? VARIABLE AGGREGATE? TYPE?
-            if(preg_match("/^(?:({$p->any})?\s*(:))?\s*({$p->variable})({$p->aggregate})?({$p->type})?$/S",$line, $match)) {
+            if(preg_match("/^(?:({$p->any})?\s*(:))?\s*({$p->variable})\s*({$p->aggregate})?\s*({$p->type})?$/S",$line, $match)) {
                 list(, $caption, $nocaphint, $var, $vaggregate, $vtype) = $match;
                 $variable = $p->variable($var)->name;
                 if(!$nocaphint || (!$nocaphint && !$caption)) $caption = ucfirst($variable);
@@ -717,7 +717,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
         $result = array();
 
         // FIELDSHORT := VARIABLE AGGREGATE? TYPE? CAPTION?
-        if(preg_match_all("/\s*({$p->variable})({$p->aggregate})?({$p->type})?\s*(?:(\")([^\"]*)\")?/",$line,$match, PREG_SET_ORDER)) {
+        if(preg_match_all("/\s*({$p->variable})\s*({$p->aggregate})?\s*({$p->type})?\s*(?:(\")([^\"]*)\")?/",$line,$match, PREG_SET_ORDER)) {
             foreach($match as $m) {
                 list(, $var, $vaggregate, $vtype, $caption_indicator, $caption) = $m;
                 $variable = $p->variable($var)->name;

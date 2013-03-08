@@ -77,7 +77,7 @@ class helper_plugin_strata_util extends DokuWiki_Plugin {
      */
     function parseType($string) {
         $p = $this->patterns;
-        if(preg_match("/^({$p->type})?$/", '_'.$string, $match)) {
+        if(preg_match("/^({$p->type})?$/", $string, $match)) {
             list($type, $hint) = $p->type($match[1]);
             return array($type, $hint);
         } else {

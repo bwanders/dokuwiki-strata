@@ -97,7 +97,7 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
             // match a "property_type(hint)*: value" pattern
             // (the * is only used to indicate that the value is actually a comma-seperated list)
             // [grammar] ENTRY := PREDICATE TYPE? '*'? ':' ANY
-            if(preg_match("/^({$p->predicate})({$p->type})?(\*)?:\s*({$p->any}?)$/",$line,$parts)) {
+            if(preg_match("/^({$p->predicate})\s*({$p->type})?\s*(\*)?\s*:\s*({$p->any}?)$/",$line,$parts)) {
                 // assign useful names
                 list(, $property, $ptype, $multi, $values) = $parts;
                 list($type,$hint) = $p->type($ptype);
