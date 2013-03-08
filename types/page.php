@@ -16,6 +16,13 @@ class plugin_strata_type_page extends plugin_strata_type {
     function normalize($value, $hint) {
         global $ID;
 
+        // fragment reference special case
+        if(!empty($hint) && substr($hint,-1) == '#') {
+            $value = $hint.$value;
+            resolve_pageid(getNS($hint),$value,$exists);
+            return $value;
+        }
+
         $base = ($hint?:getNS($ID));
 
         // check for local link, and prefix full page id
@@ -47,7 +54,7 @@ class plugin_strata_type_page extends plugin_strata_type {
 
     function getInfo() {
         return array(
-            'desc'=>'Links to a wiki page. The optional hint is treated as namespace for the link.',
+            'desc'=>'Links to a wiki page. The optional hint is treated as namespace for the link. If the hint ends with a #, all values will be treated as fragments.',
             'hint'=>'namespace'
         );
     }
