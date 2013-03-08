@@ -129,15 +129,19 @@ class helper_plugin_strata_util extends DokuWiki_Plugin {
     /**
      * Returns the normalized value for the 'is a' predicate.
      */
-    function getIsaKey() {
-        return $this->normalizePredicate($this->getConf('isa_key'));
+    function getIsaKey($normalized=true) {
+        $result = $this->getConf('isa_key');
+        if($normalized) $result = $this->normalizePredicate($result);
+        return $result;
     }
 
     /**
      * Returns the normalized valued for the 'title' predicate.
      */
-    function getTitleKey() {
-        return $this->normalizePredicate($this->getConf('title_key'));
+    function getTitleKey($normalized=true) {
+        $result = $this->getConf('title_key');
+        if($normalized) $result = $this->normalizePredicate($result);
+        return $result;
     }
 
     /**

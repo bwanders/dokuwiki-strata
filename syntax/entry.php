@@ -42,8 +42,8 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
         $result = array(
             'entry'=>'',
             'data'=> array(
-                $this->util->getIsaKey() => array(),
-                $this->util->getTitleKey() => array()
+                $this->util->getIsaKey(false) => array(),
+                $this->util->getTitleKey(false) => array()
             )
         );
 
@@ -64,7 +64,7 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
         // process the classes into triples
         foreach(preg_split('/\s+/',trim($header[1])) as $class) {
             if($class == '') continue;
-            $result['data'][$this->util->getIsaKey()][] = array('value'=>$class,'type'=>'text', 'hint'=>null);
+            $result['data'][$this->util->getIsaKey(false)][] = array('value'=>$class,'type'=>'text', 'hint'=>null);
         }
 
         // process the fragment if necessary
