@@ -309,9 +309,17 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
             if($previousPosition || $nextPosition) {
                 $R->tablerow_open();
                 $R->tableheader_open(2);
-                if($previousPosition) $R->locallink($previousPosition,'← Previous');
+                if($previousPosition) {
+                    $R->doc .= '<span class="strata-data-fragment-link-previous">';
+                    $R->locallink($previousPosition,$this->getLang('data_entry_previous'));
+                    $R->doc .= '</span>';
+                }
                 $R->doc .= ' ';
-                if($nextPosition) $R->locallink($nextPosition,'Next →');
+                if($nextPosition) {
+                    $R->doc .= '<span class="strata-data-fragment-link-next">';
+                    $R->locallink($nextPosition,$this->getLang('data_entry_next'));
+                    $R->doc .= '</span>';
+                }
                 $R->tableheader_close();
                 $R->tablerow_close();
             }

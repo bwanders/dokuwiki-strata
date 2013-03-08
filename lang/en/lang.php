@@ -68,3 +68,6 @@ $lang['error_query_grouppattern'] = 'I can\'t handle a group without at least on
 $lang['error_query_filterscope'] = 'Filter uses out-of-scope variable \'<code>%s</code>\'.';
 
 $lang['content_error_explanation'] = 'An error ocurred';
+
+$lang['data_entry_previous'] = '← Previous';
+$lang['data_entry_next'] = 'Next →';

@@ -28,3 +28,10 @@
     background-color: #FCC;
     color: black;
 }
+
+.dokuwiki .strata-data-fragment-link-previous {
+    float: left;
+}
+.dokuwiki .strata-data-fragment-link-next {
+    float: right;
+}
