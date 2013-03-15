@@ -279,7 +279,9 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
     }
 
     protected function displayError(&$R, $data) {
-        $R->doc .= '<div class="strata-debug-message">';
+        $style = '';
+        if(isset($data['error']['regions'])) $style = ' strata-debug-continued';
+        $R->doc .= '<div class="strata-debug-message '.$style.'">';
         $R->doc .= $R->_xmlEntities($this->helper->getLang('content_error_explanation'));
         $R->doc .= ': '.$data['error']['message'];
         $R->doc .= '</div>';
