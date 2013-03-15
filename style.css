@@ -1,34 +1,51 @@
-.dokuwiki div.strata-debug {
+/**
+ * Styling for error display
+ */
+.dokuwiki div.strata-debug { /* the line container */
     line-height: normal;
     font-family: monospace;
-    background-color: __background_neu__;
+    background-color: __background_site__;
+    padding: 0.5em;
+
     border: 1px solid __border__;
     border-top: 0;
-    padding: 2px 0 2px 0;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+
+    box-shadow: 0 0 0.5em __border__ inset;
 }
 
-.dokuwiki div.strata-debug-message {
-    color: black;
-    background-repeat: no-repeat;
-    background-position: .5em 0.1em;
-    border: 1px solid;
-    margin: 0;
-    padding-left: 2.5em;
-    background-color: #FCC;
+.dokuwiki div.strata-debug-message { /* the error message */
+    color: __text__;
     background-image: url(../../images/error.png);
+    background-repeat: no-repeat;
+    background-position: 8px 50%;
+    background-color: #FCC;
+
+    margin: 0;
+    padding: 0.4em 0.4em 0.4em 32px;
+
+    border: 1px solid;
     border-color: #FAA;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
 }
 
-.dokuwiki div.strata-debug div.strata-debug-line {
+.dokuwiki div.strata-debug div.strata-debug-line { /* normal line */
     white-space: pre;
     padding: 0 2px 0 2px;
 }
 
-.dokuwiki div.strata-debug div.strata-debug-highlight {
+.dokuwiki div.strata-debug div.strata-debug-highlight { /* The highlighted lines container */
     background-color: #FCC;
-    color: black;
+    color: __text__;
+    border: 1px #faa solid;
+    border-radius: 3px;
 }
 
+/**
+ * Entry styling
+ */
 .dokuwiki .strata-data-fragment-link-previous {
     float: left;
 }
