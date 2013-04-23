@@ -31,7 +31,6 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
     }
 
     function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('<table'.$this->helper->fieldsShortPattern().'* *>\s*?\n.+?\n\s*?</table>',$mode, 'plugin_strata_select');
     }
 
     function handle($match, $state, $pos, &$handler) {
@@ -142,8 +141,7 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
      * @return a string containing the unhandled parts of the header
      */
     function handleHeader($header, &$result, &$typemap) {
-        // remove prefix and suffix
-        return preg_replace('/(^<table)|( *>$)/','',$header);
+        return $header;
     }
 
     /**
@@ -169,7 +167,7 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
      * @return a string containing the unhandled parts of the footer
      */
     function handleFooter($footer, &$result, &$typemap, &$variables) {
-        return '';
+        return $footer;
     }
 
     /**
@@ -187,94 +185,14 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
         return $query;
     }
 
+    /**
+     * This method renders the data view.
+     *
+     * @param mode the rendering mode
+     * @param R the renderer
+     * @param data the custom data from the handle phase
+     */
     function render($mode, &$R, $data) {
-        if($data == array() || isset($data['error'])) {
-            if($mode == 'xhtml') {
-                $R->table_open();
-                $R->tablerow_open();
-                $R->tablecell_open();
-                $this->displayError($R, $data);
-                $R->tablecell_close();
-                $R->tablerow_close();
-                $R->table_close();
-            }
-            return;
-        }
-
-        $query = $this->prepareQuery($data['query']);
-
-        // execute the query
-        $result = $this->triples->queryRelations($query);
-
-        // prepare all columns
-        foreach($data['fields'] as $meta) {
-            $fields[] = array(
-                'variable'=>$meta['variable'],
-                'caption'=>$meta['caption'],
-                'type'=>$this->util->loadType($meta['type']),
-                'typeName'=>$meta['type'],
-                'hint'=>$meta['hint'],
-                'aggregate'=>$this->util->loadAggregate($meta['aggregate']),
-                'aggregateHint'=>$meta['aggregateHint']
-            );
-        }
-
-        if($mode == 'xhtml') {
-            // render header
-            $R->doc .= '<div class="strata-table">'.DOKU_LF;
-            $R->table_open();
-            $R->doc .= '<thead>'.DOKU_LF;
-            $R->tablerow_open();
-
-            // render all columns
-            foreach($fields as $f) {
-                $R->tableheader_open();
-                $R->doc .= $R->_xmlEntities($f['caption']);
-                $R->tableheader_close();
-            }
-            $R->tablerow_close();
-            $R->doc .= '</thead>'.DOKU_LF;
-
-            $R->doc .= '<tbody>'.DOKU_LF;
-            if($result != false) {
-                // render each row
-                foreach($result as $row) {
-                    $R->tablerow_open();
-                    foreach($fields as $f) {
-                        $R->tablecell_open();
-                        $this->util->renderField($mode, $R, $this->triples, $f['aggregate']->aggregate($row[$f['variable']],$f['aggregateHint']), $f['typeName'], $f['hint'], $f['type']);
-                        $R->tablecell_close();
-                    }
-                    $R->tablerow_close();
-                }
-                $result->closeCursor();
-            } else {
-                $R->tablecell_open(count($fields));
-                $R->emphasis_open();
-                $R->doc .= $R->_xmlEntities(sprintf($this->helper->getLang('content_error_explanation'),'Strata table'));
-                $R->emphasis_close();
-                $R->tablecell_close();
-            }
-            $R->doc .= '</tbody>'.DOKU_LF;
-
-            $R->table_close();
-            $R->doc .= '</div>'.DOKU_LF;
-
-            return true;
-        } elseif($mode == 'metadata') {
-            if($result == false) return;
-
-            // render all rows in metadata mode to enable things like backlinks
-            foreach($result as $row) {
-                foreach($fields as $f) {
-                    $this->util->renderField($mode, $R, $this->triples, $f['aggregate']->aggregate($row[$f['variable']],$f['aggregateHint']), $f['typeName'], $f['hint'], $f['type']);
-                }
-            }
-            $result->closeCursor();
-
-            return true;
-        }
-
         return false;
     }
 
