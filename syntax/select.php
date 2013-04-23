@@ -39,7 +39,7 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
             $typemap = array();
     
             // allow subclass handling of the whole match
-            $match = $this->preprocess($match, $handler, $result, $typemap);
+            $match = $this->preprocess($match, $state, $pos, $handler, $result, $typemap);
     
             // split into lines and remove header and footer
             $lines = explode("\n",$match);
@@ -121,12 +121,14 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
      * is done by the actual class.
      * 
      * @param match string the complete match
+     * @param state the parser state
+     * @param pos the position in the source
      * @param handler object the parser handler
      * @param result array the result array passed to the render method
      * @param typemap array the type map
      * @return a preprocessed string
      */
-    function preprocess($match, &$handler, &$result, &$typemap) {
+    function preprocess($match, $state, $pos, &$handler, &$result, &$typemap) {
         return $match;
     }
 

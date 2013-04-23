@@ -48,7 +48,7 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
         );
 
         // allow for preprocessing by a subclass
-        $match = $this->preprocess($match, $result);
+        $match = $this->preprocess($match, $state, $pos, $handler, $result);
 
         $lines = explode("\n",$match);
         $header = trim(array_shift($lines));
@@ -170,10 +170,13 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
      * is done by the actual class.
      * 
      * @param match string the complete match
+     * @param state the parser state
+     * @param pos the position in the source
+     * @param the handler object
      * @param result array the result array passed to the render method
      * @return a preprocessed string
      */
-    function preprocess($match, &$result) {
+    function preprocess($match, $state, $pos, &$handler, &$result) {
         return $match;
     }
 
@@ -213,6 +216,28 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
     }
 
 
+    protected function getPositions($data) {
+        global $ID;
+
+        // determine positions of other data entries
+        // (self::$previewMetadata is only filled if a preview_metadata was run)
+        if(isset(self::$previewMetadata[$ID])) {
+            $positions = self::$previewMetadata[$ID]['strata']['positions'];
+        } else {
+            $positions = p_get_metadata($ID, 'strata positions');
+        }
+
+        if(is_array($positions)) {
+            $positions = $positions[$data['entry']];
+            $currentPosition = array_search($data['position'],$positions);
+            $previousPosition = isset($positions[$currentPosition-1])?'data_fragment_'.$positions[$currentPosition-1]:null;
+            $nextPosition = isset($positions[$currentPosition+1])?'data_fragment_'.$positions[$currentPosition+1]:null;
+            $currentPosition = 'data_fragment_'.$positions[$currentPosition];
+        }
+
+        return array($currentPosition, $previousPosition, $nextPosition);
+    }
+
     function render($mode, &$R, $data) {
         global $ID;
 
@@ -221,21 +246,7 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
         }
 
         if($mode == 'xhtml') {
-            // determine positions of other data entries
-            // (self::$previewMetadata is only filled if a preview_metadata was run)
-            if(isset(self::$previewMetadata[$ID])) {
-                $positions = self::$previewMetadata[$ID]['strata']['positions'];
-            } else {
-                $positions = p_get_metadata($ID, 'strata positions');
-            }
-            if(is_array($positions)) {
-                $positions = $positions[$data['entry']];
-                $currentPosition = array_search($data['position'],$positions);
-                $previousPosition = isset($positions[$currentPosition-1])?'data_fragment_'.$positions[$currentPosition-1]:null;
-                $nextPosition = isset($positions[$currentPosition+1])?'data_fragment_'.$positions[$currentPosition+1]:null;
-                $currentPosition = 'data_fragment_'.$positions[$currentPosition];
-            }
-
+            list($currentPosition, $previousPosition, $nextPosition) = $this->getPositions($data);
             // render table header
             $R->doc .= '<div class="strata-entry" '.(isset($currentPosition)?'id="'.$currentPosition.'"':'').'>';
             $R->table_open();
@@ -311,13 +322,13 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
                 $R->tableheader_open(2);
                 if($previousPosition) {
                     $R->doc .= '<span class="strata-data-fragment-link-previous">';
-                    $R->locallink($previousPosition,$this->getLang('data_entry_previous'));
+                    $R->locallink($previousPosition, $this->util->getLang('data_entry_previous'));
                     $R->doc .= '</span>';
                 }
                 $R->doc .= ' ';
                 if($nextPosition) {
                     $R->doc .= '<span class="strata-data-fragment-link-next">';
-                    $R->locallink($nextPosition,$this->getLang('data_entry_next'));
+                    $R->locallink($nextPosition, $this->util->getLang('data_entry_next'));
                     $R->doc .= '</span>';
                 }
                 $R->tableheader_close();
