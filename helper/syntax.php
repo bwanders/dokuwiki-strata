@@ -550,6 +550,10 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                     }
                     if(!$type) {
                         list($type, $hint) = $this->util->getDefaultType();
+                    } else {
+                        $type = $p->type($type);
+                        $hint = $type->hint;
+                        $type = $type->type;
                     }
                     $type = $this->util->loadType($type);
                     $object = $this->literal($type->normalize($object,$hint));
