@@ -88,7 +88,7 @@ class syntax_plugin_strata_list extends syntax_plugin_strata_select {
                     if(!count($values)) continue;
                     if($fieldCount>1) $R->doc .= '; ';
                     if($fieldCount==1) $R->doc .= ' (';
-                    $this->util->renderField($mode, $R, $this->triples, $values, $f['typeName'], $f['hint'], $f['type']);
+                    $this->util->renderField($mode, $R, $this->triples, $values, $f['typeName'], $f['hint'], $f['type'], $f['variable']);
                     $fieldCount++;
                 }
 
@@ -107,7 +107,7 @@ class syntax_plugin_strata_list extends syntax_plugin_strata_select {
             // render all rows in metadata mode to enable things like backlinks
             foreach($result as $row) {
                 foreach($fields as $f) {
-                    $this->util->renderField($mode, $R, $this->triples, $f['aggregate']->aggregate($row[$f['variable']],$f['aggregateHint']), $f['typeName'], $f['hint'], $f['type']);
+                    $this->util->renderField($mode, $R, $this->triples, $f['aggregate']->aggregate($row[$f['variable']],$f['aggregateHint']), $f['typeName'], $f['hint'], $f['type'], $f['variable']);
                 }
             }
             $result->closeCursor();

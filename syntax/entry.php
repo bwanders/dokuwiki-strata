@@ -279,7 +279,7 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
                 $R->emphasis_open();
                 $R->doc .= ' (';
                 $values = $data['data'][$this->util->getIsaKey()];
-                $this->util->openField($mode, $R);
+                $this->util->openField($mode, $R, $this->util->getIsaKey());
                 for($i=0;$i<count($values);$i++) {
                     $triple =& $values[$i];
                     if($i!=0) $R->doc .= ', ';
@@ -306,7 +306,7 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
 
                 // render row content
                 $R->tablecell_open();
-                $this->util->openField($mode, $R);
+                $this->util->openField($mode, $R, $key);
                 for($i=0;$i<count($values);$i++) {
                     $triple =& $values[$i];
                     if($i!=0) $R->doc .= ', ';

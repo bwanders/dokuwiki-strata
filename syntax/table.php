@@ -75,7 +75,7 @@ class syntax_plugin_strata_table extends syntax_plugin_strata_select {
                     $R->tablerow_open();
                     foreach($fields as $f) {
                         $R->tablecell_open();
-                        $this->util->renderField($mode, $R, $this->triples, $f['aggregate']->aggregate($row[$f['variable']],$f['aggregateHint']), $f['typeName'], $f['hint'], $f['type']);
+                        $this->util->renderField($mode, $R, $this->triples, $f['aggregate']->aggregate($row[$f['variable']],$f['aggregateHint']), $f['typeName'], $f['hint'], $f['type'], $f['variable']);
                         $R->tablecell_close();
                     }
                     $R->tablerow_close();
@@ -100,7 +100,7 @@ class syntax_plugin_strata_table extends syntax_plugin_strata_select {
             // render all rows in metadata mode to enable things like backlinks
             foreach($result as $row) {
                 foreach($fields as $f) {
-                    $this->util->renderField($mode, $R, $this->triples, $f['aggregate']->aggregate($row[$f['variable']],$f['aggregateHint']), $f['typeName'], $f['hint'], $f['type']);
+                    $this->util->renderField($mode, $R, $this->triples, $f['aggregate']->aggregate($row[$f['variable']],$f['aggregateHint']), $f['typeName'], $f['hint'], $f['type'], $f['variable']);
                 }
             }
             $result->closeCursor();

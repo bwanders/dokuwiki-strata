@@ -202,8 +202,10 @@ class helper_plugin_strata_util extends DokuWiki_Plugin {
      * @param typename the name of the type
      * @param hint optional type hint
      * @param type optional type object, if omitted typename will be used
+     * @param field the field name of this field
+     * @param separator the seperation string to use in-between values
      */
-    function renderField($mode, &$R, &$T, $values, $typename, $hint=null, &$type=null, $separator=', ') {
+    function renderField($mode, &$R, &$T, $values, $typename, $hint=null, &$type=null, $field=null, $separator=', ') {
         // arrayfication of values (if a single value is given)
         if(!is_array($values)) $values = array($values);
 
@@ -212,7 +214,7 @@ class helper_plugin_strata_util extends DokuWiki_Plugin {
 
         // render values
         $firstValue = true;
-        $this->openField($mode, $R);
+        $this->openField($mode, $R, $field);
         foreach($values as $value) {
             if(!$firstValue) $R->doc .= $separator;
             $this->renderValue($mode, $R, $T, $value, $typename, $hint, $type);
