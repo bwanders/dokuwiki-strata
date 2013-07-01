@@ -238,4 +238,14 @@ class helper_plugin_strata_util extends DokuWiki_Plugin {
     function closeValue($mode, &$R) {
         if($mode == 'xhtml') $R->doc .= '</span>';
     }   
+
+    function renderCaptions($mode, &$R, $fields) {
+        if($mode == 'xhtml') {
+            foreach($fields as $f) {
+                $R->doc .= '<div class="strata-caption hidden" data-field="'.hsc($f['variable']).'">';
+                $R->doc .= $R->_xmlEntities($f['caption']);
+                $R->doc .= '</div>'.DOKU_LF;
+            }
+        }
+    }
 }

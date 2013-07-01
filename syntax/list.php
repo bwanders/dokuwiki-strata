@@ -76,11 +76,7 @@ class syntax_plugin_strata_list extends syntax_plugin_strata_select {
             // render header
             $R->doc .= '<div class="strata-container strata-container-list">'.DOKU_LF;
 
-            foreach($fields as $f) {
-                $R->doc .= '<div class="strata-caption hidden" data-field="'.hsc($f['variable']).'">';
-                $R->doc .= $R->_xmlEntities($f['caption']);
-                $R->doc .= '</div>'.DOKU_LF;
-            }
+            $this->util->renderCaptions($mode, $R, $fields);
 
             $R->listu_open();
 
