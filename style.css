@@ -58,3 +58,12 @@
 .dokuwiki .strata-data-fragment-link-next {
     float: right;
 }
+
+
+/**
+ * Styling for meta-data
+ */
+
+.dokuwiki .strata-container-list .strata-caption {
+  display: none;
+}

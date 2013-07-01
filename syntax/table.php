@@ -54,7 +54,7 @@ class syntax_plugin_strata_table extends syntax_plugin_strata_select {
 
         if($mode == 'xhtml') {
             // render header
-            $R->doc .= '<div class="strata-table">'.DOKU_LF;
+            $R->doc .= '<div class="strata-container strata-container-table">'.DOKU_LF;
             $R->table_open();
             $R->doc .= '<thead>'.DOKU_LF;
             $R->tablerow_open();
@@ -62,16 +62,18 @@ class syntax_plugin_strata_table extends syntax_plugin_strata_select {
             // render all columns
             foreach($fields as $f) {
                 $R->tableheader_open();
+                $R->doc .= '<span class="strata-caption" data-field="'.hsc($f['variable']).'">';
                 $R->doc .= $R->_xmlEntities($f['caption']);
+                $R->doc .= '</span>'.DOKU_LF;
                 $R->tableheader_close();
             }
             $R->tablerow_close();
             $R->doc .= '</thead>'.DOKU_LF;
 
-            $R->doc .= '<tbody>'.DOKU_LF;
             if($result != false) {
                 // render each row
                 foreach($result as $row) {
+                    $R->doc .= '<tbody class="strata-item">'.DOKU_LF;
                     $R->tablerow_open();
                     foreach($fields as $f) {
                         $R->tablecell_open();
@@ -79,6 +81,7 @@ class syntax_plugin_strata_table extends syntax_plugin_strata_select {
                         $R->tablecell_close();
                     }
                     $R->tablerow_close();
+                    $R->doc .= '</tbody>'.DOKU_LF;
                 }
                 $result->closeCursor();
             } else {
@@ -88,7 +91,6 @@ class syntax_plugin_strata_table extends syntax_plugin_strata_select {
                 $R->emphasis_close();
                 $R->tablecell_close();
             }
-            $R->doc .= '</tbody>'.DOKU_LF;
 
             $R->table_close();
             $R->doc .= '</div>'.DOKU_LF;

@@ -62,6 +62,7 @@ class syntax_plugin_strata_list extends syntax_plugin_strata_select {
         foreach($data['fields'] as $meta) {
             $fields[] = array(
                 'variable'=>$meta['variable'],
+                'caption'=>$meta['caption'],
                 'type'=>$this->util->loadType($meta['type']),
                 'typeName'=>$meta['type'],
                 'hint'=>$meta['hint'],
@@ -73,7 +74,12 @@ class syntax_plugin_strata_list extends syntax_plugin_strata_select {
 
         if($mode == 'xhtml') {
             // render header
-            $R->doc .= '<div class="strata-list">'.DOKU_LF;
+            $R->doc .= '<div class="strata-container strata-container-list">'.DOKU_LF;
+            foreach($fields as $f) {
+                $R->doc .= '<div class="strata-caption" data-field="'.hsc($f['variable']).'">';
+                $R->doc .= $R->_xmlEntities($f['caption']);
+                $R->doc .= '</div>'.DOKU_LF;
+            }
             $R->listu_open();
 
             // render each row
