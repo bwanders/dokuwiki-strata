@@ -146,6 +146,8 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
      */
     function __construct() {
         $this->util =& plugin_load('helper', 'strata_util');
+        $this->error = '';
+        $this->regions = array();
     }
 
     /**
@@ -916,8 +918,159 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
     function isGroup(&$node) {
         return array_key_exists('tag', $node);
     }
+
+    /**
+     * Sets all properties given as '$properties' to the values parsed from '$trees'.
+     *
+     * @param $properties The properties that can be set.
+     * @param $trees The trees that contain the values for these properties.
+     * @return An array with as indices the property names and as value a list of all values given for that property.
+     */
+    function setProperties($properties, $trees) {
+        $propertyValues = array();
+        $p = $this->getPatterns();
+
+        foreach ($trees as $tree) {
+            $text = $this->extractText($tree);
+            foreach($text as $lineNode) {
+                $line = utf8_trim($lineNode['text']);
+                if (preg_match('/^('.$p->predicate.')(\*)?\s*:\s*('.$p->any.')$/', $line, $match)) {
+                    list(, $variable, $multi, $value) = $match;
+                    $this->_setPropertyValue($properties, $tree['tag'], $lineNode, $variable, !empty($multi), $value, $propertyValues);
+                } else {
+                    $this->emitError($lineNode, 'error_property_weirdgroupline', hsc($tree['tag']), hsc($line));
+                }
+            }
+            // Warn about unknown groups
+            foreach ($tree['cs'] as $group) {
+                $this->emitError($group, 'error_property_unknowngroup', hsc($trees[0]['tag']), hsc($group['tag']));
+            }
+        }
+
+        // Set property defaults
+        foreach ($properties as $name => $p) {
+            if (!isset($propertyValues[$name]) && isset($p['default'])) {
+                $this->_setPropertyValue($properties, 'default value', null, $name, false, $p['default'], $propertyValues);
+            }
+        }
+
+        // Show errors, if any
+        $this->showErrors();
+
+        return $propertyValues;
+    }
+
+    function _setPropertyValue($properties, $group, $region, $variable, $isMulti, $value, &$propertyValues) {
+        if (!isset($properties[$variable])) {
+            $this->emitError($region, 'error_property_unknownproperty', hsc($group), hsc($variable), $this->list2html(array_keys($properties)));
+        } else if (isset($propertyValues[$variable])) {
+            $this->emitError($region, 'error_property_multi', hsc($group), hsc($variable));
+        } else {
+            $p = $properties[$variable];
+            $minOccur = isset($p['minOccur']) ? $p['minOccur'] : 1;
+            $maxOccur = isset($p['maxOccur']) ? $p['maxOccur'] : $minOccur;
+
+            if ($isMulti) {
+                $values = array_map('utf8_trim', split(',', $value));
+            } else if ($minOccur == 1 || $minOccur == $maxOccur) {
+                // Repeat the given value as often as we expect it
+                $values = array_fill(0, $minOccur, $value);
+            } else {
+                // A single value was given, but multiple were expected
+                $this->emitError($region, 'error_property_notmulti', hsc($group), hsc($variable), $minOccur);
+                return;
+            }
+
+            if (count($values) < $minOccur || count($values) > $maxOccur) {
+                // Number of values given differs from expected number
+                if ($minOccur == $maxOccur) {
+                    $this->emitError($region, 'error_property_occur', hsc($group), hsc($variable), $minOccur, count($values));
+                } else {
+                    $this->emitError($region, 'error_property_occurrange', hsc($group), hsc($variable), $minOccur, $maxOccur, count($values));
+                }
+            } else if (isset($p['choices'])) { // Check whether the given property values are valid choices
+                // Create a mapping from choice to normalized value of the choice
+                $choices = array();
+                foreach ($p['choices'] as $nc => $c) {
+                    if (is_array($c)) {
+                        $choices = array_merge($choices, array_fill_keys($c, $nc));
+                    } else {
+                        $choices[$c] = $c;
+                    }
+                }
+                if (!isset($choices['']) && isset($p['default'])) {
+                    $choices[''] = $choices[$p['default']];
+                }
+
+                $incorrect = array_diff($values, array_keys($choices)); // Find all values that are not a valid choice
+                if (count($incorrect) > 0) {
+                    unset($choices['']);
+                    foreach (array_unique($incorrect) as $v) {
+                        $this->emitError($region, 'error_property_invalidchoice', hsc($group), hsc($variable), hsc($v), $this->list2html(array_keys($choices)));
+                    }
+                } else {
+                    $propertyValues[$variable] = array_map(function($v) use ($choices) { return $choices[$v]; }, $values);
+                }
+            } else if (isset($p['pattern'])) { // Check whether the given property values match the pattern
+                $incorrect = array_filter($values, function($v) use ($p) { return !preg_match($p['pattern'], $v); });
+                if (count($incorrect) > 0) {
+                    foreach (array_unique($incorrect) as $v) {
+                        if (isset($p['pattern_desc'])) {
+                            $this->emitError($region, 'error_property_patterndesc', hsc($group), hsc($variable), hsc($v), $p['pattern_desc']);
+                        } else {
+                            $this->emitError($region, 'error_property_pattern', hsc($group), hsc($variable), hsc($v), hsc($p['pattern']));
+                        }
+                    }
+                } else {
+                    $propertyValues[$variable] = $values;
+                }
+            } else { // Property value has no requirements
+                $propertyValues[$variable] = $values;
+            }
+        }
+    }
+
+    /**
+     * Converts an array of items to a html string.
+     *
+     * All items are quoted and rendered in code style as a comma-separated list.
+     */
+    function list2html($list) {
+        return implode(array_map(function($v) { return '\'<code>' . hsc($v) . '</code>\''; }, $list), ', ');
+    }
+
+    /**
+     * Generates a html error message, ensuring that all utf8 in arguments is escaped correctly.
+     * The generated messages might be accumulated until showErrors is called.
+     *
+     * @param region The region at which the error occurs.
+     * @param msg_id The id of the message in the language file.
+     */
+    function emitError($region, $msg_id) {
+        $args = func_get_args();
+        array_shift($args);
+        array_shift($args);
+        $args = array_map('strval', $args); // convert everything to strings first
+        $args = array_map('utf8_tohtml', $args); // Escape args
+        $msg = vsprintf($this->getLang($msg_id), $args);
+        msg($msg, -1);
+        $this->error .= "<br />\n" . $msg;
+        $this->regions[] = $region;
+    }
+
+    /**
+     * Ensures that all emitted errors are shown.
+     */
+    function showErrors() {
+        if (!empty($this->error)) {
+            $error = $this->error;
+            $regions = $this->regions;
+            $this->error = '';
+            $this->regions = array();
+            throw new strata_exception($error, $regions);
+        }
+    }
 }
 
 // call static initiliazer (PHP doesn't offer this feature)
 helper_plugin_strata_syntax::initialize();
-

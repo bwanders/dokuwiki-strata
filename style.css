@@ -59,3 +59,53 @@
     float: right;
 }
 
+/* Column filter style */
+.strata-container-table tr.filter input {
+    background-color: __background__;
+    border: 1px solid silver;
+    font-style: italic;
+    width: 100%;
+}
+
+.strata-container-table tr.filter {
+    display: none;
+}
+
+.strata-container-table tr.filter.isFiltered, .strata-container.strata-ui-filter table tr.filter { 
+    display: table-row;
+}
+
+/* Column sort style */
+.strata-container-table thead tr th.sorting {
+    padding-right: 19px;
+    cursor: pointer;
+    background-position: right center;
+    background-repeat: no-repeat;
+}
+
+.strata-container-table .sorting[data-strata-sort-direction="asc"],
+.strata-container-table:hover .sorting[data-strata-sort-direction="asc"] {
+    background-image: url('images/sort_asc.png');
+}
+
+.strata-container-table .sorting[data-strata-sort-direction="desc"],
+.strata-container-table:hover .sorting[data-strata-sort-direction="desc"] {
+    background-image: url('images/sort_desc.png');
+}
+
+.strata-container-table:hover .sorting {
+    background-image: url('images/sort_both.png');
+}
+
+.strata-container-table td[data-strata-sort="0"] {
+    background-color: #EAEBFF;
+}
+
+.strata-container-table td[data-strata-sort="1"] {
+    background-color: #F2F3FF;
+}
+
+.strata-container-table td[data-strata-sort="2"] {
+    background-color: #F9F9FF;
+}
+
