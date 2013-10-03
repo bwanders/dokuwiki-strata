@@ -185,8 +185,7 @@ function plugin_strata_autoload($fullname) {
 
         // glob to find the required file
         $filenames = glob(DOKU_PLUGIN."*/{$kind}s/{$name}.php");
-
-        if(count($filenames) == 0) {
+        if($filenames === false || count($filenames) == 0) {
             // if we have no file, fake an implementation
             eval("class $fullname extends plugin_strata_{$kind} { };");
         } else {
