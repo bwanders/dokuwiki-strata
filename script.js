@@ -104,7 +104,7 @@ var create_item_compare = function(fields, isAscending) {
             }
         }
     }
-}
+};
 
 // Returns a text input which filters the given field
 var createFilterTextField = function(element, field, caption) {
@@ -229,7 +229,7 @@ var sortTable = function(element, field) {
         jQuery('.col' + col, element).attr('data-strata-sort-direction', isAscending[i] ? 'asc' : 'desc');
     }
     jQuery('.strata-item', element).sortElements(create_item_compare(fields, isAscending));
-}
+};
 
 // Fancy table initialization
 jQuery(document).ready(function() {
@@ -325,7 +325,7 @@ function strataFilter(element) {
             jQuery(item).addClass('hidden');
         }
     });
-}
+};
 
 function toggleFiltered(tableElement) {
     var tr = jQuery(tableElement).closest('tr.filter');
@@ -338,5 +338,5 @@ function toggleFiltered(tableElement) {
         isFiltered = isFiltered || (jQuery(select).val() != '');
     });
     tr.toggleClass('isFiltered', isFiltered);
-}
+};
 
