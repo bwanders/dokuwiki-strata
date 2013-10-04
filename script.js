@@ -274,29 +274,31 @@ jQuery(document).ready(function() {
         var headers = jQuery('tr.row0 th', thead);
         var columns = {};
         headers.each(function(i, td) {
-            var field = jQuery('*.strata-caption', td).attr('data-field');
-            // Create sort
-            jQuery(td).addClass('sorting');
-            jQuery(td).click(function(e) {
-                sortTable(div, field, e.shiftKey);
-            });
-            columns[field] = i;
-            // Create filter
-            var caption = td.textContent;
-            var th = document.createElement('th');
-            var filterType;
-            if (filterColumns == undefined) {
-                filterType = 't';
-            } else {
-                filterType = filterColumns.charAt(i);
-            }
-            createItemFilter(div, field, filterType);
-            if (filterType == 't') {
-                var input = createFilterTextField(div, field, caption);
-                jQuery(th).append(input);
-            } else if (filterType == 's' || filterType == 'p') {
-                var select = createFilterSelect(div, field, caption);
-                jQuery(th).append(select);
+            var field = jQuery('.strata-caption', td).attr('data-field');
+            var th = document.createElement('th'); // Filter field
+            if (field != undefined) { // Is there a field to sort/filter on?
+                // Create sort
+                jQuery(td).addClass('sorting');
+                jQuery(td).click(function(e) {
+                    sortTable(div, field, e.shiftKey);
+                });
+                columns[field] = i;
+                // Create filter
+                var caption = td.textContent;
+                var filterType;
+                if (filterColumns == undefined) {
+                    filterType = 't';
+                } else {
+                    filterType = filterColumns.charAt(i);
+                }
+                createItemFilter(div, field, filterType);
+                if (filterType == 't') {
+                    var input = createFilterTextField(div, field, caption);
+                    jQuery(th).append(input);
+                } else if (filterType == 's' || filterType == 'p') {
+                    var select = createFilterSelect(div, field, caption);
+                    jQuery(th).append(select);
+                }
             }
             jQuery(tr).append(th);
         });
