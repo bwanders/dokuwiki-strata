@@ -209,12 +209,17 @@ var createItemFilter = function(element, field, filterType) {
     });
 };
 
-var sortTable = function(element, field) {
+var sortTable = function(element, field, isAdditional) {
     var fields = jQuery(element).data('strata-sort-fields');
     var isAscending = jQuery(element).data('strata-sort-directions');
-    if (fields[0] == field) { // Change direction
-        isAscending[0] = !isAscending[0];
-    } else {
+    if (fields[0] == field) {
+        if (isAscending[0]) { // Change sort direction
+            isAscending[0] = false;
+        } else { // Remove from sort
+            fields.splice(0, 1);
+            isAscending.splice(0, 1);
+        }
+    } else if (isAdditional) { // Add as sort field
         var i = fields.indexOf(field);
         if (i >= 0) {
             fields.splice(i, 1);
@@ -222,8 +227,13 @@ var sortTable = function(element, field) {
         }
         fields.unshift(field);
         isAscending.unshift(true);
+    } else { // Replace sort with given field
+        fields.splice(0, fields.length, field);
+        isAscending.splice(0, fields.length, true);
     }
     var columns = jQuery(element).data('strata-sort-columns');
+    jQuery('th', element).removeAttr('data-strata-sort').removeAttr('data-strata-sort-direction');
+    jQuery('td', element).removeAttr('data-strata-sort').removeAttr('data-strata-sort-direction');
     for (var i = 0; i < fields.length; i++) {
         var col = columns[fields[i]];
         jQuery('.col' + col, element).attr('data-strata-sort', i);
@@ -268,7 +278,7 @@ jQuery(document).ready(function() {
             // Create sort
             jQuery(td).addClass('sorting');
             jQuery(td).click(function(e) {
-                sortTable(div, field);
+                sortTable(div, field, e.shiftKey);
             });
             columns[field] = i;
             // Create filter
