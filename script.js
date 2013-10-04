@@ -56,6 +56,7 @@ jQuery.fn.sortElements = (function() {
    };
 })();
 
+(function() {
 // natural compare
 var natcmp = function(s1, s2) {
     // 'normalize' the values we're sorting
@@ -306,7 +307,7 @@ jQuery(document).ready(function() {
 });
 
 // Filter every strata-item in the given element based on its filter
-function strataFilter(element) {
+var strataFilter = function(element) {
     var search = jQuery(element).data('strata-search');
     // Traverse all items (rows) that can be filtered
     jQuery('*.strata-item', element).each(function(_, item) {
@@ -327,7 +328,7 @@ function strataFilter(element) {
     });
 };
 
-function toggleFiltered(tableElement) {
+var toggleFiltered = function(tableElement) {
     var tr = jQuery(tableElement).closest('tr.filter');
     //console.log(Object.keys(...).length);
     var isFiltered = false;
@@ -340,3 +341,4 @@ function toggleFiltered(tableElement) {
     tr.toggleClass('isFiltered', isFiltered);
 };
 
+})();
