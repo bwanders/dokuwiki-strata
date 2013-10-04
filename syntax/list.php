@@ -81,8 +81,9 @@ class syntax_plugin_strata_list extends syntax_plugin_strata_select {
             $R->listu_open();
 
             // render each row
+            $itemcount = 0;
             foreach($result as $row) {
-                $R->listitem_open(1);
+                $R->doc .= '<li class="level1 strata-item" data-strata-order="'.($itemcount++).'">'.DOKU_LF;
                 $R->listcontent_open();
 
                 $fieldCount = 0;
@@ -99,7 +100,7 @@ class syntax_plugin_strata_list extends syntax_plugin_strata_select {
                 if($fieldCount>1) $R->doc .= ')';
 
                 $R->listcontent_close();
-                $R->listitem_close();
+                $R->doc.= '</li>'.DOKU_LF;
             }
             $result->closeCursor();
 

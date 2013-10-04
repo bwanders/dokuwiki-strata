@@ -72,8 +72,9 @@ class syntax_plugin_strata_table extends syntax_plugin_strata_select {
 
             if($result != false) {
                 // render each row
+                $itemcount = 0;
                 foreach($result as $row) {
-                    $R->doc .= '<tbody class="strata-item">'.DOKU_LF;
+                    $R->doc .= '<tbody class="strata-item" data-strata-order="'.($itemcount++).'">'.DOKU_LF;
                     $R->tablerow_open();
                     foreach($fields as $f) {
                         $R->tablecell_open();
