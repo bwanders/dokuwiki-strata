@@ -104,6 +104,7 @@ var create_item_compare = function(fields, isAscending) {
                 }
             }
         }
+        return parseInt(jQuery(item1).attr('data-strata-order')) - parseInt(jQuery(item2).attr('data-strata-order'));
     }
 };
 
