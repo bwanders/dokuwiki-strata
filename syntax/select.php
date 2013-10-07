@@ -274,15 +274,11 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
         $c = array();
 
         if (trim(implode($p['sort']), 'n') != '') {
-            $c[] = 'strata-sort';
+            $c[] = 'strata-ui-sort';
         }
         if (trim(implode($p['filter']), 'n') != '') {
-            $c[] = 'strata-filter';
+            $c[] = 'strata-ui-filter';
         }
-
-        $d['strata-ui'] = $p['ui'];
-        $d['strata-ui-sort'] = $p['sort'];
-        $d['strata-ui-filter'] = $p['filter'];
 
         $classes = implode(' ', array_merge($c, $additionalClasses));
         $properties = implode(' ', array_map(
@@ -290,7 +286,7 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
                 if (empty($v)) {
                     return '';
                 } else {
-                    return 'data-strata-' . $k . '="' . implode($v) . '"';
+                    return 'data-strata-ui-' . $k . '="' . implode($v) . '"';
                 }
             }, array_keys($p), $p)
         );
