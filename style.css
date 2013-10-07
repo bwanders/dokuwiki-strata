@@ -109,3 +109,28 @@
     background-color: #F9F9FF;
 }
 
+/* Generic sort and filter style */
+.strata-container ul.filter {
+    list-style-type: none;
+    padding: 0;
+    overflow: auto;
+}
+
+.strata-container ul.filter li {
+    margin: 0 3px 3px 3px;
+    padding: 4px 7px 4px 4px;
+    height: 21px;
+    display: inline-block;
+}
+
+.strata-container ul.filter li:before {
+    content: "↔ ";
+    cursor: move;
+}
+
+.strata-container ul.filter li.ui-drop-target:before {
+    content: "Drop here";
+    font-style: italic;
+    padding: 4px 7px 4px 7px;
+}
+
