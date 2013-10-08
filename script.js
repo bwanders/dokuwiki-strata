@@ -382,6 +382,9 @@ jQuery(document).ready(function() {
         jQuery(list).sortable({
             items: "li:not(.ui-state-disabled)",
             placeholder: "ui-state-highlight ui-drop-target",
+            start: function(e, ui) {
+                jQuery(ui.placeholder).css('min-width', jQuery(ui.item).width() + 'px');
+            },
             update: function(e, ui) {
                 sortGeneric(div, list);
             }
