@@ -373,7 +373,7 @@ jQuery(document).ready(function() {
                 }
             }
         });
-        jQuery(div).append(list);
+        jQuery(div).prepend(list);
 
         // Set data for sort
         jQuery(div).data('strata-sort-fields', []);

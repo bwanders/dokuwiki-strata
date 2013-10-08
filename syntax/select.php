@@ -33,6 +33,25 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
     function connectTo($mode) {
     }
 
+    function getUISettings($numFields) {
+        $bool_choices = array('y' => array('y', 'yes'), 'n' => array('n', 'no'));
+        $filter_choices = array('t' => array('t', 'text'), 's' => array('s', 'select'), 'p'=>array('p', 'prefixselect'), 'n' => array('n', 'none'));
+        $globalProperties = array(
+            'ui' => $this->getUISettingUI(),
+            'sort' => array('choices' => $bool_choices, 'minOccur' => $numFields, 'maxOccur' => $numFields, 'default' => 'yes'),
+            'filter' => array('choices' => $filter_choices, 'minOccur' => $numFields, 'maxOccur' => $numFields, 'default' => 'none')
+        );
+        $groupProperties = array(
+            'sort' => array('choices' => $bool_choices),
+            'filter' => array('choices' => $filter_choices),
+        );
+        return array($globalProperties, $groupProperties);
+    }
+
+    function getUISettingUI() {
+        return array('choices' => array('none' => array('n', 'none'), 'generic' => array('g', 'generic')), 'default' => 'none');
+    }
+
     function handle($match, $state, $pos, &$handler) {
         try {
             $result = array();
@@ -122,19 +141,7 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
     function handleUI(&$tree, &$result, &$typemap) {
         $trees = $this->helper->extractGroups($tree, 'ui');
 
-        $numFields = count($result['fields']);
-
-        $bool_choices = array('y' => array('y', 'yes'), 'n' => array('n', 'no'));
-        $filter_choices = array('t' => array('t', 'text'), 's' => array('s', 'select'), 'p'=>array('p', 'prefixselect'), 'n' => array('n', 'none'));
-        $globalProperties = array(
-            'ui' => array('choices' => array('generic' => array('g', 'generic'), 'table' => array('t', 'table')), 'default' => 'generic'),
-            'sort' => array('choices' => $bool_choices, 'minOccur' => $numFields, 'maxOccur' => $numFields, 'default' => 'yes'),
-            'filter' => array('choices' => $filter_choices, 'minOccur' => $numFields, 'maxOccur' => $numFields, 'default' => 'none')
-        );
-        $groupProperties = array(
-            'sort' => array('choices' => $bool_choices),
-            'filter' => array('choices' => $filter_choices),
-        );
+        list($globalProperties, $groupProperties) = $this->getUISettings(count($result['fields']));
 
         // Extract column settings which are set as a group
 
