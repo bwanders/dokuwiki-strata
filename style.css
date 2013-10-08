@@ -124,8 +124,9 @@
 }
 
 .strata-container ul.filter li:before {
-    content: "↔ ";
+    content: "|||| ";
     cursor: move;
+    text-shadow: 1px 1px white;
 }
 
 .strata-container ul.filter li.ui-drop-target:before {
