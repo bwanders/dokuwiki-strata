@@ -94,14 +94,17 @@ var create_item_compare = function(fields, isAscending) {
             var d = isAscending[i] ? 1 : -1;
             var values1 = valueMap1[fields[i]];
             var values2 = valueMap2[fields[i]];
-            for (var j = 0; j < values1.length; j++) {
-                if (j >= values2.length) {
-                    return d * -1;
-                }
+            var length = Math.min(values1.length, values2.length);
+            for (var j = 0; j < length; j++) {
                 var c = natcmp(values1[j], values2[j]);
                 if (c != 0) {
                     return d * c;
                 }
+            }
+            if (values1.length > values2.length) {
+                return d * 1;
+            } else if (values1.length < values2.length) {
+                return d * -1;
             }
         }
         return parseInt(jQuery(item1).attr('data-strata-order')) - parseInt(jQuery(item2).attr('data-strata-order'));
