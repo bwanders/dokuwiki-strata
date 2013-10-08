@@ -234,7 +234,7 @@ var sortGeneric = function(element, fieldlist) {
     var items = jQuery('li', fieldlist);
     for (var i = 0; i < items.length && jQuery(items[i]).attr('data-field') != undefined; i++) {
         fields.push(jQuery(items[i]).attr('data-field'));
-        isAscending.push(true);
+        isAscending.push(jQuery('.strata-ui-sort-direction', items[i]).attr('data-strata-sort-direction') == 'asc');
     }
     jQuery('.strata-item', element).sortElements(create_item_compare(fields, isAscending));
 };
@@ -348,7 +348,7 @@ jQuery(document).ready(function() {
         jQuery(list).addClass('filter');
 
         var li = document.createElement('li');
-        jQuery(li).addClass('ui-state-highlight');
+        jQuery(li).addClass('ui-state-highlight strata-ui-eos');
         jQuery(li).append(document.createTextNode('End of sort order'));
         jQuery(list).append(li);
         var lastSortable = li;
@@ -362,7 +362,19 @@ jQuery(document).ready(function() {
                 var li = document.createElement('li');
                 jQuery(li).addClass('ui-state-default');
                 jQuery(li).attr('data-field', field);
-                jQuery(li).append(document.createTextNode(caption.textContent + ' '));
+                jQuery(li).append(document.createTextNode(caption.textContent));
+                if (sortColumns.charAt(i) != 'n') {
+                    var span = document.createElement('span');
+                    jQuery(span).addClass('strata-ui-sort-direction');
+                    jQuery(span).attr('data-strata-sort-direction', 'asc');
+                    jQuery(span).append('&nbsp;');
+                    jQuery(li).append(span);
+                    jQuery(span).click(function(e) {
+                        var dir = jQuery(span).attr('data-strata-sort-direction') == 'asc' ? 'desc' : 'asc';
+                        jQuery(span).attr('data-strata-sort-direction', dir);
+                        sortGeneric(div, list);
+                    });
+                }
                 createFilterField(li, filterColumns.charAt(i), field, div, caption.textContent, minWidth);
                 if (sortColumns.charAt(i) == 'n') {
                     jQuery(li).addClass('ui-state-disabled');

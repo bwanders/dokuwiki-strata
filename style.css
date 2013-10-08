@@ -75,26 +75,31 @@
     display: table-row;
 }
 
+/* Sort style */
+.strata-ui-sort-direction,
+.strata-ui-eos ~ li .strata-ui-sort-direction,
+.strata-container-table:hover .sorting {
+    background-image: url('images/sort_both.png');
+}
+
+.strata-ui-sort-direction[data-strata-sort-direction="asc"],
+.strata-container-table .sorting[data-strata-sort-direction="asc"],
+.strata-container-table:hover .sorting[data-strata-sort-direction="asc"] {
+    background-image: url('images/sort_asc.png');
+}
+
+.strata-ui-sort-direction[data-strata-sort-direction="desc"],
+.strata-container-table .sorting[data-strata-sort-direction="desc"],
+.strata-container-table:hover .sorting[data-strata-sort-direction="desc"] {
+    background-image: url('images/sort_desc.png');
+}
+
 /* Column sort style */
 .strata-container-table thead tr th.sorting {
     padding-right: 19px;
     cursor: pointer;
     background-position: right center;
     background-repeat: no-repeat;
-}
-
-.strata-container-table .sorting[data-strata-sort-direction="asc"],
-.strata-container-table:hover .sorting[data-strata-sort-direction="asc"] {
-    background-image: url('images/sort_asc.png');
-}
-
-.strata-container-table .sorting[data-strata-sort-direction="desc"],
-.strata-container-table:hover .sorting[data-strata-sort-direction="desc"] {
-    background-image: url('images/sort_desc.png');
-}
-
-.strata-container-table:hover .sorting {
-    background-image: url('images/sort_both.png');
 }
 
 .strata-container-table td[data-strata-sort="0"] {
@@ -110,6 +115,18 @@
 }
 
 /* Generic sort and filter style */
+.strata-ui-sort-direction {
+    display: inline-block;
+    width: 19px;
+    cursor: pointer;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+
+.strata-ui-eos ~ li .strata-ui-sort-direction {
+    cursor: auto;
+}
+
 .strata-container ul.filter {
     list-style-type: none;
     padding: 0;
