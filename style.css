@@ -123,7 +123,7 @@
     display: inline-block;
 }
 
-.strata-container ul.filter li:before {
+.strata-container ul.filter li:not(.ui-state-disabled):before {
     content: "|||| ";
     cursor: move;
     text-shadow: 1px 1px white;
