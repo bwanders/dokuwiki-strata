@@ -71,3 +71,15 @@ $lang['content_error_explanation'] = 'An error ocurred';
 
 $lang['data_entry_previous'] = '← Previous';
 $lang['data_entry_next'] = 'Next →';
+
+// UI group
+$lang['error_property_weirdgroupline'] = '<code>%s</code> group contains weird line \'<code>%s</code>\', use: <code>property: value</code>.';
+$lang['error_property_unknowngroup'] = '<code>%s</code> group cannot handle column \'<code>%s</code>\'.';
+$lang['error_property_unknownproperty'] = '<code>%s</code> group does not know property \'<code>%s</code>\', only %s are known.';
+$lang['error_property_multi'] = '<code>%s</code> group accepts property \'<code>%s</code>\' only once.';
+$lang['error_property_notmulti'] = '<code>%s</code> property \'<code>%s</code>\' expects at least %d values, but only one is given. Try using \'<code>%s*: first value, second value</code>\'.';
+$lang['error_property_occur'] = '<code>%s</code> property \'<code>%s</code>\' expects %d values instead of the given %d.';
+$lang['error_property_occurrange'] = '<code>%s</code> property \'<code>%s</code>\' expects %d to %d values instead of the given %d.';
+$lang['error_property_invalidchoice'] = '<code>%s</code> property \'<code>%s</code>\' cannot have value \'<code>%s</code>\', it only accepts %s.';
+$lang['error_property_patterndesc'] = '<code>%s</code> property \'<code>%s</code>\' cannot have value \'<code>%s</code>\', it only accepts %s.';
+$lang['error_property_pattern'] = '<code>%s</code> property \'<code>%s</code>\' cannot have value \'<code>%s</code>\', it only accepts values matching <code>%s</code>.';
