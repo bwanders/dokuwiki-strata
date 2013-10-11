@@ -194,7 +194,7 @@ var createItemFilter = function(element, field, filterType) {
         
         // Create filter
         var filter;
-        if (filterType == 's' || filterType == 't') { // substring
+        if (filterType == 't') { // substring
             // must match at least one value
             filter = function(search) {
                 var result = false;
