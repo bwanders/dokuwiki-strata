@@ -33,11 +33,11 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
     function connectTo($mode) {
     }
 
-    function getUISettings($numFields) {
+    function getUISettings($numFields, $hasUIBlock) {
         $bool_choices = array('y' => array('y', 'yes'), 'n' => array('n', 'no'));
         $filter_choices = array('t' => array('t', 'text'), 's' => array('s', 'select'), 'p'=>array('p', 'prefixselect'), 'n' => array('n', 'none'));
         $globalProperties = array(
-            'ui' => $this->getUISettingUI(),
+            'ui' => $this->getUISettingUI($hasUIBlock),
             'sort' => array('choices' => $bool_choices, 'minOccur' => $numFields, 'maxOccur' => $numFields, 'default' => 'yes'),
             'filter' => array('choices' => $filter_choices, 'minOccur' => $numFields, 'maxOccur' => $numFields, 'default' => 'none')
         );
@@ -48,8 +48,8 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
         return array($globalProperties, $groupProperties);
     }
 
-    function getUISettingUI() {
-        return array('choices' => array('none' => array('n', 'none'), 'generic' => array('g', 'generic')), 'default' => 'none');
+    function getUISettingUI($hasUIBlock) {
+        return array('choices' => array('none' => array('n', 'none'), 'generic' => array('g', 'generic')), 'default' => ($hasUIBlock ? 'generic' : 'none'));
     }
 
     function handle($match, $state, $pos, &$handler) {
@@ -141,7 +141,7 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
     function handleUI(&$tree, &$result, &$typemap) {
         $trees = $this->helper->extractGroups($tree, 'ui');
 
-        list($globalProperties, $groupProperties) = $this->getUISettings(count($result['fields']));
+        list($globalProperties, $groupProperties) = $this->getUISettings(count($result['fields']), count($trees));
 
         // Extract column settings which are set as a group
 

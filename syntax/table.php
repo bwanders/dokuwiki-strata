@@ -16,7 +16,7 @@ class syntax_plugin_strata_table extends syntax_plugin_strata_select {
         $this->Lexer->addSpecialPattern('<table'.$this->helper->fieldsShortPattern().'* *>\s*?\n.+?\n\s*?</table>',$mode, 'plugin_strata_table');
     }
 
-    function getUISettingUI() {
+    function getUISettingUI($hasUIBlock) {
         return array('choices' => array('none' => array('n', 'none'), 'generic' => array('g', 'generic'), 'table' => array('t', 'table')), 'default' => 'table');
     }
 
