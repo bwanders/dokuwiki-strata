@@ -58,7 +58,7 @@ class syntax_plugin_strata_table extends syntax_plugin_strata_select {
 
         if($mode == 'xhtml') {
             // render header
-            $this->strata_container_open($R, $data, array('strata-container', 'strata-container-table'));
+            $this->ui_container_open($mode, $R, $data, array('strata-container', 'strata-container-table'));
             $R->table_open();
             $R->doc .= '<thead>'.DOKU_LF;
             $R->tablerow_open();
@@ -98,7 +98,7 @@ class syntax_plugin_strata_table extends syntax_plugin_strata_select {
             }
 
             $R->table_close();
-            $this->strata_container_close($R);
+            $this->ui_container_close($mode, $R);
 
             return true;
         } elseif($mode == 'metadata') {

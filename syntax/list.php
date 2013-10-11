@@ -74,7 +74,7 @@ class syntax_plugin_strata_list extends syntax_plugin_strata_select {
 
         if($mode == 'xhtml') {
             // render header
-            $this->strata_container_open($R, $data, array('strata-container', 'strata-container-list'));
+            $this->ui_container_open($mode, $R, $data, array('strata-container', 'strata-container-list'));
 
             $this->util->renderCaptions($mode, $R, $fields);
 
@@ -105,7 +105,7 @@ class syntax_plugin_strata_list extends syntax_plugin_strata_select {
             $result->closeCursor();
 
             $R->listu_close();
-            $this->strata_container_close($R);
+            $this->ui_container_close($mode, $R);
 
             return true;
         } elseif($mode == 'metadata') {
