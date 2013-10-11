@@ -16,6 +16,10 @@ class syntax_plugin_strata_table extends syntax_plugin_strata_select {
         $this->Lexer->addSpecialPattern('<table'.$this->helper->fieldsShortPattern().'* *>\s*?\n.+?\n\s*?</table>',$mode, 'plugin_strata_table');
     }
 
+    function getUISettingUI($hasUIBlock) {
+        return array('choices' => array('none' => array('n', 'none'), 'generic' => array('g', 'generic'), 'table' => array('t', 'table')), 'default' => 'table');
+    }
+
     function handleHeader($header, &$result, &$typemap) {
         return preg_replace('/(^<table)|( *>$)/','',$header);
     }
@@ -54,7 +58,7 @@ class syntax_plugin_strata_table extends syntax_plugin_strata_select {
 
         if($mode == 'xhtml') {
             // render header
-            $R->doc .= '<div class="strata-container strata-container-table">'.DOKU_LF;
+            $this->ui_container_open($mode, $R, $data, array('strata-container', 'strata-container-table'));
             $R->table_open();
             $R->doc .= '<thead>'.DOKU_LF;
             $R->tablerow_open();
@@ -72,8 +76,9 @@ class syntax_plugin_strata_table extends syntax_plugin_strata_select {
 
             if($result != false) {
                 // render each row
+                $itemcount = 0;
                 foreach($result as $row) {
-                    $R->doc .= '<tbody class="strata-item">'.DOKU_LF;
+                    $R->doc .= '<tbody class="strata-item" data-strata-order="'.($itemcount++).'">'.DOKU_LF;
                     $R->tablerow_open();
                     foreach($fields as $f) {
                         $R->tablecell_open();
@@ -93,7 +98,7 @@ class syntax_plugin_strata_table extends syntax_plugin_strata_select {
             }
 
             $R->table_close();
-            $R->doc .= '</div>'.DOKU_LF;
+            $this->ui_container_close($mode, $R);
 
             return true;
         } elseif($mode == 'metadata') {

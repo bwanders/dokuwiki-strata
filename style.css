@@ -59,3 +59,96 @@
     float: right;
 }
 
+/* Column filter style */
+.strata-container-table tr.filter input {
+    background-color: __background__;
+    border: 1px solid silver;
+    font-style: italic;
+    width: 100%;
+}
+
+.strata-container-table tr.filter {
+    display: none;
+}
+
+.strata-container-table tr.filter.isFiltered, .strata-container.strata-ui-filter table tr.filter { 
+    display: table-row;
+}
+
+/* Sort style */
+.strata-ui-sort-direction,
+.strata-ui-eos ~ li .strata-ui-sort-direction,
+.strata-container-table:hover .sorting {
+    background-image: url('images/sort_both.png');
+}
+
+.strata-ui-sort-direction[data-strata-sort-direction="asc"],
+.strata-container-table .sorting[data-strata-sort-direction="asc"],
+.strata-container-table:hover .sorting[data-strata-sort-direction="asc"] {
+    background-image: url('images/sort_asc.png');
+}
+
+.strata-ui-sort-direction[data-strata-sort-direction="desc"],
+.strata-container-table .sorting[data-strata-sort-direction="desc"],
+.strata-container-table:hover .sorting[data-strata-sort-direction="desc"] {
+    background-image: url('images/sort_desc.png');
+}
+
+/* Column sort style */
+.strata-container-table thead tr th.sorting {
+    padding-right: 19px;
+    cursor: pointer;
+    background-position: right center;
+    background-repeat: no-repeat;
+}
+
+.strata-container-table td[data-strata-sort="0"] {
+    background-color: #EAEBFF;
+}
+
+.strata-container-table td[data-strata-sort="1"] {
+    background-color: #F2F3FF;
+}
+
+.strata-container-table td[data-strata-sort="2"] {
+    background-color: #F9F9FF;
+}
+
+/* Generic sort and filter style */
+.strata-ui-sort-direction {
+    display: inline-block;
+    width: 19px;
+    cursor: pointer;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+
+.strata-ui-eos ~ li .strata-ui-sort-direction {
+    cursor: auto;
+}
+
+.strata-container ul.filter {
+    list-style-type: none;
+    padding: 0;
+    overflow: auto;
+}
+
+.strata-container ul.filter li {
+    margin: 0 3px 3px 3px;
+    padding: 4px 7px 4px 4px;
+    height: 21px;
+    display: inline-block;
+}
+
+.strata-container ul.filter li:not(.strata-no-sort):before {
+    content: "|||| ";
+    cursor: move;
+    text-shadow: 1px 1px white;
+}
+
+.strata-container ul.filter li.ui-drop-target:before {
+    content: "Drop here";
+    font-style: italic;
+    padding: 4px 7px 4px 7px;
+}
+
