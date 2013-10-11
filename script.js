@@ -151,16 +151,25 @@ var createFilterSelect = function(element, field, caption) {
     jQuery(select).append('<option data-filter="none"></option>');
     var group = document.createElement('optgroup');
     group.label = 'Filter on...';
+    var values = [];
     jQuery('*.strata-field[data-field="' + field + '"] *.strata-value', element).each(function(i, v) {
+        if(values.indexOf(v.textContent) == -1) {
+            values.push(v.textContent);
+        }
+    });
+    values.sort(natcmp);
+
+    jQuery.each(values, function(_,v) {
         var option = document.createElement('option');
-        option.value = v.textContent;
-        option.textContent = v.textContent==''?'<no value>':v.textContent;
-        if (v.textContent == '') {
+        option.value = v;
+        option.textContent = v==''?'<no value>':v;
+        if (v == '') {
             jQuery(select).append(option);
         } else {
             jQuery(group).append(option);
         }
     });
+
     jQuery(select).append(group);
     jQuery(select).change(function() {
         var $option = jQuery(this).find(':selected');
