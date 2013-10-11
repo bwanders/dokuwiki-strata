@@ -140,7 +140,7 @@
     display: inline-block;
 }
 
-.strata-container ul.filter li:not(.ui-state-disabled):before {
+.strata-container ul.filter li:not(.strata-no-sort):before {
     content: "|||| ";
     cursor: move;
     text-shadow: 1px 1px white;

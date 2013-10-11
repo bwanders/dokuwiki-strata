@@ -397,10 +397,12 @@ jQuery(document).ready(function() {
                         jQuery(span).attr('data-strata-sort-direction', dir);
                         sortGeneric(div, list);
                     });
+                } else {
+                    jQuery(li).append(' ');
                 }
                 createFilterField(li, filterColumns.charAt(i), field, div, caption.textContent, minWidth);
                 if (sortColumns.charAt(i) == 'n') {
-                    jQuery(li).addClass('ui-state-disabled');
+                    jQuery(li).addClass('strata-no-sort');
                     jQuery(list).append(li);
                 } else {
                     jQuery(lastSortable).after(li);
@@ -415,7 +417,7 @@ jQuery(document).ready(function() {
         jQuery(div).data('strata-sort-directions', []);
 
         jQuery(list).sortable({
-            items: "li:not(.ui-state-disabled)",
+            items: "li:not(.strata-no-sort)",
             placeholder: "ui-state-highlight ui-drop-target",
             start: function(e, ui) {
                 jQuery(ui.placeholder).css('min-width', jQuery(ui.item).width() + 'px');
