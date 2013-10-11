@@ -152,9 +152,16 @@ var createFilterSelect = function(element, field, caption) {
     var group = document.createElement('optgroup');
     group.label = 'Filter on...';
     var values = [];
-    jQuery('*.strata-field[data-field="' + field + '"] *.strata-value', element).each(function(i, v) {
-        if(values.indexOf(v.textContent) == -1) {
-            values.push(v.textContent);
+    jQuery('*.strata-field[data-field="' + field + '"]', element).each(function(_,es) {
+        var vs = jQuery('*.strata-value', es);
+        if(vs.length) {
+            vs.each(function(i, v) {
+                if(values.indexOf(v.textContent) == -1) {
+                    values.push(v.textContent);
+                }
+            });
+        } else {
+            values.push('');
         }
     });
     values.sort(natcmp);
@@ -188,8 +195,15 @@ var createFilterSelect = function(element, field, caption) {
 var createItemFilter = function(element, field, filterType) {
     jQuery('*.strata-item', element).each(function(i, item) {
         // Collect values
-        var values = jQuery('*.strata-field[data-field="' + field + '"] *.strata-value', item).map(function(_, v) {
-            return v.textContent.toLowerCase();
+        var values = jQuery('*.strata-field[data-field="' + field + '"]', item).map(function(_,es) {
+            var vs = jQuery('*.strata-value', es);
+            if(vs.length){
+                return jQuery.makeArray(vs.map(function(_, v) {
+                    return v.textContent.toLowerCase();
+                }));
+            } else {
+                return '';
+            }
         });
         
         // Create filter
