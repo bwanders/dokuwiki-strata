@@ -160,7 +160,7 @@ var createFilterSelect = function(element, field, caption) {
                     values.push(v.textContent);
                 }
             });
-        } else {
+        } else if(values.indexOf('') == -1) {
             values.push('');
         }
     });
