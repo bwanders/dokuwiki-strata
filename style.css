@@ -152,3 +152,7 @@
     padding: 4px 7px 4px 7px;
 }
 
+.strata-container .filter option.strata-filter-special {
+    font-style: italic;
+}
+

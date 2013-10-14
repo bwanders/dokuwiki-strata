@@ -148,9 +148,7 @@ var createFilterTextField = function(element, field, caption) {
 // Returns a select input which filters the given field
 var createFilterSelect = function(element, field, caption) {
     var select = document.createElement('select');
-    jQuery(select).append('<option data-filter="none"></option>');
-    var group = document.createElement('optgroup');
-    group.label = 'Filter on...';
+    jQuery(select).append('<option data-filter="none" class="strata-filter-special"></option>');
     var values = [];
     jQuery('*.strata-field[data-field="' + field + '"]', element).each(function(_,es) {
         var vs = jQuery('*.strata-value', es);
@@ -171,13 +169,11 @@ var createFilterSelect = function(element, field, caption) {
         option.value = v;
         option.textContent = v==''?'<no value>':v;
         if (v == '') {
-            jQuery(select).append(option);
-        } else {
-            jQuery(group).append(option);
+            option.className = 'strata-filter-special';
         }
+        jQuery(select).append(option);
     });
 
-    jQuery(select).append(group);
     jQuery(select).change(function() {
         var $option = jQuery(this).find(':selected');
         if($option.attr('data-filter') == 'none') {
