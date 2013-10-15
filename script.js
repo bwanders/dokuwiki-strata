@@ -300,16 +300,6 @@ jQuery(document).ready(function() {
             return;
         }
 
-        // Set column widths
-        jQuery('thead tr.row0 th', div).each(
-            function(i, th) {
-                // Set the width of a column to its initial width, which is the width of the widest row, plus one to accomodate for rounding issues.
-                // This avoids resizing when filtering hides long rows in the table.
-                var width = jQuery(th).width() + 1;
-                jQuery(th).css('min-width', width + 'px');
-            }
-        );
-
         // Set filter to empty set
         jQuery(div).data('strata-search', {});
 
@@ -340,6 +330,16 @@ jQuery(document).ready(function() {
             jQuery(tr).append(th);
         });
         jQuery(thead).append(tr);
+
+        // Set column widths
+        jQuery('thead tr.row0 th', div).each(
+            function(i, th) {
+                // Set the width of a column to its initial width, which is the width of the widest row.
+                // This avoids resizing when filtering hides long rows in the table.
+                var width = jQuery(th).width();
+                jQuery(th).css('min-width', width + 'px');
+            }
+        );
         
         // Set data for sort
         jQuery(div).data('strata-sort-fields', []);
