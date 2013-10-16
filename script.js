@@ -112,22 +112,22 @@ var create_item_compare = function(fields, isAscending) {
 };
 
 // Create a filter field of the given type and add it to the given filterElement
-var createFilterField = function(filterElement, filterType, field, containerElement, caption, minWidth) {
-    createItemFilter(containerElement, field, filterType);
+var createFilterField = function(filterElement, filterType, filterId, field, containerElement, caption, minWidth) {
+    createItemFilter(containerElement, filterId, field, filterType);
     if (filterType == 't') {
-        var input = createFilterTextField(containerElement, field, caption);
+        var input = createFilterTextField(containerElement, filterId, caption);
         if (minWidth != undefined) {
             jQuery(input).css('min-width', minWidth + 'px');
         }
         jQuery(filterElement).append(input);
     } else if (filterType == 's' || filterType == 'p') {
-        var select = createFilterSelect(containerElement, field, caption);
+        var select = createFilterSelect(containerElement, filterId, field, caption);
         jQuery(filterElement).append(select);
     }
 };
 
-// Returns a text input which filters the given field
-var createFilterTextField = function(element, field, caption) {
+// Returns a text input which filters the field belonging to the given filterId
+var createFilterTextField = function(element, filterId, caption) {
     var input = document.createElement('input');
     input.type = 'text';
     input.size = 1;
@@ -135,9 +135,9 @@ var createFilterTextField = function(element, field, caption) {
     jQuery(input).keyup(function() {
         var val = jQuery(this).val();
         if(val == '') {
-            delete jQuery(element).data('strata-search')[field];
+            delete jQuery(element).data('strata-search')[filterId];
         } else {
-            jQuery(element).data('strata-search')[field] = val.toLowerCase();
+            jQuery(element).data('strata-search')[filterId] = val.toLowerCase();
         }
         strataFilter(element);
         toggleFiltered(this);
@@ -145,8 +145,8 @@ var createFilterTextField = function(element, field, caption) {
     return input;
 };
 
-// Returns a select input which filters the given field
-var createFilterSelect = function(element, field, caption) {
+// Returns a select input which filters the field belonging to the given filterId
+var createFilterSelect = function(element, filterId, field, caption) {
     var select = document.createElement('select');
     jQuery(select).append('<option data-filter="none" class="strata-filter-special"></option>');
     var values = [];
@@ -177,9 +177,9 @@ var createFilterSelect = function(element, field, caption) {
     jQuery(select).change(function() {
         var $option = jQuery(this).find(':selected');
         if($option.attr('data-filter') == 'none') {
-            delete jQuery(element).data('strata-search')[field];
+            delete jQuery(element).data('strata-search')[filterId];
         } else {
-            jQuery(element).data('strata-search')[field] = jQuery(this).val().toLowerCase();
+            jQuery(element).data('strata-search')[filterId] = jQuery(this).val().toLowerCase();
         }
         strataFilter(element);
         toggleFiltered(this);
@@ -187,8 +187,8 @@ var createFilterSelect = function(element, field, caption) {
     return select;
 };
 
-// Create a filter for every item in this element
-var createItemFilter = function(element, field, filterType) {
+// Create a filter for every item of the field belonging to the given filterId
+var createItemFilter = function(element, filterId, field, filterType) {
     jQuery('*.strata-item', element).each(function(i, item) {
         // Collect values
         var values = jQuery('*.strata-field[data-field="' + field + '"]', item).map(function(_,es) {
@@ -243,7 +243,7 @@ var createItemFilter = function(element, field, filterType) {
             filters = {};
             jQuery(item).data('strata-item-filter', filters);
         }
-        filters[field] = filter;
+        filters[filterId] = filter;
     });
 };
 
@@ -325,7 +325,7 @@ jQuery(document).ready(function() {
                 }
                 columns[field] = i;
                 // Create filter
-                createFilterField(th, filterColumns.charAt(i), field, div, td.textContent);
+                createFilterField(th, filterColumns.charAt(i), i, field, div, td.textContent);
             }
             jQuery(tr).append(th);
         });
@@ -372,16 +372,16 @@ jQuery(document).ready(function() {
         jQuery(list).append(li);
         var lastSortable = li;
 
-        jQuery('.strata-caption', div).each(function(i, caption) {
+        jQuery('.strata-caption', div).each(function(i, captionElement) {
             if (sortColumns.charAt(i) != 'n' || filterColumns.charAt(i) != 'n') {
-                var field = jQuery(caption).attr('data-field');
+                var field = jQuery(captionElement).attr('data-field');
                 var minWidth = Math.max.apply(Math, jQuery('*.strata-field[data-field="' + field + '"] .strata-value', div).map(function(_, v) {
                     return jQuery(v).width();
                 }));
                 var li = document.createElement('li');
                 jQuery(li).addClass('ui-state-default');
                 jQuery(li).attr('data-field', field);
-                jQuery(li).append(document.createTextNode(caption.textContent));
+                jQuery(li).append(document.createTextNode(captionElement.textContent));
                 if (sortColumns.charAt(i) != 'n') {
                     var span = document.createElement('span');
                     jQuery(span).addClass('strata-ui-sort-direction');
@@ -396,7 +396,7 @@ jQuery(document).ready(function() {
                 } else {
                     jQuery(li).append(' ');
                 }
-                createFilterField(li, filterColumns.charAt(i), field, div, caption.textContent, minWidth);
+                createFilterField(li, filterColumns.charAt(i), i, field, div, captionElement.textContent, minWidth);
                 if (sortColumns.charAt(i) == 'n') {
                     jQuery(li).addClass('strata-no-sort');
                     jQuery(list).append(li);
@@ -431,19 +431,16 @@ var strataFilter = function(element) {
     // Traverse all items (rows) that can be filtered
     jQuery('*.strata-item', element).each(function(_, item) {
         // Traverse all fields on which a filter is applied, filter must match all field
+        var filterMap = jQuery(item).data('strata-item-filter');
         var matchesAllFields = true;
-        for (field in search) {
-            var filter = jQuery(item).data('strata-item-filter')[field];
-            if (!filter(search[field])) {
+        for (filterId in search) {
+            var filter = filterMap[filterId];
+            if (!filter(search[filterId])) {
                 matchesAllFields = false;
                 break;
             }
         }
-        if (matchesAllFields) {
-            jQuery(item).removeClass('hidden');
-        } else {
-            jQuery(item).addClass('hidden');
-        }
+        jQuery(item).toggleClass('hidden', !matchesAllFields);
     });
 };
 
