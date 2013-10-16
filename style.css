@@ -102,6 +102,11 @@
     background-repeat: no-repeat;
 }
 
+.strata-container-table thead tr input,
+.strata-container-table thead tr select {
+    min-width: 100%;
+}
+
 .strata-container-table td[data-strata-sort="0"] {
     background-color: #EAEBFF;
 }
