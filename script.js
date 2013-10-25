@@ -84,6 +84,33 @@ var natcmp = function(s1, s2) {
         }
     }
 };
+// natural compare right to left (numbers still left to right)
+var natcmp_rtl = function(s1, s2) {
+    // 'normalize' the values we're sorting
+    s1 = s1.replace( /<.*?>/g, "" ).replace('&gt;','<').replace('&lt;','>').replace('&amp;','&');
+    s2 = s2.replace( /<.*?>/g, "" ).replace('&gt;','<').replace('&lt;','>').replace('&amp;','&');
+
+    // do the actual sorting
+    var n = /^(.*?)(\d+)$/;
+    while (true) {
+        if (s1 == s2) { return 0; }
+        if (s1 == '') { return -1; }
+        if (s2 == '') { return 1; }
+        var n1 = n.exec(s1);
+        var n2 = n.exec(s2);
+        if ( (n1 != null) && (n2 != null) ) {
+            if (n1[2] != n2[2]) { return n1[2] - n2[2]; }
+            s1 = n1[1];
+            s2 = n2[1];
+        } else {
+            n1 = s1.charCodeAt(s1.length - 1);
+            n2 = s2.charCodeAt(s2.length - 1);
+            if (n1 != n2) { return n1 - n2; }
+            s1 = s1.substr(0, s1.length - 1);
+            s2 = s2.substr(0, s2.length - 1);
+        }
+    }
+};
 
 // multi field compare
 var create_item_compare = function(fields, isAscending) {
@@ -121,7 +148,10 @@ var createFilterField = function(filterElement, filterType, filterId, field, val
         }
         jQuery(filterElement).append(input);
     } else if (filterType == 's' || filterType == 'p') {
-        var select = createFilterSelect(containerElement, filterId, valueSelector, caption);
+        var select = createFilterSelect(containerElement, filterId, valueSelector, caption, natcmp);
+        jQuery(filterElement).append(select);
+    } else if (filterType == 'e') {
+        var select = createFilterSelect(containerElement, filterId, valueSelector, caption, natcmp_rtl);
         jQuery(filterElement).append(select);
     }
 };
@@ -146,7 +176,7 @@ var createFilterTextField = function(element, filterId, caption) {
 };
 
 // Returns a select input which filters the field belonging to the given filterId
-var createFilterSelect = function(element, filterId, valueSelector, caption) {
+var createFilterSelect = function(element, filterId, valueSelector, caption, cmp) {
     var select = document.createElement('select');
     jQuery(select).append('<option data-filter="none" class="strata-filter-special"></option>');
     var values = [];
@@ -162,7 +192,7 @@ var createFilterSelect = function(element, filterId, valueSelector, caption) {
             values.push('');
         }
     });
-    values.sort(natcmp);
+    values.sort(cmp);
 
     jQuery.each(values, function(_,v) {
         var option = document.createElement('option');
@@ -218,17 +248,22 @@ var createItemFilter = function(element, filterId, field, valueSelector, filterT
             filter = function(search) {
                 var result = false;
                 for (var k = 0; !result && k < values.length; k++) {
-                    result = values[k].slice(0, search.length) == search;
+                    result = values[k].substr(0, search.length) == search;
+                }
+                return result;
+            };
+        } else if (filterType == 'e') { // ending a.k.a. suffix
+            // must match at least one value
+            filter = function(search) {
+                var result = false;
+                for (var k = 0; !result && k < values.length; k++) {
+                    result = values[k].substr(values[k].length - search.length, search.length) == search;
                 }
                 return result;
             };
         } else { // exact
             // must match at least one value
             filter = function(search) {
-                var result = false;
-                for (var k = 0; !result && k < values.length; k++) {
-                    result = values[k].indexOf(search) != -1;
-                }
                 return jQuery.inArray(search, values) != -1;
             };
         }

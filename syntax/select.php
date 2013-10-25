@@ -35,7 +35,13 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
 
     function getUISettings($numFields, $hasUIBlock) {
         $bool_choices = array('y' => array('y', 'yes'), 'n' => array('n', 'no'));
-        $filter_choices = array('t' => array('t', 'text'), 's' => array('s', 'select'), 'p'=>array('p', 'prefixselect'), 'n' => array('n', 'none'));
+        $filter_choices = array(
+            't' => array('t', 'text'),
+            's' => array('s', 'select'),
+            'p' => array('p', 'prefixselect'),
+            'e' => array('suffixselect'),
+            'n' => array('n', 'none')
+        );
         $globalProperties = array(
             'ui' => $this->getUISettingUI($hasUIBlock),
             'sort' => array('choices' => $bool_choices, 'minOccur' => $numFields, 'maxOccur' => $numFields, 'default' => 'yes'),
