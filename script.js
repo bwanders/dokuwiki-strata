@@ -404,40 +404,70 @@ jQuery(document).ready(function() {
         jQuery(list).append(li);
         var lastSortable = li;
 
+		// Collect all sort and filter fields
+		var fields = {};
+		var fieldOrder = [];
         jQuery('.strata-caption', div).each(function(i, captionElement) {
             if (sortColumns.charAt(i) != 'n' || filterColumns.charAt(i) != 'n') {
                 var field = jQuery(captionElement).attr('data-field');
                 var minWidth = Math.max.apply(Math, jQuery('*.strata-field[data-field="' + field + '"] .strata-value', div).map(function(_, v) {
                     return jQuery(v).width();
                 }));
-                var li = document.createElement('li');
-                jQuery(li).addClass('ui-state-default');
-                jQuery(li).attr('data-field', field);
-                jQuery(li).append(document.createTextNode(captionElement.textContent));
-                if (sortColumns.charAt(i) != 'n') {
-                    var span = document.createElement('span');
-                    jQuery(span).addClass('strata-ui-sort-direction');
-                    jQuery(span).attr('data-strata-sort-direction', 'asc');
-                    jQuery(span).append('&nbsp;');
-                    jQuery(li).append(span);
-                    jQuery(span).click(function(e) {
-                        var dir = jQuery(span).attr('data-strata-sort-direction') == 'asc' ? 'desc' : 'asc';
-                        jQuery(span).attr('data-strata-sort-direction', dir);
-                        sortGeneric(div, list);
-                    });
+                var f;
+                if (field in fields) {
+                    f = fields[field];
+                    f.caption.push(captionElement.textContent);
+                    f.sortable = f.sortable || (sortColumns.charAt(i) == 'y');
+                    f.minWidth = Math.max(f.minWidth, minWidth);
                 } else {
-                    jQuery(li).append(' ');
+                    f = {
+                        'field': field,
+                        'caption': [captionElement.textContent],
+                        'sortable': sortColumns.charAt(i) == 'y',
+                        'minWidth': minWidth,
+                        'filters': []
+                    }
+                    fields[field] = f;
+                    fieldOrder.push(f);
                 }
-                createFilterField(li, filterColumns.charAt(i), i, field, '*.strata-field[data-field="' + field + '"]', div, captionElement.textContent, minWidth);
-                if (sortColumns.charAt(i) == 'n') {
-                    jQuery(li).addClass('strata-no-sort');
-                    jQuery(list).append(li);
-                } else {
-                    jQuery(lastSortable).after(li);
-                    lastSortable = li;
+                if (filterColumns.charAt(i) != 'n') {
+                    f.filters.push(filterColumns.charAt(i));
                 }
             }
         });
+        // Create the collected fields
+        for (var i = 0; i < fieldOrder.length; i++) {
+            var f = fieldOrder[i];
+            var caption = jQuery.unique(f.caption).join(' / ');
+            var li = document.createElement('li');
+            jQuery(li).addClass('ui-state-default');
+            jQuery(li).attr('data-field', f.field);
+            jQuery(li).append(document.createTextNode(caption));
+            if (f.sortable) {
+                var span = document.createElement('span');
+                jQuery(span).addClass('strata-ui-sort-direction');
+                jQuery(span).attr('data-strata-sort-direction', 'asc');
+                jQuery(span).append('&nbsp;');
+                jQuery(li).append(span);
+                jQuery(span).click(function(e) {
+                    var dir = jQuery(this).attr('data-strata-sort-direction') == 'asc' ? 'desc' : 'asc';
+                    jQuery(this).attr('data-strata-sort-direction', dir);
+                    sortGeneric(div, list);
+                });
+            } else {
+                jQuery(li).append(' ');
+            }
+            for (var j = 0; j < f.filters.length; j++) {
+                createFilterField(li, f.filters[j], i + '_' + j, f.field, '*.strata-field[data-field="' + f.field + '"]', div, caption, f.minWidth);
+            }
+            if (f.sortable) {
+                jQuery(lastSortable).after(li);
+                lastSortable = li;
+            } else {
+                jQuery(li).addClass('strata-no-sort');
+                jQuery(list).append(li);
+            }
+        }
         jQuery(div).prepend(list);
 
         // Set data for sort
