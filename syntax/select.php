@@ -34,7 +34,12 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
     }
 
     function getUISettings($numFields, $hasUIBlock) {
-        $bool_choices = array('y' => array('y', 'yes'), 'n' => array('n', 'no'));
+        $sort_choices = array(
+            'y' => array('y', 'yes'),
+            'l' => array('l', 'ltr', 'left to right'),
+            'r' => array('r', 'rtl', 'right to left'),
+            'n' => array('n', 'no')
+        );
         $filter_choices = array(
             't' => array('t', 'text'),
             's' => array('s', 'select'),
@@ -44,11 +49,11 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
         );
         $globalProperties = array(
             'ui' => $this->getUISettingUI($hasUIBlock),
-            'sort' => array('choices' => $bool_choices, 'minOccur' => $numFields, 'maxOccur' => $numFields, 'default' => 'yes'),
+            'sort' => array('choices' => $sort_choices, 'minOccur' => $numFields, 'maxOccur' => $numFields, 'default' => 'yes'),
             'filter' => array('choices' => $filter_choices, 'minOccur' => $numFields, 'maxOccur' => $numFields, 'default' => 'none')
         );
         $groupProperties = array(
-            'sort' => array('choices' => $bool_choices),
+            'sort' => array('choices' => $sort_choices),
             'filter' => array('choices' => $filter_choices),
         );
         return array($globalProperties, $groupProperties);
@@ -289,6 +294,13 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
 
         $p = $data['strata-ui'];
         $c = array();
+
+        // Default sort: rtl for suffix and ltr otherwise
+        for ($i = 0; $i < count($p['sort']); $i++) {
+            if ($p['sort'][$i] == 'y') {
+                $p['sort'][$i] = ($p['filter'][$i] == 'e' ? 'r' : 'l');
+            }
+        }
 
         if (trim(implode($p['sort']), 'n') != '') {
             $c[] = 'strata-ui-sort';

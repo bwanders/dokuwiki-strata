@@ -113,17 +113,18 @@ var natcmp_rtl = function(s1, s2) {
 };
 
 // multi field compare
-var create_item_compare = function(fields, isAscending) {
+var create_item_compare = function(fields, isAscending, sortType) {
     return function(item1, item2) {
         var valueMap1 = jQuery(item1).data('strata-item-values');
         var valueMap2 = jQuery(item2).data('strata-item-values');
         for (var i = 0; i < fields.length; i++) {
             var d = isAscending[i] ? 1 : -1;
+            var cmp = (sortType[i] == 'r' ? natcmp_rtl : natcmp);
             var values1 = valueMap1[fields[i]];
             var values2 = valueMap2[fields[i]];
             var length = Math.min(values1.length, values2.length);
             for (var j = 0; j < length; j++) {
-                var c = natcmp(values1[j], values2[j]);
+                var c = cmp(values1[j], values2[j]);
                 if (c != 0) {
                     return d * c;
                 }
@@ -139,7 +140,7 @@ var create_item_compare = function(fields, isAscending) {
 };
 
 // Create a filter field of the given type and add it to the given filterElement
-var createFilterField = function(filterElement, filterType, filterId, field, valueSelector, containerElement, caption, minWidth) {
+var createFilterField = function(filterElement, filterType, filterId, field, sortType, valueSelector, containerElement, caption, minWidth) {
     createItemFilter(containerElement, filterId, field, valueSelector, filterType);
     if (filterType == 't') {
         var input = createFilterTextField(containerElement, filterId, caption);
@@ -147,11 +148,9 @@ var createFilterField = function(filterElement, filterType, filterId, field, val
             jQuery(input).css('min-width', minWidth + 'px');
         }
         jQuery(filterElement).append(input);
-    } else if (filterType == 's' || filterType == 'p') {
-        var select = createFilterSelect(containerElement, filterId, valueSelector, caption, natcmp);
-        jQuery(filterElement).append(select);
-    } else if (filterType == 'e') {
-        var select = createFilterSelect(containerElement, filterId, valueSelector, caption, natcmp_rtl);
+    } else if (filterType == 's' || filterType == 'p' || filterType == 'e') {
+        var cmp = (sortType == 'r' ? natcmp_rtl : natcmp);
+        var select = createFilterSelect(containerElement, filterId, valueSelector, caption, cmp);
         jQuery(filterElement).append(select);
     }
 };
@@ -285,17 +284,20 @@ var createItemFilter = function(element, filterId, field, valueSelector, filterT
 var sortGeneric = function(element, fieldlist) {
     var fields = [];
     var isAscending = [];
+    var sortType = [];
     var items = jQuery('li', fieldlist);
     for (var i = 0; i < items.length && jQuery(items[i]).attr('data-field') != undefined; i++) {
         fields.push(jQuery(items[i]).attr('data-field'));
         isAscending.push(jQuery('.strata-ui-sort-direction', items[i]).attr('data-strata-sort-direction') == 'asc');
+        sortType.push(jQuery(items[i]).attr('sortType'));
     }
-    jQuery('.strata-item', element).sortElements(create_item_compare(fields, isAscending));
+    jQuery('.strata-item', element).sortElements(create_item_compare(fields, isAscending, sortType));
 };
 
 var sortTable = function(element, field, isAdditional) {
     var fields = jQuery(element).data('strata-sort-fields');
     var isAscending = jQuery(element).data('strata-sort-directions');
+    var sortType = [];
     if (fields[0] == field) {
         if (isAscending[0]) { // Change sort direction
             isAscending[0] = false;
@@ -315,14 +317,16 @@ var sortTable = function(element, field, isAdditional) {
         fields.splice(0, fields.length, field);
         isAscending.splice(0, fields.length, true);
     }
+    var sort = jQuery(element).attr('data-strata-ui-sort');
     jQuery('th', element).removeAttr('data-strata-sort').removeAttr('data-strata-sort-direction');
     jQuery('td', element).removeAttr('data-strata-sort').removeAttr('data-strata-sort-direction');
     for (var i = 0; i < fields.length; i++) {
         var col = fields[i];
         jQuery('.col' + col, element).attr('data-strata-sort', i);
         jQuery('.col' + col, element).attr('data-strata-sort-direction', isAscending[i] ? 'asc' : 'desc');
+        sortType.push(sort[col]);
     }
-    jQuery('.strata-item', element).sortElements(create_item_compare(fields, isAscending));
+    jQuery('.strata-item', element).sortElements(create_item_compare(fields, isAscending, sortType));
 };
 
 // UI initialization
@@ -358,7 +362,7 @@ jQuery(document).ready(function() {
                 }
                 // Create filter
                 var valueSelector = '.col' + i + ' *.strata-field';
-                createFilterField(th, filterColumns.charAt(i), i, i, valueSelector, div, td.textContent);
+                createFilterField(th, filterColumns.charAt(i), i, i, sortColumns.charAt(i), valueSelector, div, td.textContent);
             }
             jQuery(tr).append(th);
         });
@@ -417,13 +421,15 @@ jQuery(document).ready(function() {
                 if (field in fields) {
                     f = fields[field];
                     f.caption.push(captionElement.textContent);
-                    f.sortable = f.sortable || (sortColumns.charAt(i) == 'y');
+                    if (f.sortType == 'n') {
+                        f.sortType = sortColumns.charAt(i);
+                    }
                     f.minWidth = Math.max(f.minWidth, minWidth);
                 } else {
                     f = {
                         'field': field,
                         'caption': [captionElement.textContent],
-                        'sortable': sortColumns.charAt(i) == 'y',
+                        'sortType': sortColumns.charAt(i),
                         'minWidth': minWidth,
                         'filters': []
                     }
@@ -443,7 +449,8 @@ jQuery(document).ready(function() {
             jQuery(li).addClass('ui-state-default');
             jQuery(li).attr('data-field', f.field);
             jQuery(li).append(document.createTextNode(caption));
-            if (f.sortable) {
+            if (f.sortType != 'n') {
+                jQuery(li).attr('sortType', f.sortType);
                 var span = document.createElement('span');
                 jQuery(span).addClass('strata-ui-sort-direction');
                 jQuery(span).attr('data-strata-sort-direction', 'asc');
@@ -458,14 +465,14 @@ jQuery(document).ready(function() {
                 jQuery(li).append(' ');
             }
             for (var j = 0; j < f.filters.length; j++) {
-                createFilterField(li, f.filters[j], i + '_' + j, f.field, '*.strata-field[data-field="' + f.field + '"]', div, caption, f.minWidth);
+                createFilterField(li, f.filters[j], i + '_' + j, f.field, f.sortType, '*.strata-field[data-field="' + f.field + '"]', div, caption, f.minWidth);
             }
-            if (f.sortable) {
-                jQuery(lastSortable).after(li);
-                lastSortable = li;
-            } else {
+            if (f.sortType == 'n') {
                 jQuery(li).addClass('strata-no-sort');
                 jQuery(list).append(li);
+            } else {
+                jQuery(lastSortable).after(li);
+                lastSortable = li;
             }
         }
         jQuery(div).prepend(list);
