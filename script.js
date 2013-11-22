@@ -415,7 +415,9 @@ jQuery(document).ready(function() {
 
         // Create sort and filter fields for each column
         var list = document.createElement('ul');
-        jQuery(list).addClass('filter');
+        jQuery(list).addClass('filter')
+            .mouseenter(function(){ jQuery(div).toggleClass('section_highlight', true); })
+            .mouseleave(function(){ jQuery(div).toggleClass('section_highlight', false); });
 
         var li = document.createElement('li');
         jQuery(li).addClass('ui-state-highlight strata-ui-eos');
