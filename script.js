@@ -112,6 +112,21 @@ var natcmp_rtl = function(s1, s2) {
     }
 };
 
+// generic stable unique function
+var unique = function(es) {
+    var temp = {};
+    var result = [];
+    for(var i = 0; i < es.length; i++) {
+        var e = es[i];
+        if(! (e in temp)) {
+            result.push(e);
+            temp[e]=true;
+        }
+    }
+
+    return result;
+};
+
 // multi field compare
 var create_item_compare = function(fields, isAscending, sortType) {
     return function(item1, item2) {
@@ -432,7 +447,7 @@ jQuery(document).ready(function() {
                         'sortType': sortColumns.charAt(i),
                         'minWidth': minWidth,
                         'filters': []
-                    }
+                    };
                     fields[field] = f;
                     fieldOrder.push(f);
                 }
@@ -444,7 +459,7 @@ jQuery(document).ready(function() {
         // Create the collected fields
         for (var i = 0; i < fieldOrder.length; i++) {
             var f = fieldOrder[i];
-            var caption = jQuery.unique(f.caption).join(' / ');
+            var caption = unique(f.caption).join(' / ');
             var li = document.createElement('li');
             jQuery(li).addClass('ui-state-default');
             jQuery(li).attr('data-field', f.field);
