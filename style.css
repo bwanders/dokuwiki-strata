@@ -161,3 +161,8 @@
     font-style: italic;
 }
 
+.strata-container .filter li input,
+.strata-container .filter li select {
+    margin-left: 2px;
+}
+
