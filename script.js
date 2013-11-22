@@ -498,7 +498,7 @@ jQuery(document).ready(function() {
 
         jQuery(list).sortable({
             items: "li:not(.strata-no-sort)",
-            placeholder: "ui-state-highlight ui-drop-target",
+            placeholder: "ui-state-default ui-state-disabled ui-drop-target",
             start: function(e, ui) {
                 jQuery(ui.placeholder).css('min-width', jQuery(ui.item).width() + 'px');
             },

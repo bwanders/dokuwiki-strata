@@ -136,13 +136,17 @@
     list-style-type: none;
     padding: 0;
     overflow: auto;
+    border-radius: 5px;
+    box-shadow: 0 0 5px __border__ inset;
+    padding: 5px;
 }
 
 .strata-container ul.filter li {
-    margin: 0 3px 3px 3px;
+    margin: 1.5px 1.5px 1.5px 1.5px;
     padding: 4px 7px 4px 4px;
     height: 21px;
     display: inline-block;
+    border-radius: 2px;
 }
 
 .strata-container ul.filter li:not(.strata-no-sort):before {
