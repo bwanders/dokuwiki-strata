@@ -962,7 +962,13 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
 
     function _setPropertyValue($properties, $group, $region, $variable, $isMulti, $value, &$propertyValues) {
         if (!isset($properties[$variable])) {
-            $this->emitError($region, 'error_property_unknownproperty', hsc($group), hsc($variable), $this->list2html(array_keys($properties)));
+            $property_title_values = $this->getLang('property_title_values');
+            $propertyList = implode(array_map(function($n, $p) use($property_title_values) {
+                $values = implode(array_map(function($c) { return $c[0]; }, $p['choices']), ', ');
+                $title = sprintf($property_title_values, $values);
+                return '\'<code title="' . hsc($title) . '">' . hsc($n) . '</code>\'';
+            }, array_keys($properties), $properties), ', ');
+            $this->emitError($region, 'error_property_unknownproperty', hsc($group), hsc($variable), $propertyList);
         } else if (isset($propertyValues[$variable])) {
             $this->emitError($region, 'error_property_multi', hsc($group), hsc($variable));
         } else {
@@ -991,11 +997,15 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
             } else if (isset($p['choices'])) { // Check whether the given property values are valid choices
                 // Create a mapping from choice to normalized value of the choice
                 $choices = array();
+                $choicesInfo = array(); // For nice error messages
                 foreach ($p['choices'] as $nc => $c) {
                     if (is_array($c)) {
                         $choices = array_merge($choices, array_fill_keys($c, $nc));
+                        $title = sprintf($this->getLang('property_title_synonyms'), implode($c, ', '));
+                        $choicesInfo[] = '\'<code title="' . hsc($title) . '">' . hsc($c[0]) . '</code>\'';
                     } else {
                         $choices[$c] = $c;
+                        $choicesInfo[] = '\'<code>' . hsc($c) . '</code>\'';
                     }
                 }
                 if (!isset($choices['']) && isset($p['default'])) {
@@ -1006,7 +1016,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                 if (count($incorrect) > 0) {
                     unset($choices['']);
                     foreach (array_unique($incorrect) as $v) {
-                        $this->emitError($region, 'error_property_invalidchoice', hsc($group), hsc($variable), hsc($v), $this->list2html(array_keys($choices)));
+                        $this->emitError($region, 'error_property_invalidchoice', hsc($group), hsc($variable), hsc($v), implode($choicesInfo, ', '));
                     }
                 } else {
                     $propertyValues[$variable] = array_map(function($v) use ($choices) { return $choices[$v]; }, $values);
@@ -1028,15 +1038,6 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                 $propertyValues[$variable] = $values;
             }
         }
-    }
-
-    /**
-     * Converts an array of items to a html string.
-     *
-     * All items are quoted and rendered in code style as a comma-separated list.
-     */
-    function list2html($list) {
-        return implode(array_map(function($v) { return '\'<code>' . hsc($v) . '</code>\''; }, $list), ', ');
     }
 
     /**

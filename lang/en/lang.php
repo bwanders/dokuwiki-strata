@@ -83,3 +83,6 @@ $lang['error_property_occurrange'] = '<code>%s</code> property \'<code>%s</code>
 $lang['error_property_invalidchoice'] = '<code>%s</code> property \'<code>%s</code>\' cannot have value \'<code>%s</code>\', it only accepts %s.';
 $lang['error_property_patterndesc'] = '<code>%s</code> property \'<code>%s</code>\' cannot have value \'<code>%s</code>\', it only accepts %s.';
 $lang['error_property_pattern'] = '<code>%s</code> property \'<code>%s</code>\' cannot have value \'<code>%s</code>\', it only accepts values matching <code>%s</code>.';
+
+$lang['property_title_values'] = 'Possible values: %s';
+$lang['property_title_synonyms'] = 'Synonyms: %s';
