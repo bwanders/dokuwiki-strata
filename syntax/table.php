@@ -17,7 +17,7 @@ class syntax_plugin_strata_table extends syntax_plugin_strata_select {
     }
 
     function getUISettingUI($hasUIBlock) {
-        return array('choices' => array('none' => array('n', 'none'), 'generic' => array('g', 'generic'), 'table' => array('t', 'table')), 'default' => 'table');
+        return array('choices' => array('none' => array('none', 'n'), 'generic' => array('generic', 'g'), 'table' => array('table', 't')), 'default' => 'table');
     }
 
     function handleHeader($header, &$result, &$typemap) {

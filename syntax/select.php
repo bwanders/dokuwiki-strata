@@ -35,17 +35,17 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
 
     function getUISettings($numFields, $hasUIBlock) {
         $sort_choices = array(
-            'y' => array('y', 'yes'),
-            'l' => array('l', 'ltr', 'left to right'),
-            'r' => array('r', 'rtl', 'right to left'),
-            'n' => array('n', 'no')
+            'y' => array('default', 'yes', 'y'),
+            'l' => array('left to right', 'ltr', 'l'),
+            'r' => array('right to left', 'rtl', 'r'),
+            'n' => array('none', 'no', 'n')
         );
         $filter_choices = array(
-            't' => array('t', 'text'),
-            's' => array('s', 'select'),
-            'p' => array('p', 'prefixselect'),
-            'e' => array('suffixselect'),
-            'n' => array('n', 'none')
+            't' => array('text', 't'),
+            's' => array('select', 's'),
+            'p' => array('prefixselect', 'ps'),
+            'e' => array('suffixselect', 'ss'),
+            'n' => array('none', 'no', 'n')
         );
         $globalProperties = array(
             'ui' => $this->getUISettingUI($hasUIBlock),
@@ -60,7 +60,7 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
     }
 
     function getUISettingUI($hasUIBlock) {
-        return array('choices' => array('none' => array('n', 'none'), 'generic' => array('g', 'generic')), 'default' => ($hasUIBlock ? 'generic' : 'none'));
+        return array('choices' => array('none' => array('none', 'no', 'n'), 'generic' => array('generic', 'g')), 'default' => ($hasUIBlock ? 'generic' : 'none'));
     }
 
     function handle($match, $state, $pos, &$handler) {
