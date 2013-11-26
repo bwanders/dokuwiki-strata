@@ -123,6 +123,7 @@
 .strata-ui-sort-direction {
     display: inline-block;
     width: 19px;
+    margin-left: 4px;
     cursor: pointer;
     background-position: center center;
     background-repeat: no-repeat;
@@ -143,7 +144,7 @@
 
 .strata-container ul.filter li {
     margin: 1.5px 1.5px 1.5px 1.5px;
-    padding: 4px 7px 4px 4px;
+    padding: 4px 4px 4px 4px;
     height: 21px;
     display: inline-block;
     border-radius: 2px;

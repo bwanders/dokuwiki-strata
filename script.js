@@ -472,6 +472,9 @@ jQuery(document).ready(function() {
             jQuery(li).attr('data-field', f.field);
             jQuery(li).append(document.createTextNode(caption));
             var fieldSelector = '*.strata-field[data-field="' + f.field + '"]';
+            if (f.filters.length) {
+                jQuery(li).append('&nbsp;');
+            }
             for (var j = 0; j < f.filters.length; j++) {
                 createFilterFieldAndSort(li, f.filters[j], i + '_' + j, f.field, f.sortType, fieldSelector, div, caption, f.minWidth);
             }
