@@ -23,47 +23,47 @@ $lang['driver_prepare_failed'] = 'Strata storage: Failed to prepare query \'<cod
 $lang['driver_query_failed'] = 'Strata storage: %s (with \'<code>%s</code>\'): %s';
 $lang['driver_query_failed_default'] = 'Query failed';
 
-$lang['unnamed_group'] = 'unnamed group';
-$lang['named_group'] = '\'<code>%s</code>\' group';
+$lang['unnamed_group'] = 'unnamed block';
+$lang['named_group'] = '\'<code>%s</code>\' block';
 
 $lang['error_entry_block'] = 'I don\'t know what to do with the %s in the \'%s\' data entry';
 $lang['error_entry_line'] = 'I don\'t understand data entry line \'<code>%s</code>\'';
 
 $lang['error_pattern_garbage'] = 'I don\'t know what to do with the text after the object variable.';
 
-$lang['error_query_bothfields'] = 'Query contains both <code>fields</code> group and normal selection';
-$lang['error_query_fieldsgroups'] = 'I don\'t know how to handle a query containing multiple <code>fields</code> groups.';
-$lang['error_query_fieldsblock'] = 'I don\'t know what to do with the %s in the <code>fields</code> group.';
+$lang['error_query_bothfields'] = 'Query contains both <code>fields</code> block and normal selection';
+$lang['error_query_fieldsgroups'] = 'I don\'t know how to handle a query containing multiple <code>fields</code> block.';
+$lang['error_query_fieldsblock'] = 'I don\'t know what to do with the %s in the <code>fields</code> block.';
 $lang['error_query_noselect'] = 'I don\'t know which fields to select.';
 $lang['error_query_unknownselect'] = 'Query selects unknown field \'<code>%s</code>\'.';
 
-$lang['error_query_outofwhere'] = 'I don\'t know what to do with things outside of the <code>where</code> group.';
-$lang['error_query_singlewhere'] = 'A query should contain at most a single <code>where</code> group.';
+$lang['error_query_outofwhere'] = 'I don\'t know what to do with things outside of the <code>where</code> block.';
+$lang['error_query_singlewhere'] = 'A query should contain at most a single <code>where</code> block.';
 
-$lang['error_query_multisort'] = 'I don\'t know what to do with multiple <code>sort</code> groups.';
-$lang['error_query_sortblock'] = 'I can\'t handle groups in a <code>sort</code> group.';
-$lang['error_query_sortvar'] = '<code>sort</code> group uses out-of-scope variable \'<code>%s</code>\'.';
-$lang['error_query_sortline'] = 'I can\'t handle line \'<code>%s</code>\' in the <code>sort</code> group.';
+$lang['error_query_multisort'] = 'I don\'t know what to do with multiple <code>sort</code> blocks.';
+$lang['error_query_sortblock'] = 'I can\'t handle blocks in a <code>sort</code> block.';
+$lang['error_query_sortvar'] = '<code>sort</code> block uses out-of-scope variable \'<code>%s</code>\'.';
+$lang['error_query_sortline'] = 'I can\'t handle line \'<code>%s</code>\' in the <code>sort</code> block.';
 $lang['error_query_selectvar'] = 'selected variable \'<code>%s</code>\' is out-of-scope.';
 $lang['error_query_group'] = 'Unexpected %s in query.';
-$lang['error_query_unionblocks'] = 'Lines or named groups inside a <code>union</code> group. I can only handle unnamed groups inside a <code>union</code> group.';
-$lang['error_query_unionreq'] = 'I need at least 2 unnamed groups inside a <code>union</code> group.';
+$lang['error_query_unionblocks'] = 'Lines or named blocks inside a <code>union</code> block. I can only handle unnamed blocks inside a <code>union</code> block.';
+$lang['error_query_unionreq'] = 'I need at least 2 unnamed blocks inside a <code>union</code> block.';
 $lang['error_query_pattern'] = 'Unknown triple pattern or filter pattern \'<code>%s</code>\'.';
-$lang['error_query_fieldsline'] = 'Weird line \'<code>%s</code>\' in <code>fields</code> group.';
+$lang['error_query_fieldsline'] = 'Weird line \'<code>%s</code>\' in <code>fields</code> block.';
 $lang['error_syntax_braces'] = 'Unmatched braces in %s';
 
-$lang['error_query_multigrouping'] = 'I don\'t know what to do with multiple <code>group</code> groups.';
-$lang['error_query_groupblock'] = 'I can\'t handle groups in a <code>group</code> group.';
-$lang['error_query_groupvar'] = '<code>group</code> group uses out-of-scope variable \'<code>%s</code>\'.';
-$lang['error_query_groupline'] = 'I can\'t handle line \'<code>%s</code>\' in the <code>group</code> group.';
+$lang['error_query_multigrouping'] = 'I don\'t know what to do with multiple <code>group</code> blocks.';
+$lang['error_query_groupblock'] = 'I can\'t handle blocks in a <code>group</code> block.';
+$lang['error_query_groupvar'] = '<code>group</code> block uses out-of-scope variable \'<code>%s</code>\'.';
+$lang['error_query_groupline'] = 'I can\'t handle line \'<code>%s</code>\' in the <code>group</code> blocks.';
 $lang['error_query_groupeverything'] = 'I can\'t group everything if other variables are mentioned.';
 
-$lang['error_query_multiconsidering'] = 'I don\'t know what to do with multiple <code>consider</code> groups.';
-$lang['error_query_considerblock'] = 'I can\'t handle considers in a <code>consider</code> group.';
-$lang['error_query_considervar'] = '<code>consider</code> group uses out-of-scope variable \'<code>%s</code>\'.';
-$lang['error_query_considerline'] = 'I can\'t handle line \'<code>%s</code>\' in the <code>consider</code> group.';
+$lang['error_query_multiconsidering'] = 'I don\'t know what to do with multiple <code>consider</code> blocks.';
+$lang['error_query_considerblock'] = 'I can\'t handle considers in a <code>consider</code> block.';
+$lang['error_query_considervar'] = '<code>consider</code> block uses out-of-scope variable \'<code>%s</code>\'.';
+$lang['error_query_considerline'] = 'I can\'t handle line \'<code>%s</code>\' in the <code>consider</code> block.';
 
-$lang['error_query_grouppattern'] = 'I can\'t handle a group without at least one triple pattern or union group.';
+$lang['error_query_grouppattern'] = 'I can\'t handle a block without at least one triple pattern or union block.';
 
 $lang['error_query_filterscope'] = 'Filter uses out-of-scope variable \'<code>%s</code>\'.';
 
@@ -73,10 +73,10 @@ $lang['data_entry_previous'] = '← Previous';
 $lang['data_entry_next'] = 'Next →';
 
 // UI group
-$lang['error_property_weirdgroupline'] = '<code>%s</code> group contains weird line \'<code>%s</code>\', use: <code>property: value</code>.';
-$lang['error_property_unknowngroup'] = '<code>%s</code> group cannot handle column \'<code>%s</code>\'.';
-$lang['error_property_unknownproperty'] = '<code>%s</code> group does not know property \'<code>%s</code>\', only %s are known.';
-$lang['error_property_multi'] = '<code>%s</code> group accepts property \'<code>%s</code>\' only once.';
+$lang['error_property_weirdgroupline'] = '<code>%s</code> block contains weird line \'<code>%s</code>\', use: <code>property: value</code>.';
+$lang['error_property_unknowngroup'] = '<code>%s</code> block cannot handle column \'<code>%s</code>\'.';
+$lang['error_property_unknownproperty'] = '<code>%s</code> block does not know property \'<code>%s</code>\', only %s are known.';
+$lang['error_property_multi'] = '<code>%s</code> block accepts property \'<code>%s</code>\' only once.';
 $lang['error_property_notmulti'] = '<code>%s</code> property \'<code>%s</code>\' expects at least %d values, but only one is given. Try using \'<code>%s*: first value, second value</code>\'.';
 $lang['error_property_occur'] = '<code>%s</code> property \'<code>%s</code>\' expects %d values instead of the given %d.';
 $lang['error_property_occurrange'] = '<code>%s</code> property \'<code>%s</code>\' expects %d to %d values instead of the given %d.';
