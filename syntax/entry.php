@@ -227,7 +227,8 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
             $positions = p_get_metadata($ID, 'strata positions');
         }
 
-        if(is_array($positions)) {
+        // only read positions if we have them
+        if(is_array($positions) && isset($positions[$data['entry']])) {
             $positions = $positions[$data['entry']];
             $currentPosition = array_search($data['position'],$positions);
             $previousPosition = isset($positions[$currentPosition-1])?'data_fragment_'.$positions[$currentPosition-1]:null;
