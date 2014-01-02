@@ -922,6 +922,37 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
     /**
      * Sets all properties given as '$properties' to the values parsed from '$trees'.
      *
+     * The property array has as keys all possible properties, which are specified by its
+     * values. Such specification is an array that may have the following keys, with the
+     * described values:
+     * - choices: array of possible values, where the keys are the internally used values
+     *     and the values specify synonyms for the choice, of which the first listed one
+     *     is most common. For example: 'true' => array('yes', 'yeah') specifies that the
+     *     user can choose 'yes' or 'yeah' (of which 'yes' is the commonly used value) and
+     *     that the return value will contain 'true' if this choice was chosen.
+     * - pattern: regular expression that defines all possible values.
+     * - pattern_desc: description used for errors when a pattern is specified.
+     * - minOccur: positive integer specifying the minimum number of values, defaults to 1.
+     * - maxOccur: integer greater than or equal to minOccur, which specifies the maximum
+     *     number of values, defaults to minOccur.
+     * - default: the default value (which must be a value the user is allowed to set).
+     *     When default is given, this method guarantees that the property is always set.
+     * Either 'choices' or 'pattern' must be set (not both), all other values are optional.
+     *
+     * An example property array is as follows:
+     * array(
+     *   'example boolean' => array(
+     *     'choices' => array('y' => array('yes', 'yeah'), 'n' => array('no', 'nay')),
+     *     'minOccur' => 1,
+     *     'maxOccur' => 3,
+     *     'default' => 'yes'
+     *   ),
+     *   'example natural number' => array(
+     *     'pattern' => '/^[0-9]+$/',
+     *     'pattern_desc' => $this->getLang('property_Z*')
+     *   )
+     * )
+     *
      * @param $properties The properties that can be set.
      * @param $trees The trees that contain the values for these properties.
      * @return An array with as indices the property names and as value a list of all values given for that property.
@@ -962,6 +993,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
 
     function _setPropertyValue($properties, $group, $region, $variable, $isMulti, $value, &$propertyValues) {
         if (!isset($properties[$variable])) {
+            // Unknown property: show error
             $property_title_values = $this->getLang('property_title_values');
             $propertyList = implode(array_map(function($n, $p) use($property_title_values) {
                 $values = implode(array_map(function($c) { return $c[0]; }, $p['choices']), ', ');
@@ -970,6 +1002,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
             }, array_keys($properties), $properties), ', ');
             $this->emitError($region, 'error_property_unknownproperty', hsc($group), hsc($variable), $propertyList);
         } else if (isset($propertyValues[$variable])) {
+            // Property is specified more than once: show error
             $this->emitError($region, 'error_property_multi', hsc($group), hsc($variable));
         } else {
             $p = $properties[$variable];
