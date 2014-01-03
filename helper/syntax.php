@@ -936,7 +936,8 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
      * - maxOccur: integer greater than or equal to minOccur, which specifies the maximum
      *     number of values, defaults to minOccur.
      * - default: the default value (which must be a value the user is allowed to set).
-     *     When default is given, this method guarantees that the property is always set.
+     *     When default is given, this method guarantees that the property is always set,
+     *     otherwise the property may not be set since all properties are optional.
      * Either 'choices' or 'pattern' must be set (not both), all other values are optional.
      *
      * An example property array is as follows:
