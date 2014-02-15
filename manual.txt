@@ -15,7 +15,7 @@ A good way to get more experienced is to add some simple data to your wiki, and 
 
 ===== Data Block =====
 
-Data entry is done with ''<data>'' tags. The following example is a data block for Jane Doe. The block is meant to add some extra data to the page it is on (we assume it is on the page ''persons:jane_doe''). The examples shows you how to add simple values, how to declare a class, and how to use types.
+Data entry is done with ''<data>'' tags. The following example is a data block for Jane Doe. The block is meant to add some extra data to the page it is on (we assume it is on the page ''persons:jane_doe''). The example shows you how to add simple values, how to declare a class, and how to use types.
 
 <code>
 <data person>
@@ -53,7 +53,7 @@ Contact [link]: jane.doe@workmail.com
 
 **Multiple Values**: You can have multiple values with a field. Do this by either putting a ''*'' after the field (or after the type, if it has any), or by simply adding the field multiple times.
 
-**Comments** All lines that start with double dashes (i.e., ''%%--%%'') is ignored. Note that your comments can still be read by anyone viewing the source of the wiki page.
+**Comments** All lines that start with double dashes (i.e., ''%%--%%'') are ignored. Note that your comments can still be read by anyone viewing the source of the wiki page.
 
 
 ===== Tables and Lists =====
@@ -80,7 +80,7 @@ Literals can be written down verbatim, except for subject literals. These should
 
 **Comparisons**: You can use normal operators (e.g, ''<'', ''>'', ''>='', ''%%<=%%'', ''='', ''!='') to compare values. A variable's type will be taken into account for the comparison. See [[#Comparison Operators]] for more information.
 
-You can only compare variables that have are used in a pattern.
+You can only compare variables that are used in a pattern.
 
 **Captions**: You can put captions in the opening tag to change the caption of the column. Captions are not displayed by lists, but are still used to add names to the filtering and sorting interface.
 
@@ -144,7 +144,7 @@ Field [type::hint]*: value1, value2, valueN
 
 == Field-Value pairs ==
 
-The simplest form of data entry. Fields and values are also called predicates and objects. It is possible to leave out the value. If you do that field-value pair will not be stored, but you can easily fill in the missing value later.
+The simplest form of data entry. Fields and values are also called predicates and objects. It is possible to leave out the value, then the field-value pair will not be stored, but you can easily fill in the missing value later.
 
   * Field names can contain any character except the following: '':'' ''('' '')'' ''['' '']'' ''{'' ''}'' ''<'' ''>'' ''|'' ''~'' ''!'' ''@'' ''#'' ''$'' ''%'' ''^'' ''&'' ''*'' ''?'' ''='' ''%%"%%''
   * Values can contain any character, but values in a list of multiple values can't contain '',''
@@ -171,7 +171,7 @@ The field is generated from the fragment identifier if it is available. If the b
 
 You can add a [[#types|type]] to a field by putting the type between ''['' and '']'' and placing it after the field name. This will change how the field's values are stored and displayed. Note that the declared type is only used during entry, that is, the type is not stored. You can declare a different type when [[#Querying Data]].
 
-You can a type hint to any type you use. You do so by adding the type hint to the type with a ''::'' marker: ''[type::hint]''. Usually type hints change the way a type displays data. See [[#types]] for list of possible types and hints.
+You can add a type hint to any type you use. You do so by adding the type hint to the type with a ''::'' marker: ''[type::hint]''. Usually, type hints change the way a type displays data. See [[#types]] for possible types and hints.
 
 == Comments ==
 
@@ -195,12 +195,12 @@ A data block is associated with a fragment simply by adding a fragment identifie
 
 Sometimes, it makes sense to have all data associated with a single page, but defined in multiple data blocks throughout the page. This is possible by simply splitting the data blocks into multiple blocks.
 
-Note that the [[#classes]] do not have to be repeated. If you want to split a fragment data block, you have to  add the same [[#fragment identifier]] to every data block of the fragment.
+Note that the [[#classes]] do not have to be repeated. If you want to split a fragment data block, you have to add the same [[#fragment identifier]] to every data block of the fragment.
 
 
 ===== Query Language =====
 
-Querying data is done through the ''<table>'' and ''<list>'' syntax. A table or list block defines what data to query, and how to display it. This part of the reference is about querying the data. The [[#Query Results]] section discusses how to control the display the data (this includes sorting, grouping, and aggregation).
+Querying data is done through the ''<table>'' and ''<list>'' syntax. A table or list block defines what data to query, and how to display it. This part of the reference is about querying the data. The [[#Query Results]] section discusses how to control the display of data (this includes sorting, grouping, and aggregation).
 
 The following sections contain short samples, each of these samples is situated inside a table or list block. It is possible to enclose the whole of the query (not including sorting, grouping, or other [[#Query Results]] related blocks) in a ''query'' block as a convenience.
 
@@ -231,7 +231,7 @@ You can use types to make sure the data is interpreted in the correct way, and t
 
 [[#Types]] can only be added to variables. A variable in the subject position will always be typed as [[#types|ref]]. Literals can't be typed, but will be interpreted according to the variables they are used with.
 
-Types are 'sticky'. This means that at the first mention of a type for a certain variable will the type will stick to the variable for the whole query. You can override a specific use, but without a explicit type a variable will be of the type first attached to it.
+Types are 'sticky'. This means that the first mentioned type for a certain variable will stick to the variable for the whole query. You can override a specific use, but without an explicit type a variable will be of the type first attached to it.
 
 Types are propagated according to the following rules:
   * variables in the subject position are always of type [[#type|ref]] (and the ref type will stick)
@@ -275,7 +275,7 @@ These filters (usually) only make sense on textual values:
 |  ''~>''  | In wiki namespace |
 |  ''!~>''  | Not in wiki namespace |
 
-The ''~>'' and ''!~>'' operators are special cases of ''^~'' and ''!^~'' that use the [[#types|text]] type when comparing a left-sided variable to a right-sided literal, regardless of the variables type. The use of these two operators makes most sense when comparing variables with the [[#types|ref]] or [[#types|page]] types.
+The ''~>'' and ''!~>'' operators are special cases of ''^~'' and ''!^~'' that use the [[#types|text]] type when comparing a left-sided variable to a right-sided literal, regardless of the variable's type. The use of these two operators makes most sense when comparing variables with the [[#types|ref]] or [[#types|page]] types.
 
 
 ==== Optional ====
@@ -361,7 +361,7 @@ All elements except the variable itself are optional. If left out, a reasonable 
   * The default type is the type associated with the variable in the query
   * The default caption is the variable name with a capital first letter
 
-Any variables not mentioned in the projection are left out of consideration for determine what the results are. This might create a problem where simple results from a complex query seem incomplete, in that case try [[#Considering fields]].
+Any variables not mentioned in the projection are left out of consideration for determining what the results are. This might create a problem where simple results from a complex query seem incomplete, in that case try [[#Considering fields]].
 
 
 ==== Aggregation Functions ====
@@ -379,7 +379,7 @@ If a variable is not mentioned as one of the displayed fields, it will be ignore
     ?variable
   }
 
-All variables mentioned will be considered to be relevant, even if they are not displayed. Since the queries use so called 'set semantics', results that are equivalent will be reduced to a single result. This can be prevented by declaring additional variables to be considered.
+All variables mentioned will be considered to be relevant, even if they are not displayed. Since the queries use so called 'set semantics', results that are equivalent will be reduced to a single result. This can be prevented by declaring additional variables to be considered; results are only equivalent if all displayed and all considered fields are equal.
 
 
 ===== Types & Aggregates =====
