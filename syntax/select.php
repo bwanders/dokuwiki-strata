@@ -43,8 +43,8 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
         $filter_choices = array(
             't' => array('text', 't'),
             's' => array('select', 's'),
-            'p' => array('prefixselect', 'ps'),
-            'e' => array('suffixselect', 'ss'),
+            'p' => array('prefix select', 'ps'),
+            'e' => array('suffix select', 'ss'),
             'n' => array('none', 'no', 'n')
         );
         $globalProperties = array(
