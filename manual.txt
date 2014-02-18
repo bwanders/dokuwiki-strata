@@ -381,7 +381,147 @@ If a variable is not mentioned as one of the displayed fields, it will be ignore
 
 All variables mentioned will be considered to be relevant, even if they are not displayed. Since the queries use so called 'set semantics', results that are equivalent will be reduced to a single result. This can be prevented by declaring additional variables to be considered; results are only equivalent if all displayed and all considered fields are equal.
 
+===== User Interface =====
+The ''%%ui%%'' block controls the interactive (i.e. JavaScript) user interface of tables and lists. It can be used to make columns sortable and filterable. A ''%%ui%%'' block looks as follows:
 
+<code>
+ui {
+  ui: generic
+  sort: default
+  filter: text
+}
+</code>
+
+The properties that can be specified, are explained in the following subsections.
+==== UI ====
+The property ''%%ui%%'' specifies which user interface is shown and can have the values: ''%%none%%'', ''%%generic%%'', and ''%%table%%'' (only for tables). When the ''%%ui%%'' block is present, this property defaults to ''%%table%%'' for tables and ''%%generic%%'' otherwise. However, when no ''%%ui%%'' block is present, tables do have a ''%%table%%'' ui by default, since it is very subtle, but lists have no interactive ui.
+==== Sorting ====
+Using ''%%sort%%'' you can specify whether all columns are sortable (''%%default%%'') or not (''%%none%%''). Instead of the default sorting order, you can also choose ''%%left to right%%'' or ''%%right to left%%'' sorting.
+==== Filtering ====
+Using ''%%filter%%'' you can specify whether and how columns are filterable:
+  * ''text'': a text input field. It filters rows that have a value that contains the filter string (substring matching). E.g.: filtering for //David// will match //10 David Street//.
+  * ''%%select%%'': a drop down select box filter, which contains all possible values. It filters rows that have exactly the value that is selected (exact matching).
+  * ''%%prefix select%%'': a drop down select box filter, which contains all possible values. It filters rows that start with the value that is selected (prefix matching). E.g.: if the values //EN//, //%%EN-US%%//, and //%%EN-GB%%// are present, filtering for //EN// will match all three values.
+  * ''%%suffix select%%'': a drop down select box filter, which contains all possible values. It filters rows that end with the value that is selected (suffix matching). E.g.: if the values //10 David Street// and //David Street// are present, filtering for //David Street// will match both values.
+  * ''%%none%%'': no filtering.
+By default, columns are not filterable.
+
+==== Per column configuration ====
+The properties ''%%sort%%'' and ''%%filter%%'' are applied on each column. It is also possible to set these properties differently for some columns, as follows:
+<code>
+<table>
+fields {
+  Person 1: ?p1
+  Relation: ?r
+  Person 2: ?p2
+}
+ui {
+  filter: text
+  Relation {
+    filter: select
+    sort: none
+  }
+}
+?p1 is a: person
+?p2 is a: person
+?p1 ?r: ?p2
+</table>
+</code>
+
+Here, we use a block ''%%Relation%%'' to set different properties for the column named ''%%Relation%%'' (this name is specified in the ''%%fields%%'' group). Thus, all columns are sortable and have text-based filters, except the column ''%%Relation%%'', which is not sortable and has a select-based filter.
+
+Besides identifying columns by name, they can also be identified by number. For example, column ''%%Relation%%'' is also column ''%%#2%%''.
+
+When multiple columns have the same name, settings are applied to all columns that have the given name. To identify specific columns, index them by number. If you use both a block with a name (e.g. ''%%Relation%%'') and one with a number (e.g. ''%%#2%%''), then all settings specified in the numbered block will override the ones specified in the named block. (If you name a column ''%%#2%%'', then ''%%#2%%'' is considered a name, not a number.)
+
+=== Alternative column configuration ===
+Instead of using a block for each column, it is also possible to set all ''%%sort%%'' or ''%%filter%%'' values at once, but this is---in general---less readable than specifying a block for each column. Using this style, the previous example will become as follows:
+<code>
+<table>
+fields {
+  Person 1: ?p1
+  Relation: ?r
+  Person 2: ?p2
+}
+ui {
+  filter*: text, select, text
+  sort*: no, yes, no
+}
+?p1 is a: person
+?p2 is a: person
+?p1 ?r: ?p2
+</table>
+</code>
+By adding a ''%%*%%'' to the property name, we indicate that we are setting multiple columns at once. We must set all columns (e.g.: here, precisely three values must be given). However, we can leave some value the default by giving them the empty string:
+<code>
+<table>
+fields {
+  Person 1: ?p1
+  Relation: ?r
+  Person 2: ?p2
+}
+ui {
+  -- We specify the second column as block, so don't care about the values now
+  filter*: text, , text
+  sort*: no,,no
+  Relation {
+    filter: select
+    sort: no
+  }
+}
+?p1 is a: person
+?p2 is a: person
+?p1 ?r: ?p2
+</table>
+</code>
+
+==== UI with Aggregates ====
+
+In general, the UI is quite intuitive, but combining it with aggregates might give unexpected results. The example below shows the column ''%%address%%'' twice: once the actual values and once the number of values. Because the UI creates filters per column, only one filter will be created for the ''%%address%%'' column. This filter filters both on addresses and number of addresses per person.
+
+<code>
+<list ?p "Person" ?address@count "# of Addresses" ?address>
+?p is a: person
+
+optional {
+  ?p Address: ?address
+}
+
+group {
+  ?p
+}
+sort {
+  ?address (desc)
+}
+ui {
+  filter: text
+}
+</list>
+</code>
+
+As shown below, the above query can easily be converted to one which lists each column only once and, therefore, does have separate filters for the address count and the addresses.
+
+<code>
+<list ?p "Person" ?address-to-count@count "# of Addresses" ?address>
+?p is a: person
+
+optional {
+  ?p Address: ?address
+  ?p Address: ?address-to-count
+  ?address = ?address-to-count
+}
+
+group {
+  ?p
+}
+sort {
+  ?address (desc)
+}
+ui {
+  filter: text
+}
+</list>
+</code>
 ===== Types & Aggregates =====
 
 Types and aggregates are used to control how data is stored and displayed.
