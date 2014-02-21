@@ -102,6 +102,14 @@ group {
 sort {
   ?address (desc)
 }
+ui {
+  Person {
+    filter: select
+  }
+  Address {
+    filter: text
+  }
+}
 </table>
 </code>
 
@@ -119,6 +127,8 @@ You can have multiple optional blocks. You can even have optional blocks inside 
 
 **Sorting**: By adding ''sort'' you can define one or more variables to sort on. You can name one variable per line, and include a direction with ''(ascending)'' or ''(descending)'' (or their short-hands ''(asc)'' and ''(desc)'').
 
+**User Interface**: By adding ''ui'' you can define how and if the user interface allows filtering (and sorting) on the client. See [[#User Interface]] for details.
+
 **Comments**: As with a [[#data block]], you can use ''%%--%%'' at the start of a line to add comments.
 
 
@@ -128,6 +138,7 @@ The reference guide is split up into four sections:
   * [[#Data Entry]]
   * [[#Query Language]]
   * [[#Query Results]]
+  * [[#User Interface]]
   * [[#Types & Aggregates]]
 
 
@@ -382,7 +393,7 @@ If a variable is not mentioned as one of the displayed fields, it will be ignore
 All variables mentioned will be considered to be relevant, even if they are not displayed. Since the queries use so called 'set semantics', results that are equivalent will be reduced to a single result. This can be prevented by declaring additional variables to be considered; results are only equivalent if all displayed and all considered fields are equal.
 
 ===== User Interface =====
-The ''%%ui%%'' block controls the interactive (i.e. JavaScript) user interface of tables and lists. It can be used to make columns sortable and filterable. A ''%%ui%%'' block looks as follows:
+The ''%%ui%%'' block controls the interactive user interface of tables and lists. It can be used to make columns sortable and filterable. A ''%%ui%%'' block looks as follows:
 
 <code>
 ui {
@@ -393,6 +404,8 @@ ui {
 </code>
 
 The properties that can be specified, are explained in the following subsections.
+
+Note: Users that have JavaScript disabled will not benefit from the user interface settings.
 ==== UI ====
 The property ''%%ui%%'' specifies which user interface is shown and can have the values: ''%%none%%'', ''%%generic%%'', and ''%%table%%'' (only for tables). When the ''%%ui%%'' block is present, this property defaults to ''%%table%%'' for tables and ''%%generic%%'' otherwise. However, when no ''%%ui%%'' block is present, tables do have a ''%%table%%'' ui by default, since it is very subtle, but lists have no interactive ui.
 ==== Sorting ====
@@ -477,7 +490,7 @@ ui {
 
 ==== UI with Aggregates ====
 
-In general, the UI is quite intuitive, but combining it with aggregates might give unexpected results. The example below shows the column ''%%address%%'' twice: once the actual values and once the number of values. Because the UI creates filters per column, only one filter will be created for the ''%%address%%'' column. This filter filters both on addresses and number of addresses per person.
+In general, the UI is quite intuitive, but combining it with aggregates might give unexpected results (unless you use a table, in which case no special handling is needed). The example below shows the column ''%%address%%'' twice: once the actual values and once the number of values. Because the UI creates filters per column, only one filter will be created for the ''%%address%%'' column. This filter filters both on addresses and number of addresses per person.
 
 <code>
 <list ?p "Person" ?address@count "# of Addresses" ?address>
