@@ -26,5 +26,9 @@ Later on, you can make a list (to get a table, use ``<table>`` instead) of peopl
     </list>
 
 
+#### More Information
+
+See the [plugin page][pp] for more information on usage and configuration.
 
 [dw]: https://www.dokuwiki.org
+[pp]: https://www.dokuwiki.org/plugin:strata
