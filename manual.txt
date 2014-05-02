@@ -131,6 +131,8 @@ You can have multiple optional blocks. You can even have optional blocks inside 
 
 **Comments**: As with a [[#data block]], you can use ''%%--%%'' at the start of a line to add comments.
 
+**Caching**: By default, the results you see on the page will be cached. So if you edit other pages, you'll need to refresh the page with the list yourself, or add ''%%~~NOCACHE~~%%'' to force dokuwiki to rerender.
+
 
 ====== Reference Guide ======
 
@@ -556,3 +558,8 @@ Types are normally indicated by putting them between ''['' and '']''. Type hints
 Aggregates are used on displays of variables. They are attached to the variable with ''@'', for example: ''?x@unique'' applies the unique aggregate to the values of variables ''?x''. Aggregates can be passed a hint by adding the hint between parenthesis: ''?variable@aggregate(hint)''.
 
 ~~INFO:strataaggregates~~
+
+===== Caching =====
+By default, strata does not disable caching. This can result in pages with queries not updating after you edit data somewhere else.
+
+If you edit other pages, you'll need to refresh the page with the list yourself, or add ''%%~~NOCACHE~~%%'' to the page with the query to force dokuwiki to refresh the page every time.
