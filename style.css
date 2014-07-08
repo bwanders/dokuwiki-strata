@@ -142,12 +142,13 @@
     padding: 5px;
 }
 
-.strata-container ul.filter li {
+.page .strata-container ul.filter li {
     margin: 1.5px 1.5px 1.5px 1.5px;
     padding: 4px 4px 4px 4px;
     height: 21px;
     display: inline-block;
     border-radius: 2px;
+    color: @ini_text;
 }
 
 .strata-container ul.filter li:not(.strata-no-sort):before {
