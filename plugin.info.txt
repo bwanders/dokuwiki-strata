@@ -1,7 +1,7 @@
 base   strata
 author Brend Wanders
 email  b.wanders@utwente.nl
-date   2014-03-09
+date  2014-07-08
 name   Strata
 desc   Semi-Structured data plugin
 url    http://github.com/bwanders/dokuwiki-strata
