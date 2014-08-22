@@ -250,6 +250,7 @@ var createItemFilterAndSort = function(element, filterId, field, fieldSelector, 
         } else if (filterType == 'p') { // prefix
             // must match at least one value
             filter = function(search) {
+                if (search == '') return jQuery.inArray('', values) != -1; // Filtering for empty prefix is useless, so do exact match
                 var result = false;
                 for (var k = 0; !result && k < values.length; k++) {
                     result = values[k].substr(0, search.length) == search;
@@ -259,6 +260,7 @@ var createItemFilterAndSort = function(element, filterId, field, fieldSelector, 
         } else if (filterType == 'e') { // ending a.k.a. suffix
             // must match at least one value
             filter = function(search) {
+                if (search == '') return jQuery.inArray('', values) != -1; // Filtering for empty suffix is useless, so do exact match
                 var result = false;
                 for (var k = 0; !result && k < values.length; k++) {
                     result = values[k].substr(values[k].length - search.length, search.length) == search;
@@ -530,7 +532,7 @@ var strataFilter = function(element) {
     var search = jQuery(element).data('strata-search');
     // Traverse all items (rows) that can be filtered
     jQuery('*.strata-item', element).each(function(_, item) {
-        // Traverse all fields on which a filter is applied, filter must match all field
+        // Traverse all fields on which a filter is applied, filter must match all fields
         var filterMap = jQuery(item).data('strata-item-filter');
         var matchesAllFields = true;
         for (filterId in search) {
