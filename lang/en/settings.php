@@ -8,3 +8,4 @@ $lang['title_key'] = 'The name of the \'entry title\' relation';
 $lang['debug'] = 'Enable debug information? (Warning: enabling debug information may expose confidential information)';
 
 $lang['enable_entry'] = 'Is the data entry syntax enabled?';
+$lang['use_acl'] = 'Should the results be filtered according to the ACL rules?';

@@ -10,3 +10,6 @@ CREATE INDEX idx_spo ON data(subject, predicate, object);
 
 -- index for predicate-primary retrieval (i.e. property fetch)
 CREATE INDEX idx_pso ON data(predicate, subject, object);
+
+-- index for ACL rule checks
+CREATE INDEX idx_g ON data(graph);

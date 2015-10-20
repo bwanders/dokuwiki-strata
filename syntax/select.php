@@ -16,6 +16,7 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
         $this->helper =& plugin_load('helper', 'strata_syntax');
         $this->util =& plugin_load('helper', 'strata_util');
         $this->triples =& plugin_load('helper', 'strata_triples');
+        $this->triples->init_blocked_graphs();
     }
 
     function getType() {

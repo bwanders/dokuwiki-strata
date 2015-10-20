@@ -8,3 +8,5 @@ $meta['title_key'] = array('string');
 $meta['debug'] = array('onoff');
 
 $meta['enable_entry'] = array('onoff');
+
+$meta['use_acl'] = array('onoff');

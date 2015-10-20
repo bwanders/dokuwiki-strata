@@ -15,6 +15,7 @@ if (!defined('DOKU_INC')) die('Meh.');
 class helper_plugin_strata_triples extends DokuWiki_Plugin {
     public static $readable = 'data';
     public static $writable = 'data';
+    public static $blocked_graphs_sql = '';
 
     function __construct() {
         $this->_initialize();
@@ -38,6 +39,40 @@ class helper_plugin_strata_triples extends DokuWiki_Plugin {
         return str_replace($tokens,$replacers,$str);
     }
 
+    /**
+     * Initializes SQL filter of blocked graphs (no page permission by ACL rules).
+     */
+     function init_blocked_graphs() {
+      if ($this->getConf('use_acl') and self::$blocked_graphs_sql == '') {
+        $sql = "SELECT DISTINCT graph FROM " . self::$readable;
+        
+        // prepare query
+        $query = $this->_db->prepare($sql);
+        if($query == false) return;
+
+        // execute query
+        $res = $query->execute($values);
+        if($res === false) {
+            $error = $query->errorInfo();
+            msg(sprintf($this->getLang('error_graphs_fetch'),hsc($error[2])),-1);
+        }
+
+        // fetch results and return them
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+        $query->closeCursor();
+        
+        // a list of graphs reachable by the current user is generated 
+        $blocked_graphs = array();
+        foreach ($result as $row) {
+          if (auth_quickaclcheck($row['graph']) < AUTH_READ)
+            array_push($blocked_graphs, "'" . $row['graph'] . "'");
+        }
+
+        // result set is additionally filtered by graphs the user is enabled for
+        self::$blocked_graphs_sql = " AND graph NOT IN (" . implode(",", $blocked_graphs) . ")";
+      }            
+    }
+    
     /**
      * Initializes the triple helper.
      * 
@@ -71,7 +106,6 @@ class helper_plugin_strata_triples extends DokuWiki_Plugin {
         if(!$this->_db->isInitialized()) {
             $this->_db->initializeDatabase();
         }
-
 
         return true;
     }
@@ -155,10 +189,12 @@ class helper_plugin_strata_triples extends DokuWiki_Plugin {
                 $values[] = $$param;
             }
         }
-
-        $sql .= "SELECT subject, predicate, object, graph FROM ".self::$readable." WHERE ". implode(" AND ", $filters);
-
-        // prepare queyr
+   
+        // Extra filtering by adding ". self::$blocked_graphs_sql" seems not be necessary
+        // as long fetchTriples() is only applied while rendering (already filtered) reference links.
+        $sql = "SELECT subject, predicate, object, graph FROM ".self::$readable." WHERE " . implode(" AND ", $filters);
+        
+        // prepare query
         $query = $this->_db->prepare($sql);
         if($query == false) return;
 
@@ -478,7 +514,7 @@ class strata_sql_generator {
      */
     function _trans_tp($tp) {
         return array(
-            'sql'=>'SELECT '.$this->_genPR($tp).' FROM '.helper_plugin_strata_triples::$readable.' WHERE '.$this->_genCond($tp),
+            'sql'=>'SELECT '.$this->_genPR($tp).' FROM '.helper_plugin_strata_triples::$readable.' WHERE ('.$this->_genCond($tp).')'. helper_plugin_strata_triples::$blocked_graphs_sql,
             'terms'=>array($this->_name($tp['subject']),$this->_name($tp['predicate']), $this->_name($tp['object']))
         );
     }
