@@ -21,7 +21,7 @@ class action_plugin_strata extends DokuWiki_Action_Plugin {
      *
      * @param controller object the controller to register with
      */
-    public function register(Doku_Event_Handler &$controller) {
+    public function register(Doku_Event_Handler $controller) {
         $controller->register_hook('IO_WIKIPAGE_WRITE', 'BEFORE', $this, '_io_page_write');
         $controller->register_hook('PARSER_METADATA_RENDER', 'BEFORE', $this, '_parser_metadata_render_before');
         $controller->register_hook('STRATA_PREVIEW_METADATA_RENDER', 'BEFORE', $this, '_parser_metadata_render_before');

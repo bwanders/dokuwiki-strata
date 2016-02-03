@@ -38,7 +38,7 @@ class syntax_plugin_strata_info extends DokuWiki_Syntax_Plugin {
         $this->Lexer->addSpecialPattern('~~INFO:strataaggregates~~',$mode,'plugin_strata_info');
     }
 
-    public function handle($match, $state, $pos, &$handler){
+    public function handle($match, $state, $pos, Doku_Handler $handler){
         $data = array();
         preg_match('/~~INFO:strata(type|aggregate)s~~/',$match, $captures);
         list(,$kind) = $captures;
@@ -72,7 +72,7 @@ class syntax_plugin_strata_info extends DokuWiki_Syntax_Plugin {
         return strcmp($a['name'], $b['name']);
     }
 
-    public function render($mode, &$R, $data) {
+    public function render($mode, Doku_Renderer $R, $data) {
         if($mode == 'xhtml') {
             list($kind, $items) = $data;
 

@@ -34,11 +34,11 @@ class syntax_plugin_strata_nodata extends DokuWiki_Syntax_Plugin {
         $this->Lexer->addSpecialPattern('~~NODATA~~',$mode,'plugin_strata_nodata');
     }
 
-    public function handle($match, $state, $pos, &$handler){
+    public function handle($match, $state, $pos, Doku_Handler $handler){
         return array();
     }
 
-    public function render($mode, &$R, $data) {
+    public function render($mode, Doku_Renderer $R, $data) {
         if($mode == 'metadata') {
             $R->info['data'] = false;
             return true;
