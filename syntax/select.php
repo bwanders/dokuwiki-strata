@@ -63,7 +63,7 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
         return array('choices' => array('none' => array('none', 'no', 'n'), 'generic' => array('generic', 'g')), 'default' => ($hasUIBlock ? 'generic' : 'none'));
     }
 
-    function handle($match, $state, $pos, &$handler) {
+    function handle($match, $state, $pos, Doku_Handler $handler) {
         try {
             $result = array();
             $typemap = array();
@@ -275,7 +275,7 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
      * @param R the renderer
      * @param data the custom data from the handle phase
      */
-    function render($mode, &$R, $data) {
+    function render($mode, Doku_Renderer $R, $data) {
         return false;
     }
 

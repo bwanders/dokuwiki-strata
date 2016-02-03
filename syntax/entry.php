@@ -38,7 +38,7 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
         }
     }
 
-    function handle($match, $state, $pos, &$handler) {
+    function handle($match, $state, $pos, Doku_Handler $handler) {
         $result = array(
             'entry'=>'',
             'data'=> array(
@@ -239,7 +239,7 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
         return array($currentPosition, $previousPosition, $nextPosition);
     }
 
-    function render($mode, &$R, $data) {
+    function render($mode, Doku_Renderer $R, $data) {
         global $ID;
 
         if($data == array()) {

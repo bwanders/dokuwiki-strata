@@ -24,7 +24,7 @@ class syntax_plugin_strata_table extends syntax_plugin_strata_select {
         return preg_replace('/(^<table)|( *>$)/','',$header);
     }
 
-    function render($mode, &$R, $data) {
+    function render($mode, Doku_Renderer $R, $data) {
         if($data == array() || isset($data['error'])) {
             if($mode == 'xhtml') {
                 $R->table_open();
