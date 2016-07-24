@@ -52,7 +52,6 @@ class plugin_strata_type_wiki extends plugin_strata_type {
         $id = $parts[0];
 
 		list($id,$hash) = explode('#', $id, 2);
-        
         // normalize selflink
         if($id === '') {
             $id = $ID;
@@ -60,6 +59,8 @@ class plugin_strata_type_wiki extends plugin_strata_type {
 
         // actually resolve the page
         resolve_pageid(getNS($ID), $id, $exists);
+        // make the resolved pageid absolute, so it does not re-resolve to something else later on
+        $id = ':'.$id;
 
         // render the link
         return $this->_linkSyntax($instruction, $id.'#'.$hash);
