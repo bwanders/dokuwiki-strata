@@ -877,12 +877,18 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
      */
     function extractGroups(&$root, $tag) {
         $result = array();
+        $to_remove = array();
         foreach($root['cs'] as $i=>&$tree) {
             if(!$this->isGroup($tree)) continue;
             if($tree['tag'] == $tag || (($tag=='' || $tag==null) && $tree['tag'] == null) ) {
                 $result[] =& $tree;
-                array_splice($root['cs'],$i,1);
+                $to_remove[] = $i;
             }
+        }
+        // invert order of to_remove to always remove higher indices first
+        rsort($to_remove);
+        foreach($to_remove as $i) {
+            array_splice($root['cs'],$i,1);
         }
         return $result;
     }
@@ -897,9 +903,15 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
      */
     function extractText(&$root) {
         $result = array();
+        $to_remove = array();
         foreach($root['cs'] as $i=>&$tree) {
             if(!$this->isText($tree)) continue;
             $result[] =& $tree;
+            $to_remove[] = $i;
+        }
+        // invert order of to_remove to always remove higher indices first
+        rsort($to_remove);
+        foreach($to_remove as $i) {
             array_splice($root['cs'],$i,1);
         }
         return $result;
