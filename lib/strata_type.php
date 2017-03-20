@@ -26,8 +26,8 @@ class plugin_strata_type {
      * @return true if the mode was handled, false if it was not
      */
     function render($mode, &$renderer, &$triples, $value, $hint) {
-        if($mode == 'xhtml') {
-            $renderer->doc .= $renderer->_xmlEntities($value);
+        if($mode == 'xhtml' || $mode == 'odt') {
+            $renderer->cdata($value);
             return true;
         }
 

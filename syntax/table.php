@@ -12,6 +12,9 @@ if (!defined('DOKU_INC')) die('Meh.');
  * Table syntax for basic query handling.
  */
 class syntax_plugin_strata_table extends syntax_plugin_strata_select {
+    protected $odt_loaded = false;
+    protected $stylesCreated = false;
+
     function connectTo($mode) {
         $this->Lexer->addSpecialPattern('<table'.$this->helper->fieldsShortPattern().'* *>\s*?\n.+?\n\s*?</table>',$mode, 'plugin_strata_table');
     }
@@ -26,7 +29,7 @@ class syntax_plugin_strata_table extends syntax_plugin_strata_select {
 
     function render($mode, Doku_Renderer $R, $data) {
         if($data == array() || isset($data['error'])) {
-            if($mode == 'xhtml') {
+            if($mode == 'xhtml' || $mode == 'odt') {
                 $R->table_open();
                 $R->tablerow_open();
                 $R->tablecell_open();
@@ -101,7 +104,15 @@ class syntax_plugin_strata_table extends syntax_plugin_strata_select {
             $this->ui_container_close($mode, $R);
 
             return true;
-        } elseif($mode == 'metadata') {
+        }elseif($mode == 'odt') {
+            if (!$this->odt_loaded) {
+                $this->util = plugin_load('helper', 'strata_utilodt');
+                $this->odt_loaded = true;
+            }
+
+            $this->render_odt_table ($mode, $R, $data, $result, $fields);
+            return true;
+        }elseif($mode == 'metadata') {
             if($result == false) return;
 
             // render all rows in metadata mode to enable things like backlinks
@@ -116,5 +127,53 @@ class syntax_plugin_strata_table extends syntax_plugin_strata_select {
         }
 
         return false;
+    }
+
+    protected function render_odt_table($mode, Doku_Renderer $R, $data, $result, $fields) {
+        if (!$this->stylesCreated) {
+            $this->util->createSpanStyle($R, 'strata-caption', 'class="strata-caption"', 'strata-caption');
+            $this->stylesCreated = true;
+        }
+
+        // render header
+        $R->table_open();
+        $R->tablerow_open();
+
+        // render all columns
+        foreach($fields as $f) {
+            $R->tableheader_open();
+
+            $this->util->openSpan($R, 'Plugin_Strata_Span_strata-caption');
+            $R->cdata($f['caption']);
+            $this->util->closeSpan($R);
+
+            $R->tableheader_close();
+        }
+        $R->tablerow_close();
+
+        if($result != false) {
+            // render each row
+            $itemcount = 0;
+            foreach($result as $row) {
+                $R->tablerow_open();
+                foreach($fields as $f) {
+                    $R->tablecell_open();
+                    $this->util->renderField($mode, $R, $this->triples, $f['aggregate']->aggregate($row[$f['variable']],$f['aggregateHint']), $f['typeName'], $f['hint'], $f['type'], $f['variable']);
+                    $R->tablecell_close();
+                }
+                $R->tablerow_close();
+            }
+            $result->closeCursor();
+        } else {
+            $R->tablerow_open();
+            $R->tablecell_open(count($fields));
+            $R->emphasis_open();
+            $R->cdata(sprintf($this->helper->getLang('content_error_explanation'),'Strata table'));
+            $R->emphasis_close();
+            $R->tablecell_close();
+            $R->tablerow_close();
+        }
+
+        $R->table_close();
     }
 }
