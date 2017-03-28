@@ -505,7 +505,7 @@ class strata_sql_generator {
             }
             $intersect = implode(' AND ',$intersect);
         } else {
-            $intersect = '1';
+            $intersect = '(1=1)';
         }
 
         $fields = implode(', ',$fields);
