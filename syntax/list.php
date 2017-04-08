@@ -5,7 +5,7 @@
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author     Brend Wanders <b.wanders@utwente.nl>
  */
- 
+
 if (!defined('DOKU_INC')) die('Meh.');
 
 /**
@@ -22,11 +22,11 @@ class syntax_plugin_strata_list extends syntax_plugin_strata_select {
 
     function render($mode, Doku_Renderer $R, $data) {
         if($data == array() || isset($data['error'])) {
-            if($mode == 'xhtml') {
+            if($mode == 'xhtml' || $mode == 'odt') {
                 $R->listu_open();
                 $R->listitem_open(1);
                 $R->listcontent_open();
-                $this->displayError($R, $data);
+                $this->displayError($mode, $R, $data);
                 $R->listcontent_close();
                 $R->listitem_close();
                 $R->listu_close();
@@ -41,22 +41,21 @@ class syntax_plugin_strata_list extends syntax_plugin_strata_select {
         $result = $this->triples->queryRelations($query);
 
         if($result == false) {
-            if($mode == 'xhtml') {
+            if($mode == 'xhtml' || $mode == 'odt') {
                 $R->listu_open();
                 $R->listitem_open(1);
                 $R->listcontent_open();
                 $R->emphasis_open();
-                $R->doc .= $R->_xmlEntities(sprintf($this->helper->getLang('content_error_explanation'),'Strata list'));
+                $R->cdata(sprintf($this->helper->getLang('content_error_explanation'),'Strata list'));
                 $R->emphasis_close();
                 $R->listcontent_close();
                 $R->listitem_close();
                 $R->listu_close();
             }
 
-
             return;
         }
-    
+
         // prepare all 'columns'
         $fields = array();
         foreach($data['fields'] as $meta) {
@@ -72,7 +71,7 @@ class syntax_plugin_strata_list extends syntax_plugin_strata_select {
         }
 
 
-        if($mode == 'xhtml') {
+        if($mode == 'xhtml' || $mode == 'odt') {
             // render header
             $this->ui_container_open($mode, $R, $data, array('strata-container', 'strata-container-list'));
 
@@ -83,7 +82,11 @@ class syntax_plugin_strata_list extends syntax_plugin_strata_select {
             // render each row
             $itemcount = 0;
             foreach($result as $row) {
-                $R->doc .= '<li class="level1 strata-item" data-strata-order="'.($itemcount++).'">'.DOKU_LF;
+                if($mode == 'xhtml') {
+                    $R->doc .= '<li class="level1 strata-item" data-strata-order="'.($itemcount++).'">'.DOKU_LF;
+                } else {
+                    $R->listitem_open(1);
+                }
                 $R->listcontent_open();
 
                 $fieldCount = 0;
@@ -91,16 +94,20 @@ class syntax_plugin_strata_list extends syntax_plugin_strata_select {
                 foreach($fields as $f) {
                     $values = $f['aggregate']->aggregate($row[$f['variable']], $f['aggregateHint']);
                     if(!count($values)) continue;
-                    if($fieldCount>1) $R->doc .= '; ';
-                    if($fieldCount==1) $R->doc .= ' (';
+                    if($fieldCount>1) $R->cdata('; ');
+                    if($fieldCount==1) $R->cdata(' (');
                     $this->util->renderField($mode, $R, $this->triples, $values, $f['typeName'], $f['hint'], $f['type'], $f['variable']);
                     $fieldCount++;
                 }
 
-                if($fieldCount>1) $R->doc .= ')';
+                if($fieldCount>1) $R->cdata(')');
 
                 $R->listcontent_close();
-                $R->doc.= '</li>'.DOKU_LF;
+                if($mode == 'xhtml') {
+                    $R->doc.= '</li>'.DOKU_LF;
+                } else {
+                    $R->listitem_close();
+                }
             }
             $result->closeCursor();
 
