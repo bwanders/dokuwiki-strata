@@ -1,5 +1,13 @@
 <?php
 require_once('stratatest.inc.php');
+
+/**
+ * Tests storage.
+ *
+ * @group plugin_strata_storage
+ * @group plugin_strata
+ * @group plugins
+ */
 class storage_test extends Strata_UnitTestCase {
 
 	function testAdd() {
@@ -9,7 +17,7 @@ class storage_test extends Strata_UnitTestCase {
 		$expected = array(
 			array('subject' => 'Bob', 'predicate' => 'knows', 'object' => 'Alice', 'graph' => 'wiki')
 		);
-		$this->assertEqual($data, $expected);
+		$this->assertEquals($data, $expected);
 	}
 
 	function testAddArray() {
@@ -19,7 +27,7 @@ class storage_test extends Strata_UnitTestCase {
 		$expected = array(
 			array('subject' => 'Bob', 'predicate' => 'knows', 'object' => 'Alice', 'graph' => 'wiki')
 		);
-		$this->assertEqual($data, $expected);
+		$this->assertEquals($data, $expected);
 	}
 
 	function testAddMulti() {
@@ -32,7 +40,7 @@ class storage_test extends Strata_UnitTestCase {
 			array('subject' => 'Bob', 'predicate' => 'knows', 'object' => 'Alice', 'graph' => 'wiki'),
 			array('subject' => 'Alice', 'predicate' => 'knows', 'object' => 'Carol', 'graph' => 'wiki')
 		);
-		$this->assertEqual($data, $expected);
+		$this->assertEquals($data, $expected);
 	}
 
 	function testSpecialChars() {
@@ -48,7 +56,7 @@ class storage_test extends Strata_UnitTestCase {
 			array('subject' => '_', 'predicate' => '(', 'object' => '`', 'graph' => 'wiki'),
 			array('subject' => ';', 'predicate' => '\'', 'object' => '"', 'graph' => 'wiki')
 		);
-		$this->assertEqual($data, $expected);
+		$this->assertEquals($data, $expected);
 	}
 }
 

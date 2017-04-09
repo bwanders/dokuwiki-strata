@@ -1,5 +1,13 @@
 <?php
 require_once('stratatest.inc.php');
+
+/**
+ * Tests storage removing.
+ *
+ * @group plugin_strata_storage
+ * @group plugin_strata
+ * @group plugins
+ */
 class storage_removes_test extends Strata_UnitTestCase {
 
 	function setup() {
@@ -17,70 +25,70 @@ class storage_removes_test extends Strata_UnitTestCase {
 		$this->expected3 = array('subject' => 'Alice', 'predicate' => 'dislikes', 'object' => 'Carol', 'graph' => 'wiki');
 
 		$data = $this->_triples->fetchTriples();
-		$this->assertEqual($data, array($this->expected1, $this->expected2, $this->expected3));
+		$this->assertEquals($data, array($this->expected1, $this->expected2, $this->expected3));
 	}
 
 	function testRemove() {
 		// Remove all
 		$this->_triples->removeTriples();
 		$data = $this->_triples->fetchTriples();
-                $this->assertEqual($data, array());
+                $this->assertEquals($data, array());
 	}
 
 	function testRemoveBySubject() {
 		$this->_triples->removeTriples('Bob');
 		$data = $this->_triples->fetchTriples();
-                $this->assertEqual($data, array($this->expected2, $this->expected3));
+                $this->assertEquals($data, array($this->expected2, $this->expected3));
 	
 		$this->_triples->removeTriples('Alice');
 		$data = $this->_triples->fetchTriples();
-                $this->assertEqual($data, array());
+                $this->assertEquals($data, array());
 	}
 
 	function testRemoveByPredicate() {
 		$this->_triples->removeTriples(null, 'knows');
 		$data = $this->_triples->fetchTriples();
-                $this->assertEqual($data, array($this->expected3));
+                $this->assertEquals($data, array($this->expected3));
 	
 		$this->_triples->removeTriples(null, 'dislikes');
 		$data = $this->_triples->fetchTriples();
-                $this->assertEqual($data, array());
+                $this->assertEquals($data, array());
 	}
 
 	function testRemoveByObject() {
 		$this->_triples->removeTriples(null, null, 'Alice');
 		$data = $this->_triples->fetchTriples();
-                $this->assertEqual($data, array($this->expected2, $this->expected3));
+                $this->assertEquals($data, array($this->expected2, $this->expected3));
 	
 		$this->_triples->removeTriples(null, null, 'Carol');
 		$data = $this->_triples->fetchTriples();
-                $this->assertEqual($data, array());
+                $this->assertEquals($data, array());
 	}
 
 	function testRemoveBySubjectAndPredicate() {
 		$this->_triples->removeTriples('Alice', 'knows');
 		$data = $this->_triples->fetchTriples();
-                $this->assertEqual($data, array($this->expected1, $this->expected3));
+                $this->assertEquals($data, array($this->expected1, $this->expected3));
 	}
 
 	function testRemoveByPredicateAndObject() {
 		$this->_triples->removeTriples(null, 'knows', 'Carol');
 		$data = $this->_triples->fetchTriples();
-                $this->assertEqual($data, array($this->expected1, $this->expected3));
+                $this->assertEquals($data, array($this->expected1, $this->expected3));
 	}
 
 	function testRemoveCaseInsensitive() {
 		$this->_triples->removeTriples('bob');
 		$data = $this->_triples->fetchTriples();
-                $this->assertEqual($data, array($this->expected2, $this->expected3));
+                $this->assertEquals($data, array($this->expected2, $this->expected3));
 
 		$this->_triples->removeTriples(null, 'Knows');
 		$data = $this->_triples->fetchTriples();
-                $this->assertEqual($data, array($this->expected3));
+                $this->assertEquals($data, array($this->expected3));
 
 		$this->_triples->removeTriples(null, null, 'carol');
 		$data = $this->_triples->fetchTriples();
-                $this->assertEqual($data, array());
+                $this->assertEquals($data, array());
 	}
 }
 

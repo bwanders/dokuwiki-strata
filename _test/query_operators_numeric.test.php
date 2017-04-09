@@ -1,6 +1,12 @@
 <?php
 require_once('strataquerytest.inc.php');
-require_once(DOKU_INC.'lib/plugins/strata/helper/types.php');
+
+/**
+ * Tests queries - numeric operators.
+ *
+ * @group plugin_strata
+ * @group plugins
+ */
 class query_operators_numeric_test extends Strata_Query_UnitTestCase {
 
     function setup() {

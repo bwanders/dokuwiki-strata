@@ -1,6 +1,12 @@
 <?php
 require_once('strataquerytest.inc.php');
-require_once(DOKU_INC.'lib/plugins/strata/helper/types.php');
+
+/**
+ * Tests queries - sorting optional.
+ *
+ * @group plugin_strata_optional
+ * @group plugins
+ */
 class query_sort_optional_test extends Strata_Query_UnitTestCase {
 
     function setup() {

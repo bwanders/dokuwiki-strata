@@ -1,16 +1,21 @@
 <?php
-require_once(DOKU_INC.'_test/lib/unittest.php');
-require_once(DOKU_INC.'inc/init.php');
-require_once(DOKU_INC.'inc/plugin.php');
-require_once(DOKU_INC.'lib/plugins/strata/helper/triples.php');
-class Strata_UnitTestCase extends Doku_UnitTestCase {
+require_once DOKU_INC.'lib/plugins/strata/helper/triples.php';
+
+/**
+ * Base test class for Strata plugin.
+ */
+class Strata_UnitTestCase extends DokuWikiTest {
 
 	function setup() {
+        $this->pluginsEnabled[] = 'strata';
+        parent::setUp();
+
 		// Setup a new database (uncomment the one to use)
-		$this->_triples = new helper_plugin_stratastorage_triples();
+		//$this->_triples = new helper_plugin_stratastorage_triples();
+        $this->_triples = new helper_plugin_strata_triples();
 
 		// Use SQLite (default)
-		$this->_triples->initialize('sqlite::memory:');
+		$this->_triples->_initialize('sqlite::memory:');
 
 		// Use MySQL, which is set up with:
 		// CREATE DATABASE strata_test;

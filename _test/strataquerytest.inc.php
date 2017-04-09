@@ -1,6 +1,13 @@
 <?php
 require_once('stratatest.inc.php');
 require_once(DOKU_INC.'lib/plugins/strata/helper/util.php');
+
+/**
+ * Tests query.
+ *
+ * @group plugin_strata
+ * @group plugins
+ */
 class Strata_Query_UnitTestCase extends Strata_UnitTestCase {
 
     function setup() {
@@ -70,8 +77,8 @@ class Strata_Query_UnitTestCase extends Strata_UnitTestCase {
     function assertIteratorsEqual($x, $y, $message='') {
         $message = $message?$message.': ':'';
         do {
-            $this->assertEqual($x->valid(), $y->valid(), $message.'Number of result and expected rows differ: %s');
-            $this->assertEqual($x->current(), $y->current(), $message.'Result row differs from expected one: %s');
+            $this->assertEquals($x->valid(), $y->valid(), $message.'Number of result and expected rows differ: %s');
+            $this->assertEquals($x->current(), $y->current(), $message.'Result row differs from expected one: %s');
             $x->next();
             $y->next();
         } while ($x->valid() || $y->valid());
