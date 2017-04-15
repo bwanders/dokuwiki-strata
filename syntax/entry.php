@@ -250,6 +250,9 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
             list($currentPosition, $previousPosition, $nextPosition) = $this->getPositions($data);
             // render table header
             if($mode == 'xhtml') { $R->doc .= '<div class="strata-entry" '.(isset($currentPosition)?'id="'.$currentPosition.'"':'').'>'; }
+            if($mode == 'odt' && isset($currentPosition) && method_exists ($R, 'insertBookmark')) {
+                $R->insertBookmark($currentPosition, false);
+            }
             $R->table_open();
             $R->tablerow_open();
             $R->tableheader_open(2);
