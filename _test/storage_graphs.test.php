@@ -1,5 +1,13 @@
 <?php
 require_once('stratatest.inc.php');
+
+/**
+ * Tests storage graphs.
+ *
+ * @group plugin_strata_storage
+ * @group plugin_strata
+ * @group plugins
+ */
 class storage_graphs_test extends Strata_UnitTestCase {
 
 	function testGraphs() {
@@ -13,19 +21,19 @@ class storage_graphs_test extends Strata_UnitTestCase {
 
 		// Retrieve the wiki graph
 		$data = $this->_triples->fetchTriples(null, null, null, 'wiki');
-		$this->assertEqual($data, array());
+		$this->assertEquals($data, array());
 
 		// Retrieve Bobs graph
 		$data = $this->_triples->fetchTriples(null, null, null, 'knowledgebase of bob');
-		$this->assertEqual($data, array($expected1));
+		$this->assertEquals($data, array($expected1));
 
 		// Retrieve Alices graph
 		$data = $this->_triples->fetchTriples(null, null, null, 'knowledgebase of alice');
-		$this->assertEqual($data, array($expected2));
+		$this->assertEquals($data, array($expected2));
 
 		// Retrieve all graphs
 		$data = $this->_triples->fetchTriples(null, null, null, null);
-		$this->assertEqual($data, array($expected1, $expected2));
+		$this->assertEquals($data, array($expected1, $expected2));
 	}
 }
 
