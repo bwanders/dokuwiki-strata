@@ -11,7 +11,7 @@ if(!defined('DOKU_INC')) die('Meh.');
  */
 class plugin_strata_type_date extends plugin_strata_type {
     function render($mode, &$R, &$triples, $value, $hint) {
-        if($mode == 'xhtml') {
+        if($mode == 'xhtml' || $mode == 'odt') {
             if(is_numeric($value)) {
                 // use the hint if available
                 $format = $hint ?: 'Y-m-d';
@@ -21,9 +21,9 @@ class plugin_strata_type_date extends plugin_strata_type {
                 $date->setTimestamp((int)$value);
 
                 // render
-                $R->doc .= $R->_xmlEntities($date->format($format));
+                $R->cdata($date->format($format));
             } else {
-                $R->doc .= $R->_xmlEntities($value);
+                $R->cdata($value);
             }
             return true;
         }

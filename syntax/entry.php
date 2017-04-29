@@ -13,6 +13,8 @@ if (!defined('DOKU_INC')) die('Meh.');
  */
 class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
     protected static $previewMetadata = array();
+    protected $odt_loaded = false;
+    protected $stylesCreated = false;
 
     function __construct() {
         $this->syntax =& plugin_load('helper', 'strata_syntax');
@@ -341,6 +343,14 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
             
             return true;
 
+        } elseif($mode == 'odt') {
+            if (!$this->odt_loaded) {
+                $this->util = plugin_load('helper', 'strata_utilodt');
+                $this->odt_loaded = true;
+            }
+
+            $this->render_odt_entry ($mode, $R, $data);
+            return true;
         } elseif($mode == 'metadata' || $mode == 'preview_metadata') {
             $triples = array();
             $subject = $ID.'#'.$data['entry'];
@@ -410,5 +420,105 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
         }
 
         return false;
+    }
+
+    protected function render_odt_entry($mode, Doku_Renderer &$R, $data) {
+        global $ID;
+
+        if (!$this->stylesCreated) {
+            $this->util->createSpanStyle($R, 'strata-data-fragment-link-previous', 'class="strata-data-fragment-link-previous"', 'strata-data-fragment-link-previous');
+            $this->util->createSpanStyle($R, 'strata-data-fragment-link-next', 'class="strata-data-fragment-link-next"', 'strata-data-fragment-link-next');
+            $this->stylesCreated = true;
+        }
+
+        list($currentPosition, $previousPosition, $nextPosition) = $this->getPositions($data);
+        // render table header
+        $R->table_open(2,1);
+        $R->tablerow_open();
+        $R->tableheader_open(2);
+
+        // determine actual header text
+        $heading = '';
+        if(isset($data['data'][$this->util->getTitleKey()])) {
+            // use title triple if possible
+            $heading = $data['data'][$this->util->getTitleKey()][0]['value'];
+        } elseif (!empty($data['title candidate'])) {
+            // use title candidate if possible
+            $heading = $data['title candidate']['value'];
+        } else {
+            if(useHeading('content')) {
+                // fall back to page title, depending on wiki configuration
+                $heading = p_get_first_heading($ID);
+            }
+
+            if(!$heading) {
+                // use page id if all else fails
+                $heading = noNS($ID);
+            }
+        }
+        $R->cdata($heading);
+
+        // display a comma-separated list of classes if the entry has classes
+        if(isset($data['data'][$this->util->getIsaKey()])) {
+            $R->emphasis_open();
+            $R->cdata(' (');
+            $values = $data['data'][$this->util->getIsaKey()];
+            $this->util->openField($mode, $R, $this->util->getIsaKey());
+            for($i=0;$i<count($values);$i++) {
+                $triple =& $values[$i];
+                if($i!=0) $R->cdata(', ');
+                $type = $this->util->loadType($triple['type']);
+                $this->util->renderValue($mode, $R, $this->triples, $triple['value'], $triple['type'], $type, $triple['hint']);
+            }
+            $this->util->closeField($mode, $R);
+            $R->cdata (')');
+            $R->emphasis_close();
+        }
+        $R->tableheader_close();
+        $R->tablerow_close();
+
+        // render a row for each key, displaying the values as comma-separated list
+        foreach($data['data'] as $key=>$values) {
+            // skip isa and title keys
+            if($key == $this->util->getTitleKey() || $key == $this->util->getIsaKey()) continue;
+            
+            // render row header
+            $R->tablerow_open();
+            $R->tableheader_open();
+            $this->util->renderPredicate($mode, $R, $this->triples, $key);
+            $R->tableheader_close();
+
+            // render row content
+            $R->tablecell_open();
+            $this->util->openField($mode, $R, $key);
+            for($i=0;$i<count($values);$i++) {
+                $triple =& $values[$i];
+                if($i!=0) $R->cdata(', ');
+                $this->util->renderValue($mode, $R, $this->triples, $triple['value'], $triple['type'], $triple['hint']);
+            }
+            $this->util->closeField($mode, $R);
+            $R->tablecell_close();
+            $R->tablerow_close();
+        }
+
+        if($previousPosition || $nextPosition) {
+            $R->tablerow_open();
+            $R->tableheader_open(2);
+            if($previousPosition) {
+                $this->util->openSpan($R, 'Plugin_Strata_Span_strata-data-fragment-link-previous');
+                $R->locallink($previousPosition, $this->util->getLang('data_entry_previous'));
+                $this->util->closeSpan($R);
+            }
+            $R->cdata(' ');
+            if($nextPosition) {
+                $this->util->openSpan($R, 'Plugin_Strata_Span_strata-data-fragment-link-next');
+                $R->locallink($nextPosition, $this->util->getLang('data_entry_next'));
+                $this->util->closeSpan($R);
+            }
+            $R->tableheader_close();
+            $R->tablerow_close();
+        }
+
+        $R->table_close();
     }
 }

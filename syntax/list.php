@@ -12,6 +12,8 @@ if (!defined('DOKU_INC')) die('Meh.');
  * List syntax for basic query handling.
  */
 class syntax_plugin_strata_list extends syntax_plugin_strata_select {
+    protected $odt_loaded = false;
+
     function connectTo($mode) {
         $this->Lexer->addSpecialPattern('<list'.$this->helper->fieldsShortPattern().'* *>\s*?\n.+?\n\s*?</list>',$mode, 'plugin_strata_list');
     }
@@ -22,7 +24,7 @@ class syntax_plugin_strata_list extends syntax_plugin_strata_select {
 
     function render($mode, Doku_Renderer $R, $data) {
         if($data == array() || isset($data['error'])) {
-            if($mode == 'xhtml') {
+            if($mode == 'xhtml' || $mode == 'odt') {
                 $R->listu_open();
                 $R->listitem_open(1);
                 $R->listcontent_open();
@@ -41,12 +43,12 @@ class syntax_plugin_strata_list extends syntax_plugin_strata_select {
         $result = $this->triples->queryRelations($query);
 
         if($result == false) {
-            if($mode == 'xhtml') {
+            if($mode == 'xhtml' || $mode == 'odt') {
                 $R->listu_open();
                 $R->listitem_open(1);
                 $R->listcontent_open();
                 $R->emphasis_open();
-                $R->doc .= $R->_xmlEntities(sprintf($this->helper->getLang('content_error_explanation'),'Strata list'));
+                $R->cdata($R->_xmlEntities(sprintf($this->helper->getLang('content_error_explanation'),'Strata list')));
                 $R->emphasis_close();
                 $R->listcontent_close();
                 $R->listitem_close();
@@ -108,6 +110,14 @@ class syntax_plugin_strata_list extends syntax_plugin_strata_select {
             $this->ui_container_close($mode, $R);
 
             return true;
+        } elseif($mode == 'odt') {
+            if (!$this->odt_loaded) {
+                $this->util = plugin_load('helper', 'strata_utilodt');
+                $this->odt_loaded = true;
+            }
+
+            $this->render_odt_list ($mode, $R, $data, $result, $fields);
+            return true;
         } elseif($mode == 'metadata') {
             // render all rows in metadata mode to enable things like backlinks
             foreach($result as $row) {
@@ -121,5 +131,40 @@ class syntax_plugin_strata_list extends syntax_plugin_strata_select {
         }
 
         return false;
+    }
+
+    protected function render_odt_list($mode, Doku_Renderer $R, $data, $result, $fields) {
+        // render header
+        $this->util->renderCaptions($mode, $R, $fields);
+
+        $R->listu_open();
+
+        // render each row
+        $itemcount = 0;
+        foreach($result as $row) {
+            $R->listitem_open();
+            $R->listcontent_open();
+
+            $fieldCount = 0;
+
+            foreach($fields as $f) {
+                $values = $f['aggregate']->aggregate($row[$f['variable']], $f['aggregateHint']);
+                if(!count($values)) continue;
+                if($fieldCount>1) $R->cdata('; ');
+                if($fieldCount==1) $R->cdata(' (');
+                $this->util->renderField($mode, $R, $this->triples, $values, $f['typeName'], $f['hint'], $f['type'], $f['variable']);
+                $fieldCount++;
+            }
+
+            if($fieldCount>1) $R->cdata(')');
+
+            $R->listcontent_close();
+            $R->listitem_close();
+        }
+        $result->closeCursor();
+
+        $R->listu_close();
+
+        return true;
     }
 }
