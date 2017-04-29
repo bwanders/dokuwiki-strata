@@ -11,3 +11,5 @@ CREATE INDEX idx_spo ON data(subject(32), predicate(32), object(32)); -- Prefix 
 -- index for predicate-primary retrieval (i.e. property fetch)
 CREATE INDEX idx_pso ON data(predicate(32), subject(32), object(32)); -- Prefix length is arbitrary
 
+-- index for ACL rule checks
+CREATE INDEX idx_g ON data(graph);

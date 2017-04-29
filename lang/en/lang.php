@@ -9,6 +9,8 @@ $lang['error_triples_add'] = 'Strata storage: Failed to add triples: %s';
 $lang['error_triples_query'] = 'Strata storage: Failed to execute query: %s';
 $lang['error_triples_node'] = 'Strata storage: Unknown abstract query tree node type \'%s\'';
 
+$lang['error_graphs_fetch'] = 'Strata storage: Failed to fetch unique graphs: %s';
+
 $lang['debug_sql'] = 'Debug SQL: <code>%s</code>';
 $lang['debug_literals'] = 'Debug Literals: <pre>%s</pre>';
 
