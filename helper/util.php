@@ -108,7 +108,7 @@ class helper_plugin_strata_util extends DokuWiki_Plugin {
                 );
             }
         }
-        
+
         return $this->configTypes[$key];
     }
 
@@ -146,7 +146,7 @@ class helper_plugin_strata_util extends DokuWiki_Plugin {
 
     /**
      * Normalizes a predicate.
-     * 
+     *
      * @param p the string to normalize
      */
     function normalizePredicate($p) {
@@ -171,7 +171,7 @@ class helper_plugin_strata_util extends DokuWiki_Plugin {
      * Renders a single value. If the mode is xhtml, this also surrounds the value with
      * the necessary <span> tag to allow styling of types and to ease extraction of values
      * with javascript.
-     * 
+     *
      * @param mode the rendering mode
      * @param R the renderer
      * @param T the triples helper
@@ -194,7 +194,7 @@ class helper_plugin_strata_util extends DokuWiki_Plugin {
      * Renders multiple values. If the mode is xhtml, this also surrounds the field with
      * the necessary <span> tag to allow styling of fields and to ease extraction of values
      * with javascript.
-     * 
+     *
      * @param mode the rendering mode
      * @param R the renderer
      * @param T the triples helper
@@ -216,7 +216,7 @@ class helper_plugin_strata_util extends DokuWiki_Plugin {
         $firstValue = true;
         $this->openField($mode, $R, $field);
         foreach($values as $value) {
-            if(!$firstValue) $R->doc .= $separator;
+            if(!$firstValue) $R->cdata($separator);
             $this->renderValue($mode, $R, $T, $value, $typename, $hint, $type);
             $firstValue = false;
         }
@@ -237,13 +237,13 @@ class helper_plugin_strata_util extends DokuWiki_Plugin {
 
     function closeValue($mode, &$R) {
         if($mode == 'xhtml') $R->doc .= '</span>';
-    }   
+    }
 
     function renderCaptions($mode, &$R, $fields) {
         if($mode == 'xhtml') {
             foreach($fields as $f) {
                 $R->doc .= '<div class="strata-caption hidden" data-field="'.hsc($f['variable']).'">';
-                $R->doc .= $R->_xmlEntities($f['caption']);
+                $R->cdata($f['caption']);
                 $R->doc .= '</div>'.DOKU_LF;
             }
         }

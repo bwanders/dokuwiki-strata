@@ -11,24 +11,20 @@ if(!defined('DOKU_INC')) die('Meh.');
  */
 class plugin_strata_type_date extends plugin_strata_type {
     function render($mode, &$R, &$triples, $value, $hint) {
-        if($mode == 'xhtml') {
-            if(is_numeric($value)) {
-                // use the hint if available
-                $format = $hint ?: 'Y-m-d';
+        if(is_numeric($value)) {
+            // use the hint if available
+            $format = $hint ?: 'Y-m-d';
 
-                // construct representation
-                $date = new DateTime();
-                $date->setTimestamp((int)$value);
+            // construct representation
+            $date = new DateTime();
+            $date->setTimestamp((int)$value);
 
-                // render
-                $R->doc .= $R->_xmlEntities($date->format($format));
-            } else {
-                $R->doc .= $R->_xmlEntities($value);
-            }
-            return true;
+            // render
+            $R->cdata($date->format($format));
+        } else {
+            $R->cdata($value);
         }
-
-        return false;
+        return true;
     }
 
     function normalize($value, $hint) {
@@ -46,7 +42,7 @@ class plugin_strata_type_date extends plugin_strata_type {
             return $date->getTimestamp();
         }
     }
-        
+
     function getInfo() {
         return array(
             'desc'=>'Stores and displays dates in the YYYY-MM-DD format. The optional hint can give a different format to use.',

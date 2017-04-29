@@ -73,7 +73,7 @@ class syntax_plugin_strata_info extends DokuWiki_Syntax_Plugin {
     }
 
     public function render($mode, Doku_Renderer $R, $data) {
-        if($mode == 'xhtml') {
+        if($mode == 'xhtml' || $mode == 'odt') {
             list($kind, $items) = $data;
 
             $R->listu_open();
@@ -82,24 +82,26 @@ class syntax_plugin_strata_info extends DokuWiki_Syntax_Plugin {
                 $R->listcontent_open();
 
                 $R->strong_open();
-                $R->doc .= $data['name'];
+                $R->cdata($data['name']);
                 $R->strong_close();
 
                 if($data['meta']['hint']) {
-                    $R->doc .= ' ('.$kind.' hint: '.$R->_xmlEntities($data['meta']['hint']).')';
+                    $R->cdata(' ('.$kind.' hint: '. $data['meta']['hint'] .')');
                 }
+                // $R->emphasis_open();
+                // $R->cdata(' in '.$data['plugin'].' plugin');
+                // $R->emphasis_close();
 
                 $R->linebreak();
-                $R->doc .= $R->_xmlEntities($data['meta']['desc']);
+                $R->cdata($data['meta']['desc']);
 
                 if(count($data['meta']['tags'])) {
-                    $R->doc .=' (';
+                    $R->cdata(' (');
                     $R->emphasis_open();
-                    $R->doc .= $R->_xmlEntities(hsc(implode(', ',$data['meta']['tags'])));
+                    $R->cdata(implode(', ',$data['meta']['tags']));
                     $R->emphasis_close();
-                    $R->doc .= ')';
+                    $R->cdata(')');
                 }
-                // $R->doc .= ' in '.$data['plugin'].' plugin';
 
                 $R->listcontent_close();
                 $R->listitem_close();
@@ -111,4 +113,3 @@ class syntax_plugin_strata_info extends DokuWiki_Syntax_Plugin {
         return false;
     }
 }
-

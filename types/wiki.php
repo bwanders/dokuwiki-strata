@@ -73,7 +73,7 @@ class plugin_strata_type_wiki extends plugin_strata_type {
         global $ID;
 
         // simply prefix the current page
-        return $this->_linkSyntax($instruction, $ID.'#'.$instruction[0]); 
+        return $this->_linkSyntax($instruction, $ID.'#'.$instruction[0]);
     }
 
     /**
@@ -142,7 +142,7 @@ class plugin_strata_type_wiki extends plugin_strata_type {
         // construct the syntax
         return '{{'.$al.$src.$size.$ar.$title.'}}';
     }
-    
+
     /**
      * Renders the link syntax, invoking media normalization
      * if required.
@@ -178,7 +178,7 @@ class plugin_strata_type_wiki extends plugin_strata_type {
     function render($mode, &$R, &$T, $value, $hint) {
         // though this breaks backlink functionality, we really do not want
         // metadata renders of included pieces of wiki.
-        if($mode == 'xhtml') {
+        if($mode == 'xhtml' || $mode == 'odt') {
             $instructions = $this->_instructions($value);
             $instructions = array_slice($instructions, 2, -2);
 
@@ -230,7 +230,7 @@ class plugin_strata_type_wiki extends plugin_strata_type {
         foreach(p_get_parsermodes() as $mode) {
             if(!in_array($mode['mode'], $allowedModes)) continue;
 
-            $parser->addMode($mode['mode'], $mode['obj']); 
+            $parser->addMode($mode['mode'], $mode['obj']);
         }
 
         trigger_event('PARSER_WIKITEXT_PREPROCESS', $text);

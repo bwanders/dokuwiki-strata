@@ -7,7 +7,7 @@
  */
 
 if (!defined('DOKU_INC')) die('Meh.');
- 
+
 /**
  * Data entry syntax for dedicated data blocks.
  */
@@ -79,7 +79,7 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
 
         // allow subclasses first pick in the tree
         $this->handleBody($tree, $result);
-        
+
         // fetch all lines
         $lines = $this->syntax->extractText($tree);
 
@@ -153,7 +153,7 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
             }
         }
 
-        
+
         // normalize title candidate
         if(!empty($result['title candidate'])) {
             $type = $this->util->loadType($result['title candidate']['type']);
@@ -168,7 +168,7 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
     /**
      * Handles the whole match. This method is called before any processing
      * is done by the actual class.
-     * 
+     *
      * @param match string the complete match
      * @param state the parser state
      * @param pos the position in the source
@@ -206,7 +206,7 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
     /**
      * Handles the footer of the syntax. This method is called after the
      * data has been parsed and normalized.
-     * 
+     *
      * @param footer string the footer string
      * @param result array the result array passed to the render method
      * @return a string containing the unhandled parts of the footer
@@ -246,10 +246,13 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
             return false;
         }
 
-        if($mode == 'xhtml') {
+        if($mode == 'xhtml' || $mode == 'odt') {
             list($currentPosition, $previousPosition, $nextPosition) = $this->getPositions($data);
             // render table header
-            $R->doc .= '<div class="strata-entry" '.(isset($currentPosition)?'id="'.$currentPosition.'"':'').'>';
+            if($mode == 'xhtml') { $R->doc .= '<div class="strata-entry" '.(isset($currentPosition)?'id="'.$currentPosition.'"':'').'>'; }
+            if($mode == 'odt' && isset($currentPosition) && method_exists ($R, 'insertBookmark')) {
+                $R->insertBookmark($currentPosition, false);
+            }
             $R->table_open();
             $R->tablerow_open();
             $R->tableheader_open(2);
@@ -273,22 +276,22 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
                     $heading = noNS($ID);
                 }
             }
-            $R->doc .= $R->_xmlEntities($heading);
+            $R->cdata($heading);
 
             // display a comma-separated list of classes if the entry has classes
             if(isset($data['data'][$this->util->getIsaKey()])) {
                 $R->emphasis_open();
-                $R->doc .= ' (';
+                $R->cdata(' (');
                 $values = $data['data'][$this->util->getIsaKey()];
                 $this->util->openField($mode, $R, $this->util->getIsaKey());
                 for($i=0;$i<count($values);$i++) {
                     $triple =& $values[$i];
-                    if($i!=0) $R->doc .= ', ';
+                    if($i!=0) $R->cdata(', ');
                     $type = $this->util->loadType($triple['type']);
                     $this->util->renderValue($mode, $R, $this->triples, $triple['value'], $triple['type'], $type, $triple['hint']);
                 }
                 $this->util->closeField($mode, $R);
-                $R->doc .= ')';
+                $R->cdata(')');
                 $R->emphasis_close();
             }
             $R->tableheader_close();
@@ -298,7 +301,7 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
             foreach($data['data'] as $key=>$values) {
                 // skip isa and title keys
                 if($key == $this->util->getTitleKey() || $key == $this->util->getIsaKey()) continue;
-                
+
                 // render row header
                 $R->tablerow_open();
                 $R->tableheader_open();
@@ -310,7 +313,7 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
                 $this->util->openField($mode, $R, $key);
                 for($i=0;$i<count($values);$i++) {
                     $triple =& $values[$i];
-                    if($i!=0) $R->doc .= ', ';
+                    if($i!=0) $R->cdata(', ');
                     $this->util->renderValue($mode, $R, $this->triples, $triple['value'], $triple['type'], $triple['hint']);
                 }
                 $this->util->closeField($mode, $R);
@@ -322,23 +325,23 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
                 $R->tablerow_open();
                 $R->tableheader_open(2);
                 if($previousPosition) {
-                    $R->doc .= '<span class="strata-data-fragment-link-previous">';
+                    if($mode == 'xhtml') { $R->doc .= '<span class="strata-data-fragment-link-previous">'; }
                     $R->locallink($previousPosition, $this->util->getLang('data_entry_previous'));
-                    $R->doc .= '</span>';
+                    if($mode == 'xhtml') { $R->doc .= '</span>'; }
                 }
-                $R->doc .= ' ';
+                $R->cdata(' ');
                 if($nextPosition) {
-                    $R->doc .= '<span class="strata-data-fragment-link-next">';
+                    if($mode == 'xhtml') { $R->doc .= '<span class="strata-data-fragment-link-next">'; }
                     $R->locallink($nextPosition, $this->util->getLang('data_entry_next'));
-                    $R->doc .= '</span>';
+                    if($mode == 'xhtml') { $R->doc .= '</span>'; }
                 }
                 $R->tableheader_close();
                 $R->tablerow_close();
             }
 
             $R->table_close();
-            $R->doc .= '</div>';
-            
+            if($mode == 'xhtml') { $R->doc .= '</div>'; }
+
             return true;
 
         } elseif($mode == 'metadata' || $mode == 'preview_metadata') {
@@ -399,7 +402,7 @@ class syntax_plugin_strata_entry extends DokuWiki_Syntax_Plugin {
             if(!isset($R->info['data']) || $R->info['data']==true) {
                 // batch-store triples if we're allowed to store
                 $this->triples->addTriples($triples, $ID);
-                
+
                 // set flag for title addendum
                 if($fixTitle) {
                     $R->meta['strata']['fixTitle'] = true;

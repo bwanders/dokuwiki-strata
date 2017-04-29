@@ -5,9 +5,9 @@
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author     Brend Wanders <b.wanders@utwente.nl>
  */
- 
+
 if(!defined('DOKU_INC')) die('Meh.');
- 
+
 /**
  * Select syntax for basic query handling.
  */
@@ -67,67 +67,67 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
         try {
             $result = array();
             $typemap = array();
-    
+
             // allow subclass handling of the whole match
             $match = $this->preprocess($match, $state, $pos, $handler, $result, $typemap);
-    
+
             // split into lines and remove header and footer
             $lines = explode("\n",$match);
             $header = trim(array_shift($lines));
             $footer = trim(array_pop($lines));
-    
+
             // allow subclass header handling
             $header = $this->handleHeader($header, $result, $typemap);
-    
+
             // parse projection information in 'short syntax' if available
             if(trim($header) != '') {
                 $result['fields'] = $this->helper->parseFieldsShort($header, $typemap);
             }
-    
+
             $tree = $this->helper->constructTree($lines,'query');
-    
+
             // parse long fields, if available
             $longFields = $this->helper->getFields($tree, $typemap);
-    
+
             // check double data
             if(count($result['fields']) && count($longFields)) {
                 $this->helper->_fail($this->getLang('error_query_bothfields'));
             }
-    
+
             // assign longfields if necessary
             if(count($result['fields']) == 0) {
                 $result['fields'] = $longFields;
             }
-    
+
             // check no data
             if(count($result['fields']) == 0) {
                 $this->helper->_fail($this->helper->getLang('error_query_noselect'));
             }
-    
+
             // determine the variables to project
             $projection = array();
             foreach($result['fields'] as $f) $projection[] = $f['variable'];
             $projection = array_unique($projection);
-    
+
             // allow subclass body handling
             $this->handleBody($tree, $result, $typemap);
 
             // parse UI group
             $this->handleUI($tree, $result, $typemap);
-    
+
             // parse the query itself
             list($result['query'], $variables) = $this->helper->constructQuery($tree, $typemap, $projection);
-    
+
             // allow subclass footer handling
             $footer = $this->handleFooter($footer, $result, $typemap, $variable);
-    
+
             // check projected variables and load types
             foreach($result['fields'] as $i=>$f) {
                 $var = $f['variable'];
                 if(!in_array($var, $variables)) {
                     $this->helper->_fail(sprintf($this->helper->getLang('error_query_unknownselect'),utf8_tohtml(hsc($var))));
                 }
-    
+
                 if(empty($f['type'])) {
                     if(!empty($typemap[$var])) {
                         $result['fields'][$i] = array_merge($result['fields'][$i],$typemap[$var]);
@@ -138,7 +138,7 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
                     }
                 }
             }
-    
+
             return $result;
         } catch(strata_exception $e) {
             return array('error'=>array(
@@ -200,7 +200,7 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
     /**
      * Handles the whole match. This method is called before any processing
      * is done by the actual class.
-     * 
+     *
      * @param match string the complete match
      * @param state the parser state
      * @param pos the position in the source
@@ -242,7 +242,7 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
      * Handles the footer of the syntax. This method is called after the
      * query has been parsed, but before the typemap is applied to determine
      * all field types.
-     * 
+     *
      * @param footer string the footer string
      * @param result array the result array passed to the render method
      * @param typemape array the type map
@@ -290,6 +290,7 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
      * @param additionalClasses array containing classes to be set on the generated container
      */
     function ui_container_open($mode, &$R, $data, $additionalClasses=array()) {
+        // only xhtml mode needs the UI container
         if($mode != 'xhtml') return;
 
         $p = $data['strata-ui'];
@@ -324,17 +325,22 @@ class syntax_plugin_strata_select extends DokuWiki_Syntax_Plugin {
     }
 
     function ui_container_close($mode, &$R) {
+        // only xhtml mode needs the UI container
         if($mode != 'xhtml') return;
         $R->doc .= '</div>' . DOKU_LF;
     }
 
-    protected function displayError(&$R, $data) {
-        $style = '';
-        if(isset($data['error']['regions'])) $style = ' strata-debug-continued';
-        $R->doc .= '<div class="strata-debug-message '.$style.'">';
-        $R->doc .= $R->_xmlEntities($this->helper->getLang('content_error_explanation'));
-        $R->doc .= ': '.$data['error']['message'];
-        $R->doc .= '</div>';
-        if(isset($data['error']['regions'])) $R->doc .= $this->helper->debugTree($data['error']['lines'], $data['error']['regions']);
+    protected function displayError($mode, &$R, $data) {
+        if($mode == 'xhtml') {
+            $style = '';
+            if(isset($data['error']['regions'])) $style = ' strata-debug-continued';
+            $R->doc .= '<div class="strata-debug-message '.$style.'">';
+            $R->cdata($this->helper->getLang('content_error_explanation'));
+            $R->doc .= ': '.$data['error']['message'];
+            $R->doc .= '</div>';
+            if(isset($data['error']['regions'])) $R->doc .= $this->helper->debugTree($data['error']['lines'], $data['error']['regions']);
+        } elseif($mode == 'odt') {
+            $R->cdata($this->helper->getLang('content_error_explanation__non_xhtml'));
+        }
     }
 }

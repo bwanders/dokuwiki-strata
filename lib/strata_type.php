@@ -11,7 +11,7 @@ if(!defined('DOKU_INC')) die('Meh.');
  *
  * There are two kinds of types: normal types and synthetic types.
  * Normal types are meant for users, while synthetic types exist to
- * keep the plugin working. (i.e., unloadable types are faked by a 
+ * keep the plugin working. (i.e., unloadable types are faked by a
  * synthetic type, and non-user types should be synthetic).
  */
 class plugin_strata_type {
@@ -26,12 +26,8 @@ class plugin_strata_type {
      * @return true if the mode was handled, false if it was not
      */
     function render($mode, &$renderer, &$triples, $value, $hint) {
-        if($mode == 'xhtml') {
-            $renderer->doc .= $renderer->_xmlEntities($value);
-            return true;
-        }
-
-        return false;
+        $renderer->cdata($value);
+        return true;
     }
 
     /**

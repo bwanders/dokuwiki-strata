@@ -5,7 +5,7 @@
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author     Brend Wanders <b.wanders@utwente.nl>
  */
- 
+
 if (!defined('DOKU_INC')) die('Meh.');
 
 /**
@@ -26,11 +26,11 @@ class syntax_plugin_strata_table extends syntax_plugin_strata_select {
 
     function render($mode, Doku_Renderer $R, $data) {
         if($data == array() || isset($data['error'])) {
-            if($mode == 'xhtml') {
+            if($mode == 'xhtml' || $mode == 'odt') {
                 $R->table_open();
                 $R->tablerow_open();
                 $R->tablecell_open();
-                $this->displayError($R, $data);
+                $this->displayError($mode, $R, $data);
                 $R->tablecell_close();
                 $R->tablerow_close();
                 $R->table_close();
@@ -56,29 +56,29 @@ class syntax_plugin_strata_table extends syntax_plugin_strata_select {
             );
         }
 
-        if($mode == 'xhtml') {
+        if($mode == 'xhtml' || $mode == 'odt') {
             // render header
             $this->ui_container_open($mode, $R, $data, array('strata-container', 'strata-container-table'));
             $R->table_open();
-            $R->doc .= '<thead>'.DOKU_LF;
+            if($mode == 'xhtml') { $R->doc .= '<thead>'.DOKU_LF; }
             $R->tablerow_open();
 
             // render all columns
             foreach($fields as $f) {
                 $R->tableheader_open();
-                $R->doc .= '<span class="strata-caption" data-field="'.hsc($f['variable']).'">';
-                $R->doc .= $R->_xmlEntities($f['caption']);
-                $R->doc .= '</span>'.DOKU_LF;
+                if($mode == 'xhtml') { $R->doc .= '<span class="strata-caption" data-field="'.hsc($f['variable']).'">'; }
+                $R->cdata($f['caption']);
+                if($mode == 'xhtml') { $R->doc .= '</span>'.DOKU_LF; }
                 $R->tableheader_close();
             }
             $R->tablerow_close();
-            $R->doc .= '</thead>'.DOKU_LF;
+            if($mode == 'xhtml') { $R->doc .= '</thead>'.DOKU_LF; }
 
             if($result != false) {
                 // render each row
                 $itemcount = 0;
                 foreach($result as $row) {
-                    $R->doc .= '<tbody class="strata-item" data-strata-order="'.($itemcount++).'">'.DOKU_LF;
+                    if($mode == 'xhtml') { $R->doc .= '<tbody class="strata-item" data-strata-order="'.($itemcount++).'">'.DOKU_LF; }
                     $R->tablerow_open();
                     foreach($fields as $f) {
                         $R->tablecell_open();
@@ -86,15 +86,17 @@ class syntax_plugin_strata_table extends syntax_plugin_strata_select {
                         $R->tablecell_close();
                     }
                     $R->tablerow_close();
-                    $R->doc .= '</tbody>'.DOKU_LF;
+                    if($mode == 'xhtml') { $R->doc .= '</tbody>'.DOKU_LF; }
                 }
                 $result->closeCursor();
             } else {
+                $R->tablerow_open();
                 $R->tablecell_open(count($fields));
                 $R->emphasis_open();
-                $R->doc .= $R->_xmlEntities(sprintf($this->helper->getLang('content_error_explanation'),'Strata table'));
+                $R->cdata(sprintf($this->helper->getLang('content_error_explanation'),'Strata table'));
                 $R->emphasis_close();
                 $R->tablecell_close();
+                $R->tablerow_close();
             }
 
             $R->table_close();

@@ -68,6 +68,7 @@ $lang['error_query_grouppattern'] = 'I can\'t handle a block without at least on
 $lang['error_query_filterscope'] = 'Filter uses out-of-scope variable \'<code>%s</code>\'.';
 
 $lang['content_error_explanation'] = 'An error ocurred';
+$lang['content_error_explanation__non_xhtml'] = 'An error ocurred (see online wikipage for details)';
 
 $lang['data_entry_previous'] = '← Previous';
 $lang['data_entry_next'] = 'Next →';
