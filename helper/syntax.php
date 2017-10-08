@@ -1023,7 +1023,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
             $maxOccur = isset($p['maxOccur']) ? $p['maxOccur'] : $minOccur;
 
             if ($isMulti) {
-                $values = array_map('utf8_trim', split(',', $value));
+                $values = array_map('utf8_trim', explode(',', $value));
             } else if ($minOccur == 1 || $minOccur == $maxOccur) {
                 // Repeat the given value as often as we expect it
                 $values = array_fill(0, $minOccur, $value);
