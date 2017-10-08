@@ -111,7 +111,7 @@ class helper_plugin_strata_syntax_RegexHelperCapture implements ArrayAccess {
             }
         }
     }
-    
+
     function offsetSet($offset, $value) {
         // noop
         $trace = debug_backtrace();
@@ -261,8 +261,8 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
             if(count($ordering) > 1) {
                 $this->_fail($this->getLang('error_query_multisort'), $ordering);
             }
-   
-            // handle each line in the group 
+
+            // handle each line in the group
             foreach($ordering[0]['cs'] as $line) {
                 if($this->isGroup($line)) {
                     $this->_fail($this->getLang('error_query_sortblock'), $line);
@@ -344,7 +344,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
 
     /**
      * Transforms a full query group.
-     * 
+     *
      * @param root array the tree to transform
      * @param typemap array the type information
      * @return the transformed group and a list of in-scope variables
@@ -381,7 +381,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
             $this->_fail(sprintf($this->getLang('error_query_grouppattern')), $root);
         }
 
-        // chain all patterns with ANDs 
+        // chain all patterns with ANDs
         $result = array_shift($patterns);
         foreach($patterns as $pattern) {
             $result = array(
@@ -445,7 +445,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
 
     /**
      * Transforms a union group with multiple subgroups
-     * 
+     *
      * @param root array the union group to transform
      * @param typemap array the type information
      * @return the transformed group and a list of in-scope variables
@@ -700,7 +700,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
             $fields = $this->parseFieldsLong($fieldsLines, $typemap);
             if(!$fields) return array();
         }
-    
+
         return $fields;
     }
 
