@@ -6,6 +6,7 @@ Strata is a semi-structured data plugin for [DokuWiki][dw]. Strata allows you to
 #### Installation
 1. Use the DokuWiki plugin manager to install Strata.
 2. Optionally, copy the contents of the ``manual.txt`` file into a wiki page (``wiki:strata`` would be a good location)
+3. Optionally, configure your DokuWiki instance's [`useheading`](https://www.dokuwiki.org/config:useheading) setting to have nicer-looking links.
 
 #### Quick-start
 Below is a very simple example of how to use Strata. You can find more information in the ``manual.txt`` (which you can copy-paste into a wiki page to have the manual available for all users).
