@@ -95,7 +95,7 @@ class syntax_plugin_strata_info extends DokuWiki_Syntax_Plugin {
                 $R->linebreak();
                 $R->cdata($data['meta']['desc']);
 
-                if(count($data['meta']['tags'])) {
+                if(isset($data['meta']['tags']) && count($data['meta']['tags'])) {
                     $R->cdata(' (');
                     $R->emphasis_open();
                     $R->cdata(implode(', ',$data['meta']['tags']));
