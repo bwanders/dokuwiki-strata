@@ -6,6 +6,10 @@
 // must be run within Dokuwiki
 if(!defined('DOKU_INC')) die('Meh.');
 
+use dokuwiki\Parsing\Parser;
+use dokuwiki\Parsing\Handler\Block;
+
+
 /**
  * The 'render as wiki text' type.
  */
@@ -205,8 +209,11 @@ class plugin_strata_type_wiki extends plugin_strata_type {
         // that have a paragraph type other than 'normal')
 
         // determine all modes allowed inside a table cell or list item
+
+        // import parser classes and mode definitions to make the $PARSER_MODES global available to us
+        require_once(DOKU_INC . 'inc/parser/parser.php');
         global $PARSER_MODES;
-        $allowedModes = array_merge (
+        $allowedModes = array_merge(
             $PARSER_MODES['formatting'],
             $PARSER_MODES['substition'],
             $PARSER_MODES['disabled'],
@@ -215,21 +222,31 @@ class plugin_strata_type_wiki extends plugin_strata_type {
 
         // determine all modes that are not allowed either due to paragraph
         // handling, or because they're blacklisted as they don't make sense.
-        $blockHandler = new Doku_Handler_Block();
+        $blockHandler = new Block();
         $disallowedModes = array_merge(
-            $blockHandler->blockOpen,
-            $blockHandler->stackOpen,
+            // inlined from Block::blockOpen due to being protected:
+            array(
+                'header',
+                'listu_open','listo_open','listitem_open','listcontent_open',
+                'table_open','tablerow_open','tablecell_open','tableheader_open','tablethead_open',
+                'quote_open',
+                'code','file','hr','preformatted','rss',
+                'htmlblock','phpblock',
+                'footnote_open',
+            ),
+            // inlined from Block::stackOpen due to being protected:
+            array(
+                'section_open',
+            ),
             array('notoc', 'nocache')
         );
 
         $allowedModes = array_diff($allowedModes, $disallowedModes);
 
-        $parser = new Doku_Parser();
-        $parser->Handler = new Doku_Handler();
+        $parser = new Parser(new Doku_Handler());
 
         foreach(p_get_parsermodes() as $mode) {
             if(!in_array($mode['mode'], $allowedModes)) continue;
-
             $parser->addMode($mode['mode'], $mode['obj']);
         }
 
