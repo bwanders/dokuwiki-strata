@@ -191,6 +191,11 @@ function plugin_strata_autoload($fullname) {
         } else {
             // include the file
             require_once $filenames[0];
+            // If the class still does not exist, the required file does not define the class, so we fall back
+            // to the default
+            if(!class_exists($fullname)) {
+                eval("class $fullname extends plugin_strata_{$kind} { };");
+            }
         }
 
         return;
