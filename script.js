@@ -235,7 +235,7 @@ var createFilterSelect = function(element, filterId, fieldSelector, caption, cmp
 var createItemFilterAndSort = function(element, filterId, field, fieldSelector, filterType) {
     jQuery('*.strata-item', element).each(function(i, item) {
         var values = getValues(item, fieldSelector);
-        
+
         // Create filter
         var filter;
         if (filterType == 't') { // substring
@@ -399,7 +399,7 @@ jQuery(document).ready(function() {
                 jQuery(th).css('min-width', width + 'px');
             }
         );
-        
+
         // Set data for sort
         jQuery(div).data('strata-sort-fields', []);
         jQuery(div).data('strata-sort-directions', []);

@@ -47,4 +47,3 @@ class syntax_plugin_strata_nodata extends DokuWiki_Syntax_Plugin {
         return false;
     }
 }
-

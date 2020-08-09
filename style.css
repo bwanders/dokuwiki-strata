@@ -71,7 +71,7 @@
     display: none;
 }
 
-.strata-container-table tr.filter.isFiltered, .strata-container.strata-ui-filter table tr.filter { 
+.strata-container-table tr.filter.isFiltered, .strata-container.strata-ui-filter table tr.filter {
     display: table-row;
 }
 
@@ -171,4 +171,3 @@
 .strata-container .filter li select {
     margin-left: 2px;
 }
-

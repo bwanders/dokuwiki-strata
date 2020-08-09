@@ -54,7 +54,7 @@ class action_plugin_strata extends DokuWiki_Action_Plugin {
 
             // store the original metadata in the global $METADATA_RENDERERS so p_set_metadata can use it
             $METADATA_RENDERERS[$ID] =& $orig;
-        
+
             // add an extra key for the event - to tell event handlers the page whose metadata this is
             $orig['page'] = $ID;
             $evt = new Doku_Event('STRATA_PREVIEW_METADATA_RENDER', $orig);
@@ -65,22 +65,22 @@ class action_plugin_strata extends DokuWiki_Action_Plugin {
                     unset($METADATA_RENDERERS[$ID]);
                     return null; // something went wrong with the instructions
                 }
-        
+
                 // set up the renderer
                 $renderer = new renderer_plugin_strata();
                 $renderer->meta =& $orig['current'];
                 $renderer->persistent =& $orig['persistent'];
-        
+
                 // loop through the instructions
                 foreach ($instructions as $instruction){
                     // execute the callback against the renderer
                     call_user_func_array(array(&$renderer, $instruction[0]), (array) $instruction[1]);
                 }
-        
+
                 $evt->result = array('current'=>&$renderer->meta,'persistent'=>&$renderer->persistent);
             }
             $evt->advise_after();
-        
+
             // clean up
             unset($METADATA_RENDERERS[$id]);
         }
@@ -204,4 +204,3 @@ function plugin_strata_autoload($fullname) {
 
 // register autoloader with SPL loader stack
 spl_autoload_register('plugin_strata_autoload');
-

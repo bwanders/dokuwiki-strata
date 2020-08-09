@@ -49,7 +49,7 @@ class plugin_strata_type_link extends plugin_strata_type {
 
         return $value;
     }
-        
+
     function getInfo() {
         return array(
             'desc'=>'Creates a link. This type is multi-purpose: it handles external links, interwiki links, email addresses, windows shares and normal wiki links (basically any link DokuWiki knows of). The optional hint will be used as link title.',

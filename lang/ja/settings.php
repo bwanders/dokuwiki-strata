@@ -13,4 +13,3 @@ $lang['title_key'] = '\'entry title\' 関係の名前';
 $lang['debug'] = 'デバッグ情報の有効化（警告：有効にすると、機密情報を漏洩する可能性がある）';
 
 $lang['enable_entry'] = 'データ入力構文の有効化';
-

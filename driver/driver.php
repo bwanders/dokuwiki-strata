@@ -288,4 +288,3 @@ abstract class plugin_strata_driver {
         }
     }
 }
-

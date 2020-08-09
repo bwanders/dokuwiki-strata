@@ -10,4 +10,3 @@ CREATE INDEX idx_spo ON data(lower(subject), lower(predicate), lower(object));
 
 -- index for predicate-primary retrieval (i.e. property fetch)
 CREATE INDEX idx_pso ON data(lower(predicate), lower(subject), lower(object));
-

@@ -33,4 +33,3 @@ class plugin_strata_driver_pgsql extends plugin_strata_driver {
         return $this->_db->query("SELECT * FROM pg_tables WHERE schemaname = 'public' AND tablename = 'data'")->rowCount() != 0;
     }
 }
-

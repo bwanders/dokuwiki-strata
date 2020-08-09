@@ -27,7 +27,7 @@ class helper_plugin_strata_triples extends DokuWiki_Plugin {
 
     /**
      * Expands tokens in the DSN.
-     * 
+     *
      * @param str string the string to process
      * @return a string with replaced tokens
      */
@@ -40,7 +40,7 @@ class helper_plugin_strata_triples extends DokuWiki_Plugin {
 
     /**
      * Initializes the triple helper.
-     * 
+     *
      * @param dsn string an optional alternative DSN
      * @return true if initialization succeeded, false otherwise
      */
@@ -78,7 +78,7 @@ class helper_plugin_strata_triples extends DokuWiki_Plugin {
 
     /**
      * Makes the an SQL expression case insensitive.
-     * 
+     *
      * @param a string the expression to process
      * @return a SQL expression
      */
@@ -206,7 +206,7 @@ class helper_plugin_strata_triples extends DokuWiki_Plugin {
             // insert a single triple
             $values = array($t['subject'],$t['predicate'],$t['object'],$graph);
             $res = $query->execute($values);
-            
+
             // handle errors
             if($res === false) {
                 $error = $query->errorInfo();
@@ -261,7 +261,7 @@ class helper_plugin_strata_triples extends DokuWiki_Plugin {
     /**
      * Executes the abstract query tree, and returns all properties of the matching subjects.
      * This method assumes that the root is a 'select' node.
-     * 
+     *
      * @param query array the abstract query tree
      * @return an iterator over the resources
      */
@@ -372,7 +372,7 @@ class strata_sql_generator {
 
     /**
      * Name generator. Makes the distinction between literals
-     * and variables, as they can have the same spelling (and 
+     * and variables, as they can have the same spelling (and
      * frequently do in simple queries).
      */
     function _name($term) {
@@ -752,7 +752,7 @@ class strata_sql_generator {
                 $this->grouped[$name] = $v;
             }
         }
-        
+
 
         // determine exact projection
         foreach($vars as $v) {
@@ -857,7 +857,7 @@ class strata_relations_iterator implements Iterator {
         // initialize the iterator
         $this->next();
     }
-    
+
     function current() {
         return $this->row;
     }
@@ -932,7 +932,7 @@ class strata_resource_iterator implements Iterator {
         // initialize the iterator
         $this->next();
     }
-    
+
     function current() {
         return $this->item;
     }
@@ -961,7 +961,7 @@ class strata_resource_iterator implements Iterator {
             $o = $peekRow[$this->__object][0];
             if(!isset($this->item[$p])) $this->item[$p] = array();
             $this->item[$p][] = $o;
-            
+
             $this->data->next();
             $peekRow = $this->data->current();
         }
@@ -1010,7 +1010,7 @@ class strata_aggregating_iterator implements Iterator {
         $this->peekRow = $this->data->fetch(PDO::FETCH_ASSOC);
         $this->next();
     }
-    
+
     function current() {
         return $this->item;
     }
@@ -1063,7 +1063,7 @@ class strata_aggregating_iterator implements Iterator {
                     }
                 }
             }
-            
+
             $this->peekRow = $this->data->fetch(PDO::FETCH_ASSOC);
         }
 
