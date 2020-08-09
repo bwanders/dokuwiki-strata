@@ -408,22 +408,22 @@ class strata_sql_generator {
     function _genCond($tp) {
         $conditions = array();
 
-        // the subject is a variable
-        if($tp['subject']['type'] != 'variable') {
+        // the subject is a literal
+        if($tp['subject']['type'] == 'literal') {
             $id = $this->_alias('qv');
             $conditions[] = $this->_ci('subject').' = '.$this->_ci(':'.$id);
             $this->literals[$id] = $tp['subject']['text'];
         }
 
-        // the predicate is a variable
-        if($tp['predicate']['type'] != 'variable') {
+        // the predicate is a literal
+        if($tp['predicate']['type'] == 'literal') {
             $id = $this->_alias('qv');
             $conditions[] = $this->_ci('predicate').' = '.$this->_ci(':'.$id);
             $this->literals[$id] = $tp['predicate']['text'];
         }
 
-        // the object is a variable
-        if($tp['object']['type'] != 'variable') {
+        // the object is a literal
+        if($tp['object']['type'] == 'literal') {
             $id = $this->_alias('qv');
             $conditions[] = $this->_ci('object').' = '.$this->_ci(':'.$id);
             $this->literals[$id] = $tp['object']['text'];
@@ -477,9 +477,26 @@ class strata_sql_generator {
      * Translates a triple pattern into a graph pattern.
      */
     function _trans_tp($tp) {
+        $terms = array();
+
+        // the subject is a variable
+        if($tp['subject']['type'] == 'variable') {
+            $terms[] = $this->_name($tp['subject']);
+        }
+
+        // the predicate is a variable
+        if($tp['predicate']['type'] == 'variable') {
+            $terms[] = $this->_name($tp['predicate']);
+        }
+
+        // the object is a variable
+        if($tp['object']['type'] == 'variable') {
+            $terms[] = $this->_name($tp['object']);
+        }
+
         return array(
             'sql'=>'SELECT '.$this->_genPR($tp).' FROM '.helper_plugin_strata_triples::$readable.' WHERE '.$this->_genCond($tp),
-            'terms'=>array($this->_name($tp['subject']),$this->_name($tp['predicate']), $this->_name($tp['object']))
+            'terms'=>$terms
         );
     }
 
