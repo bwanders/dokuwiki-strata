@@ -337,7 +337,7 @@ class strata_sql_generator {
     /**
      * Constructor.
      */
-    function strata_sql_generator($triples) {
+    function __construct($triples) {
         $this->_triples = $triples;
         $this->_db = $this->_triples->_db;
     }
