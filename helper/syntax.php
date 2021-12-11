@@ -1047,7 +1047,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                 foreach ($p['choices'] as $nc => $c) {
                     if (is_array($c)) {
                         $choices = array_merge($choices, array_fill_keys($c, $nc));
-                        $title = sprintf($this->getLang('property_title_synonyms'), implode($c, ', '));
+                        $title = sprintf($this->getLang('property_title_synonyms'), implode(', ', $c));
                         $choicesInfo[] = '\'<code title="' . hsc($title) . '">' . hsc($c[0]) . '</code>\'';
                     } else {
                         $choices[$c] = $c;
