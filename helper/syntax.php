@@ -1008,11 +1008,13 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
         if (!isset($properties[$variable])) {
             // Unknown property: show error
             $property_title_values = $this->getLang('property_title_values');
-            $propertyList = implode(array_map(function($n, $p) use($property_title_values) {
-                $values = implode(array_map(function($c) { return $c[0]; }, $p['choices']), ', ');
+            $propertyList = implode(', ', array_map(function ($n, $p) use ($property_title_values) {
+                $values = implode(', ', array_map(function ($c) {
+                    return $c[0];
+                }, $p['choices']));
                 $title = sprintf($property_title_values, $values);
                 return '\'<code title="' . hsc($title) . '">' . hsc($n) . '</code>\'';
-            }, array_keys($properties), $properties), ', ');
+            }, array_keys($properties), $properties));
             $this->emitError($region, 'error_property_unknownproperty', hsc($group), hsc($variable), $propertyList);
         } else if (isset($propertyValues[$variable])) {
             // Property is specified more than once: show error
@@ -1062,7 +1064,7 @@ class helper_plugin_strata_syntax extends DokuWiki_Plugin {
                 if (count($incorrect) > 0) {
                     unset($choices['']);
                     foreach (array_unique($incorrect) as $v) {
-                        $this->emitError($region, 'error_property_invalidchoice', hsc($group), hsc($variable), hsc($v), implode($choicesInfo, ', '));
+                        $this->emitError($region, 'error_property_invalidchoice', hsc($group), hsc($variable), hsc($v), implode(', ', $choicesInfo));
                     }
                 } else {
                     $propertyValues[$variable] = array_map(function($v) use ($choices) { return $choices[$v]; }, $values);
