@@ -45,7 +45,7 @@ class helper_plugin_strata_syntax_RegexHelper {
         if(array_key_exists($name, $this->regexFragments)) {
             return $this->regexFragments[$name];
         } else {
-            $trace = debug_backtrace();
+            $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
             trigger_error("Undefined syntax fragment '$name' on {$trace[0]['file']}:{$trace[0]['line']}", E_USER_NOTICE);
         }
     }
@@ -65,7 +65,7 @@ class helper_plugin_strata_syntax_RegexHelper {
                 return null;
             }
         } else {
-            $trace = debug_backtrace();
+            $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
             trigger_error("Undefined syntax capture '$name' on {$trace[0]['file']}:{$trace[0]['line']}", E_USER_NOTICE);
         }
     }
