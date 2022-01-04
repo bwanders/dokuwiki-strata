@@ -147,6 +147,7 @@ class helper_plugin_strata_triples extends DokuWiki_Plugin {
      * parameters can be left out to indicate 'any'.
      */
     function fetchTriples($subject=null, $predicate=null, $object=null, $graph=null) {
+	global $ID;
         // construct filter
         $filters = array('1 = 1');
         foreach(array('subject','predicate','object','graph') as $param) {
@@ -155,8 +156,9 @@ class helper_plugin_strata_triples extends DokuWiki_Plugin {
                 $values[] = $$param;
             }
         }
+	$scopeRestriction = ($this->getConf('scoped')? ' AND graph like "'.getNS($ID).'%"':"" );
 
-        $sql .= "SELECT subject, predicate, object, graph FROM ".self::$readable." WHERE ". implode(" AND ", $filters);
+        $sql .= "SELECT subject, predicate, object, graph FROM ".self::$readable." WHERE ". implode(" AND ", $filters).$scopeRestriction;
 
         // prepare queyr
         $query = $this->_db->prepare($sql);
@@ -477,6 +479,7 @@ class strata_sql_generator {
      * Translates a triple pattern into a graph pattern.
      */
     function _trans_tp($tp) {
+	global $ID;
         $terms = array();
 
         // the subject is a variable
@@ -494,8 +497,9 @@ class strata_sql_generator {
             $terms[] = $this->_name($tp['object']);
         }
 
+        $scopeRestriction = ($this->_triples->getConf('scoped')? ' AND graph like "'.getNS($ID).'%"':"" );
         return array(
-            'sql'=>'SELECT '.$this->_genPR($tp).' FROM '.helper_plugin_strata_triples::$readable.' WHERE '.$this->_genCond($tp),
+            'sql'=>'SELECT '.$this->_genPR($tp).' FROM '.helper_plugin_strata_triples::$readable.' WHERE '.$this->_genCond($tp).$scopeRestriction,
             'terms'=>array_unique($terms)
         );
     }
