@@ -1,6 +1,8 @@
 Strata
 ======
 
+__This dokuwiki plugin is no longer maintained. Due to time constraints and no longer using this plugin myself, I can no longer properly maintain it.__
+
 Strata is a semi-structured data plugin for [DokuWiki][dw]. Strata allows you to add data to your wiki pages, and later on query that data to create automatic indices or other overviews.
 
 #### Installation
